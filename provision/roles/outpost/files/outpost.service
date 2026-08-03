@@ -1,0 +1,14 @@
+[Unit]
+Description=Outpost | Meshtastic Device Interface Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/outpost
+ExecStart=/opt/outpost/bin/outpost_server
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

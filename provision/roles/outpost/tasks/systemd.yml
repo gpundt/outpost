@@ -16,3 +16,10 @@
     state: restarted
     enabled: true
   become: true
+
+- name: Restart Outpost
+  ansible.builtin.systemd_service:
+    name: outpost
+    state: restarted
+    enabled: true
+  become: true

@@ -1,3 +1,30 @@
 ---
+- name: Copy hostapd Config
+  ansible.builtin.copy:
+    src: hostapd.conf
+    dest: /etc/hostapd/hostapd.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Copy dnsmasq Config
+  ansible.builtin.copy:
+    src: dnsmasq.conf
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Copy Outpost Service File
+  ansible.builtin.copy:
+    src: outpost.service
+    dest: /etc/systemd/system/outpost.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
 - name: Clear shell path cache
   ansible.builtin.shell: hash -r
