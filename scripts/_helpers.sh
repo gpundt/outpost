@@ -30,8 +30,8 @@ function successful() {
   echo -e "\t - ${GREEN}*Successful*${RESET}"
 }
 function error_message() {
-  _print_aligned "${RED}ERROR${RESET}:" "$1" $2
-  if [[ "$3" == "exit" ]]; then
+  _print_aligned "${RED}ERROR${RESET}:" "$1" $3
+  if [[ "$2" == "exit" ]]; then
     graceful_exit
   fi
 }

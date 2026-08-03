@@ -2,8 +2,8 @@
 source ./_helpers.sh
 
 if [ "$#" -eq 0 ]; then
-    echo "Error: No client hostname provided"
-    echo "Usage: $0 [client_hostname]"
+    error_message "No client hostname provided"
+    message "Usage" "$0 [client_hostname]"
     exit 1
 fi
 
@@ -21,15 +21,15 @@ DST_CLIENT_KEY="/opt/watchtower/tls/${CLIENT_HOSTNAME}_client/client.key"
 
 # ──── Cert Generation ───────────────────────────────────────────────────────────────
 function _generate_client_key() {
+    start_step_message "Generating Client Key -> '${CLIENT_KEY}'"
 
+    successful
 }
 
 function _generate_client_cert() {
+    start_step_message "Generating Client Cert -> '${CLIENT_CERT}'"
 
-}
-
-function _modify_client_yaml_config() {
-
+    successful
 }
 
 function main() {
@@ -37,6 +37,5 @@ function main() {
     prepare_certs_directory "client" "${CLIENT_CERTS_DIR}"
     _generate_client_key
     _generate_client_cert
-    _modify_client_yaml_config
 }
 main
