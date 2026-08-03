@@ -1,0 +1,8 @@
+---
+- name: Install Necessary Packages
+  ansible.builtin.package:
+    name:
+      - hostapd
+      - dnsmasq
+    state: present
+  become: yes
