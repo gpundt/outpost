@@ -2,7 +2,7 @@
 
 -  Server (Rust)
     - HTTP endpoint
-    - API authentication
+    - API authentication (mTLS)
     - Webpage
     - Serial connection
     - Send and receive Meshtastic packets
