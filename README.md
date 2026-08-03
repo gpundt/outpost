@@ -15,3 +15,6 @@ To configure an outpost node, do the following:
     - `cd provision && ansible-playbook -i inventry/hosts.yml playbooks/outpost.yml`
 
 4) Reboot each Outpost node, and you should see a new wireless network become available.
+
+5) Connect to the new wireless network, and run the `outpost_client` binary:
+    - `./outpost_client -h 192.168.99.1`
