@@ -1,0 +1,5 @@
+---
+- name: Configure Outpost Nodes
+  hosts: outpost_nodes
+  roles:
+    - outpost
