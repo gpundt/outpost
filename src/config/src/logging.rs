@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 use super::files::LOG_DIR;
 
-pub fn initialize_logger(log_type: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn initialize_logger(log_type: &str, verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let filepath: PathBuf =
         PathBuf::from(LOG_DIR).join(format!("outpost_{}_{}.log", log_type, timestamp));
@@ -55,9 +55,9 @@ pub fn initialize_logger(log_type: &str) -> Result<(), Box<dyn std::error::Error
 
             Ok(())
         })
-        .filter_level(match log_type {
-            "server" => LevelFilter::Trace,
-            _ => LevelFilter::Info,
+        .filter_level(match verbose {
+            true => LevelFilter::Trace,
+            false => LevelFilter::Info,
         })
         .init();
 
