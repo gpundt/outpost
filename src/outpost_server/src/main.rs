@@ -1,3 +1,5 @@
+use endpoints::HEALTH_CHECK_ENDPOINT;
+
 fn main() {
-    println!("Hello, world!");
+    println!("{}", HEALTH_CHECK_ENDPOINT);
 }
