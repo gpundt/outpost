@@ -1,5 +1,6 @@
 use chrono::Utc;
 use colored::Colorize;
+use log::LevelFilter;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
@@ -25,13 +26,13 @@ pub fn initialize_logger(log_type: &str) -> Result<(), Box<dyn std::error::Error
     env_logger::Builder::new()
         .format(move |_buf, record| {
             let ts = Utc::now()
-                .format("%Y-%m-%d %H:%M:%S")
+                .format("%H:%M:%S")
                 .to_string()
-                .purple()
+                .bright_magenta()
                 .dimmed();
 
             let level = match record.level() {
-                log::Level::Error => record.level().to_string().red().bold(),
+                log::Level::Error => record.level().to_string().bright_red().bold(),
                 log::Level::Warn => record.level().to_string().yellow().bold(),
                 log::Level::Info => "".to_string().normal(),
                 log::Level::Debug => record.level().to_string().cyan(),
@@ -54,7 +55,10 @@ pub fn initialize_logger(log_type: &str) -> Result<(), Box<dyn std::error::Error
 
             Ok(())
         })
-        .filter_level(log::LevelFilter::Info)
+        .filter_level(match log_type {
+            "server" => LevelFilter::Trace,
+            _ => LevelFilter::Info,
+        })
         .init();
 
     Ok(())

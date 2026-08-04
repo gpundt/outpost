@@ -1,8 +1,8 @@
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
-use config::files::{ETC_DIR, OPT_DIR, create_output_directories};
+use config::files::{BIN_DIR, ETC_DIR, LOG_DIR, OPT_DIR, create_output_directories};
 use config::logging::initialize_logger;
 
-use log::{error, info};
+use log::{debug, error, info, trace, warn};
 
 fn main() {
     match create_output_directories() {
@@ -20,7 +20,9 @@ fn main() {
         }
     }
 
+    trace!("{}", BIN_DIR);
+    debug!("{}", OPT_DIR);
     info!("{}", ETC_DIR);
-    info!("{}", OPT_DIR);
+    warn!("{}", LOG_DIR);
     error!("{}", HEALTH_CHECK_ENDPOINT);
 }
