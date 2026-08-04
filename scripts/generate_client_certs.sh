@@ -1,4 +1,5 @@
 #!/bin/bash
+# Cert generation script to be run once on each user's roaming device
 source ./_helpers.sh
 
 if [ "$#" -eq 0 ]; then
@@ -15,9 +16,9 @@ CLIENT_CERTS_DIR="${CERTS_ROOT_DIR}/${CLIENT_HOSTNAME}_client"
 CLIENT_CERT="${CLIENT_CERTS_DIR}/client.crt"
 CLIENT_KEY="${CLIENT_CERTS_DIR}/client.key"
 CLIENT_YAML_CONFIG="../config/client.yaml"
-DST_CA_CERT="/opt/watchtower/tls/ca/ca.crt"
-DST_CLIENT_CERT="/opt/watchtower/tls/${CLIENT_HOSTNAME}_client/client.crt"
-DST_CLIENT_KEY="/opt/watchtower/tls/${CLIENT_HOSTNAME}_client/client.key"
+DST_CA_CERT="/opt/outpost/tls/ca/ca.crt"
+DST_CLIENT_CERT="/opt/outpost/tls/${CLIENT_HOSTNAME}_client/client.crt"
+DST_CLIENT_KEY="/opt/outpost/tls/${CLIENT_HOSTNAME}_client/client.key"
 
 # ──── Cert Generation ───────────────────────────────────────────────────────────────
 function _generate_client_key() {
