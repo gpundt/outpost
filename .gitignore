@@ -1,5 +1,6 @@
 certs/
 .env
+build/
 
 provision/roles/outpost/files/*
 !provision/roles/outpost/files/hostapd.conf
