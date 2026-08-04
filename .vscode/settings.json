@@ -1,6 +1,10 @@
 {
     "rust-analyzer.linkedProjects": [
         "./src/outpost_server/Cargo.toml",
-        "./src/outpost_client/Cargo.toml"
-    ]
+        "./src/outpost_client/Cargo.toml",
+        "./src/config/Cargo.toml"
+    ],
+    "terminal.integrated.env.windows": {
+        "COLORTERM": "truecolor"
+    }
 }

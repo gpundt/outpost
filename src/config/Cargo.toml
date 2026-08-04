@@ -1,0 +1,16 @@
+[package]
+name = "config"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chrono = "0.4.45"
+colored = "3.1.1"
+const_format = "0.2.36"
+env_logger = "0.11.11"
+log = "0.4.33"
+strip-ansi-escapes = "0.2.1"
+
+[lib]
+name = "config"
+path = "src/lib.rs"

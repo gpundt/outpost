@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-const_format = "0.2.36"
-endpoints = { path = "../endpoints" }
+config = { path = "../config" }
+env_logger = "0.11.11"
+log = "0.4.33"
