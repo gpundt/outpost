@@ -8,7 +8,7 @@ SERVER_KEY="${CERTS_ROOT_DIR}/server/server.key"
 
 # ──── Cert Generation ───────────────────────────────────────────────────────────────
 function _generate_ca() {
-    start_step_message "Generating CA Cert and Key '${CERTS_ROOT_DIR}/ca'"
+    start_step_message "Generating CA Cert and Key '${CERTS_ROOT_DIR}/ca'" "substep"
     if [[ -f "${CA_CERT}" && -f "${CA_KEY}" ]]; then
         info_message "Skipping -> CA Cert already exists: '${CA_CERT}'"
         info_message "Skipping -> CA Key already exists: '${CA_KEY}'"
@@ -25,7 +25,7 @@ function _generate_ca() {
 }
 
 function _generate_server_key() {
-    start_step_message "Generating Server Private Key '${CERTS_ROOT_DIR}/server'"
+    start_step_message "Generating Server Private Key '${CERTS_ROOT_DIR}/server'" "substep"
     if [ -f "${SERVER_KEY}" ]; then
         info_message "Skipping -> Server Key already exists: '${SERVER_KEY}'"
         return
@@ -38,7 +38,7 @@ function _generate_server_key() {
 }
 
 function _generate_server_cert() {
-    start_step_message "Generating Server Certificate Signing Request (CSR)"
+    start_step_message "Generating Server Certificate Signing Request (CSR)" "substep"
     if [ -f "${CERTS_ROOT_DIR}/server/server.csr" ]; then
         info_message "Skipping -> Server CSR already exists: '${CERTS_ROOT_DIR}/server/server.csr'"
     else
@@ -54,7 +54,7 @@ EOF
         successful
     fi
 
-    start_step_message "Generating CA Signed Server Certificate '${CERTS_ROOT_DIR}/server/'"
+    start_step_message "Generating CA Signed Server Certificate '${CERTS_ROOT_DIR}/server/'" "substep"
     if [ -f "${SERVER_CERT}" ]; then
         info_message "Skipping -> Server Cert already exists: '${SERVER_CERT}'"
     else

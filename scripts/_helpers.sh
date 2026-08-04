@@ -110,7 +110,7 @@ function apt_install_openssl() {
 }
 
 function prepare_certs_directory() {
-    start_step_message "Preparing Certificate Output Directory '${CERTS_DIR}'"
+    start_step_message "Preparing Certificate Output Directory '${CERTS_ROOT_DIR}'" "substep"
     mkdir -p "${CERTS_ROOT_DIR}/ca"
     if [ "$1" == "server" ]; then    
         mkdir -p "${CERTS_ROOT_DIR}/server"

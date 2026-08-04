@@ -22,13 +22,13 @@ DST_CLIENT_KEY="/opt/outpost/tls/${CLIENT_HOSTNAME}_client/client.key"
 
 # ──── Cert Generation ───────────────────────────────────────────────────────────────
 function _generate_client_key() {
-    start_step_message "Generating Client Key -> '${CLIENT_KEY}'"
+    start_step_message "Generating Client Key -> '${CLIENT_KEY}'" "substep"
 
     successful
 }
 
 function _generate_client_cert() {
-    start_step_message "Generating Client Cert -> '${CLIENT_CERT}'"
+    start_step_message "Generating Client Cert -> '${CLIENT_CERT}'" "substep"
 
     successful
 }

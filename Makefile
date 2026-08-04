@@ -6,13 +6,13 @@ GREEN   := \033[0;32m
 YELLOW  := \033[0;33m
 BLUE    := \033[0;34m
 CYAN	:= \033[0;36m
-RESET   := \033[0m
+RESET   := \033[0;0m
 define start_step_message
 	@echo -e "\n$(CYAN)[*] $(1) [*]$(RESET)"
 endef
 define error_message
-	@echo "$(RED)ERROR$(RESET): $(1)"
-	$(error)
+	@echo -e "$(RED)ERROR$(RESET): $(1)"
+	$(error $(RED)ERROR$(RESET): $(1))
 endef
 define successful
 	@echo -e "\t - $(GREEN)*Successful*$(RESET)\n"
@@ -29,8 +29,8 @@ generate_certs:												## Generates server and client-side certificates
 ifndef CLIENT_HOSTNAME
 	$(call error_message,"CLIENT_HOSTNAME not defined")
 endif
-	cd ./scripts && ./generate_server_certs.sh
-	cd ./scripts && ./generate_client_certs.sh $(CLIENT_HOSTNAME)
+	@cd ./scripts && ./generate_server_certs.sh
+	@cd ./scripts && ./generate_client_certs.sh $(CLIENT_HOSTNAME)
 
 prep_provisioning_files: build_outpost generate_certs		## Prepares Ansible provisioning files
 	$(call start_step_message,"Prepping Ansible Provisioning Directories")

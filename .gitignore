@@ -1,2 +1,7 @@
 certs/
 .env
+
+provision/roles/outpost/files/*
+!provision/roles/outpost/files/hostapd.conf
+!provision/roles/outpost/files/dnsmasq.conf
+!provision/roles/outpost/files/outpost.service

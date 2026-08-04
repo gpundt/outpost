@@ -6,8 +6,8 @@ CLIENT_DIR := $(CURRENT_DIR)/outpost_client
 BUILD_OUTPUT_DIR := $(CURRENT_DIR)/../build
 
 prepare_output_directory:
-	rm -rf $(BUILD_OUTPUT_DIR)
-	mkdir -p $(BUILD_OUTPUT_DIR)
+	@rm -rf $(BUILD_OUTPUT_DIR)
+	@mkdir -p $(BUILD_OUTPUT_DIR)
 
 build: prepare_output_directory
 	cargo build --release --manifest-path $(SERVER_DIR)/Cargo.toml
