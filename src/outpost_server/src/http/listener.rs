@@ -1,4 +1,6 @@
 use super::query::health_check_response;
+use crate::arguments::Args;
+use crate::arguments::get_arguments;
 use axum::{
     Router,
     routing::{MethodRouter, get},
@@ -6,7 +8,7 @@ use axum::{
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
 use log::{debug, error, info, trace, warn};
 
-pub async fn initialize_http_listener(port_number: u16) {
+pub async fn initialize_http_listener() {
     let app = Router::new();
     let app = initialize_query_endpoint(
         app,
@@ -14,10 +16,10 @@ pub async fn initialize_http_listener(port_number: u16) {
         get(health_check_response),
     );
 
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port_number))
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", get_arguments().port))
         .await
         .unwrap();
-    info!("Listening on 0.0.0.0:{}", port_number);
+    info!("Listening on 0.0.0.0:{}", get_arguments().port);
     axum::serve(listener, app)
         .with_graceful_shutdown(graceful_exit())
         .await

@@ -2,7 +2,7 @@ mod arguments;
 
 pub mod http;
 use crate::http::initialize_http_listener;
-use arguments::Args;
+use arguments::{get_arguments, init_arguments};
 use clap::Parser;
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
 use config::files::{BIN_DIR, ETC_DIR, LOG_DIR, OPT_DIR, create_output_directories};
@@ -13,7 +13,7 @@ use log::{debug, error, info, trace, warn};
 #[tokio::main]
 async fn main() {
     start_time();
-    let args: Args = Args::parse();
+    init_arguments();
 
     match create_output_directories() {
         Ok(_) => {}
@@ -22,7 +22,7 @@ async fn main() {
             return;
         }
     }
-    match initialize_logger("server", args.verbose) {
+    match initialize_logger("server", get_arguments().verbose) {
         Ok(_) => {}
         Err(e) => {
             println!("{}", e.to_string());
@@ -36,5 +36,5 @@ async fn main() {
     warn!("{}", LOG_DIR);
     error!("{}", HEALTH_CHECK_ENDPOINT);
 
-    initialize_http_listener(args.port).await;
+    initialize_http_listener().await;
 }

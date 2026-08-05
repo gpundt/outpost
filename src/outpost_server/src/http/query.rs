@@ -1,10 +1,9 @@
+use crate::arguments::get_arguments;
 use axum::Json;
-use clap::builder::Str;
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
 use config::time::get_uptime_str;
 use log::{debug, error, info, trace, warn};
 use serde::Serialize;
-use std::time::Duration;
 
 #[derive(Serialize)]
 pub struct HealthCheckResponse {
