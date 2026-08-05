@@ -36,5 +36,5 @@ async fn main() {
     warn!("{}", LOG_DIR);
     error!("{}", HEALTH_CHECK_ENDPOINT);
 
-    initialize_http_listener().await;
+    initialize_http_listener(args.port).await;
 }

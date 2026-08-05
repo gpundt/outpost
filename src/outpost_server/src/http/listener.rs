@@ -6,7 +6,7 @@ use axum::{
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
 use log::{debug, error, info, trace, warn};
 
-pub async fn initialize_http_listener() {
+pub async fn initialize_http_listener(port_number: u16) {
     let app = Router::new();
     let app = initialize_query_endpoint(
         app,
@@ -14,7 +14,10 @@ pub async fn initialize_http_listener() {
         get(health_check_response),
     );
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port_number))
+        .await
+        .unwrap();
+    info!("Listening on 0.0.0.0:{}", port_number);
     axum::serve(listener, app)
         .with_graceful_shutdown(graceful_exit())
         .await
@@ -22,7 +25,7 @@ pub async fn initialize_http_listener() {
 }
 
 pub fn initialize_query_endpoint(app: Router, path: String, response_func: MethodRouter) -> Router {
-    info!("Initialized {} Endpoint", path);
+    debug!("Initialized {} Endpoint", path);
     app.route(&path, response_func)
 }
 
