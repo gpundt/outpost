@@ -3,7 +3,6 @@ mod arguments;
 pub mod http;
 use crate::http::initialize_http_listener;
 use arguments::{get_arguments, init_arguments};
-use clap::Parser;
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
 use config::files::{BIN_DIR, ETC_DIR, LOG_DIR, OPT_DIR, create_output_directories};
 use config::logging::initialize_logger;

@@ -1,4 +1,3 @@
-use crate::arguments::get_arguments;
 use axum::Json;
 use config::endpoints::HEALTH_CHECK_ENDPOINT;
 use config::time::get_uptime_str;

@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use clap::{Arg, Parser};
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(name = "Outpost Server")]
