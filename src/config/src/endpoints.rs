@@ -6,3 +6,4 @@ pub const API_ENDPOINT: &str = formatcp!("/api/{}", API_VERSION);
 pub const QUERY_ENDPOINT: &str = formatcp!("{}/query", API_ENDPOINT);
 pub const HEALTH_CHECK_ENDPOINT: &str = formatcp!("{}/health_check", QUERY_ENDPOINT);
 pub const CONFIG_QUERY_ENDPOINT: &str = formatcp!("{}/config", QUERY_ENDPOINT);
+pub const STATUS_QUERY_ENDPOINT: &str = formatcp!("{}/status", QUERY_ENDPOINT);

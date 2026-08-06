@@ -1,11 +1,11 @@
-use super::query::{config_query_response, health_check_response};
-use crate::arguments::get_arguments;
+use super::query::{health_check_response, status_query_response};
+use crate::{arguments::get_arguments, http::query::config_query_response};
 use axum::{
     Router,
     routing::{MethodRouter, get},
 };
-use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT};
-use log::{debug, error, info, trace, warn};
+use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
+use log::{LevelFilter, debug, error, info, trace, warn};
 
 pub async fn initialize_http_listener() {
     let app = Router::new();
@@ -16,9 +16,21 @@ pub async fn initialize_http_listener() {
     );
     let app = initialize_query_endpoint(
         app,
-        CONFIG_QUERY_ENDPOINT.to_string(),
-        get(config_query_response),
+        STATUS_QUERY_ENDPOINT.to_string(),
+        get(status_query_response),
     );
+
+    let app = match log::max_level() {
+        LevelFilter::Trace => {
+            let app = initialize_query_endpoint(
+                app,
+                CONFIG_QUERY_ENDPOINT.to_string(),
+                get(config_query_response),
+            );
+            app
+        }
+        _ => app,
+    };
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", get_arguments().port))
         .await

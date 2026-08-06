@@ -21,13 +21,13 @@ async fn main() {
             return;
         }
     }
-    match initialize_logger("server", get_arguments().verbose) {
+    match initialize_logger("server", get_arguments().debug) {
         Ok(_) => {}
         Err(e) => {
             println!("{}", e.to_string());
             return;
         }
-    }
+    };
 
     trace!("{}", BIN_DIR);
     debug!("{}", OPT_DIR);

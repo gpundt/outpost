@@ -4,14 +4,31 @@ use log::LevelFilter;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::{Mutex, OnceLock};
 
 use super::files::LOG_DIR;
 
-pub fn initialize_logger(log_type: &str, verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
+static LOG_FILENAME: OnceLock<Mutex<String>> = OnceLock::new();
+fn log_filename() -> &'static Mutex<String> {
+    LOG_FILENAME.get_or_init(|| Mutex::new(String::new()))
+}
+
+fn set_log_filename(name: &str) {
+    let mut file = log_filename().lock().unwrap();
+    *file = name.to_string();
+}
+
+pub fn get_log_filename() -> String {
+    let file = log_filename().lock().unwrap();
+    file.clone()
+}
+
+pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let filepath: PathBuf =
         PathBuf::from(LOG_DIR).join(format!("outpost_{}_{}.log", log_type, timestamp));
 
+    set_log_filename(filepath.to_str().unwrap_or("invalid utf-8"));
     // CHANGED: keep file handle separately for the format closure
     let log_file = OpenOptions::new()
         .create(true)
@@ -55,7 +72,7 @@ pub fn initialize_logger(log_type: &str, verbose: bool) -> Result<(), Box<dyn st
 
             Ok(())
         })
-        .filter_level(match verbose {
+        .filter_level(match debug {
             true => LevelFilter::Trace,
             false => LevelFilter::Info,
         })

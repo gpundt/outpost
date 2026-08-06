@@ -1,14 +1,16 @@
 use crate::arguments::get_arguments;
 use axum::Json;
-use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT};
+use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
+use config::logging::get_log_filename;
 use config::time::get_uptime_str;
-use log::{debug, error, info, trace, warn};
+use log::{Level, LevelFilter, debug, error, info, max_level, trace, warn};
 use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct HealthCheckResponse {
     status: String,
     uptime: String,
+    version: String,
 }
 
 pub async fn health_check_response() -> Json<HealthCheckResponse> {
@@ -16,21 +18,57 @@ pub async fn health_check_response() -> Json<HealthCheckResponse> {
     let payload = HealthCheckResponse {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
     };
     Json(payload)
 }
 
 #[derive(Serialize)]
 pub struct ConfigResponse {
-    verbose: bool,
+    debug: bool,
     port: u16,
+    serial_port: String,
+    log_level: String,
+    log_file: String,
 }
 
 pub async fn config_query_response() -> Json<ConfigResponse> {
     trace!("HTTP GET: {}", CONFIG_QUERY_ENDPOINT);
     let payload = ConfigResponse {
-        verbose: get_arguments().verbose,
+        debug: get_arguments().debug,
         port: get_arguments().port,
+        serial_port: "".to_string(),
+        log_level: log::max_level().to_string(),
+        log_file: get_log_filename(),
+    };
+    Json(payload)
+}
+
+#[derive(Serialize)]
+pub struct StatusResponse {
+    status: String,
+    uptime: String,
+    version: String,
+    serial_connected: bool,
+    serial_port: String,
+    database_reachable: bool,
+    packets_received: u32,
+    last_packet_received: String,
+    connected_peers: u16,
+}
+
+pub async fn status_query_response() -> Json<StatusResponse> {
+    trace!("HTTP GET: {}", STATUS_QUERY_ENDPOINT);
+    let payload = StatusResponse {
+        status: "Healthy".to_string(),
+        uptime: get_uptime_str(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        serial_connected: false,
+        serial_port: "".to_string(),
+        database_reachable: false,
+        packets_received: 0,
+        last_packet_received: "".to_string(),
+        connected_peers: 0,
     };
     return Json(payload);
 }
