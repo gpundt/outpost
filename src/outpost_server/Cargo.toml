@@ -11,3 +11,10 @@ clap = { version ="4.6.5", features = ["derive"] }
 config = { path = "../config" }
 env_logger = "0.11.11"
 log = "0.4.33"
+serialport = "4.9.0"
+thiserror = "2.0.19"
+meshtastic = "0.1.9"
+tokio-serial = "5.5.0"
+chrono = "0.4.45"
+prost = "0.14.4"
+arc = "0.0.1"

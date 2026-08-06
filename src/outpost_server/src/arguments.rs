@@ -13,7 +13,15 @@ pub struct Args {
 
     /// Port to bind HTTP listener to
     #[arg(short, long, default_value_t = 8080)]
-    pub port: u16,
+    pub http_port: u16,
+
+    /// Flag to list available serial device ports and immediately exit
+    #[arg(short, long, default_value_t = false)]
+    pub enumerate: bool,
+
+    /// Specifies which serial device port to connect to
+    #[arg(short, long)]
+    pub serial_port: Option<String>,
 }
 
 // static global storage

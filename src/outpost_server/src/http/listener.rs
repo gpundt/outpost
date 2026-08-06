@@ -32,10 +32,10 @@ pub async fn initialize_http_listener() {
         _ => app,
     };
 
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", get_arguments().port))
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", get_arguments().http_port))
         .await
         .unwrap();
-    info!("Listening on 0.0.0.0:{}", get_arguments().port);
+    info!("Listening on 0.0.0.0:{}", get_arguments().http_port);
     axum::serve(listener, app)
         .with_graceful_shutdown(graceful_exit())
         .await
