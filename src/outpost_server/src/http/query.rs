@@ -3,7 +3,7 @@ use axum::Json;
 use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
 use config::logging::get_log_filename;
 use config::time::get_uptime_str;
-use log::{Level, LevelFilter, debug, error, info, max_level, trace, warn};
+use log::{debug, error, info, trace, warn};
 use serde::Serialize;
 
 #[derive(Serialize)]
