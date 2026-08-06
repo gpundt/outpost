@@ -1,11 +1,10 @@
-use super::query::health_check_response;
-use crate::arguments::Args;
+use super::query::{config_query_response, health_check_response};
 use crate::arguments::get_arguments;
 use axum::{
     Router,
     routing::{MethodRouter, get},
 };
-use config::endpoints::HEALTH_CHECK_ENDPOINT;
+use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT};
 use log::{debug, error, info, trace, warn};
 
 pub async fn initialize_http_listener() {
@@ -14,6 +13,11 @@ pub async fn initialize_http_listener() {
         app,
         HEALTH_CHECK_ENDPOINT.to_string(),
         get(health_check_response),
+    );
+    let app = initialize_query_endpoint(
+        app,
+        CONFIG_QUERY_ENDPOINT.to_string(),
+        get(config_query_response),
     );
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", get_arguments().port))
