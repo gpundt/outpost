@@ -12,7 +12,7 @@ pub struct Args {
     pub debug: bool,
 
     /// Port to bind HTTP listener to
-    #[arg(short, long, default_value_t = 8080)]
+    #[arg(long, default_value_t = 8080)]
     pub http_port: u16,
 
     /// Flag to list available serial device ports and immediately exit

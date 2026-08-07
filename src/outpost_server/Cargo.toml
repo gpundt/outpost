@@ -18,3 +18,4 @@ tokio-serial = "5.5.0"
 chrono = "0.4.45"
 prost = "0.14.4"
 arc = "0.0.1"
+sqlx = { version = "0.9.0", features = ["sqlite", "runtime-tokio", "tls-rustls"] }

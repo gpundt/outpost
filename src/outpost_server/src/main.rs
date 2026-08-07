@@ -1,5 +1,6 @@
 mod arguments;
 
+pub mod database;
 pub mod http;
 pub mod meshtastic;
 use crate::http::initialize_http_listener;
@@ -8,6 +9,7 @@ use arguments::{get_arguments, init_arguments};
 use config::files::create_output_directories;
 use config::logging::initialize_logger;
 use config::time::start_time;
+use database::init_database;
 use log::{debug, error, info, trace, warn};
 use meshtastic::device::{enumerate_serial_devices, list_serial_devices};
 
@@ -21,7 +23,7 @@ async fn main() {
         return;
     }
 
-    match create_output_directories() {
+    match create_output_directories("server") {
         Ok(_) => {}
         Err(e) => {
             println!("{}", e.to_string());
@@ -39,6 +41,14 @@ async fn main() {
     if let None = get_arguments().serial_port {
         error!("You must specify a serial port: --serial-port PORT");
         return;
+    }
+
+    match init_database().await {
+        Ok(database_url) => info!("Database initialized: {}", database_url),
+        Err(e) => {
+            error!("Database Initialization Failure: {}", e.to_string());
+            return;
+        }
     }
 
     {
