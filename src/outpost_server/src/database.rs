@@ -19,11 +19,13 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS http_requests (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            method TEXT NOT NULL,
-            source TEXT NOT NULL,
-            endpoint TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            id          INTEGER  PRIMARY KEY AUTOINCREMENT,
+            method      TEXT     NOT NULL,
+            source      TEXT     NOT NULL,
+            endpoint    TEXT     NOT NULL,
+            user_agent  TEXT     NOT NULL,
+            status_code INTEGER  NOT NULL DEFAULT 0,
+            timestamp   DATETIME DEFAULT CURRENT_TIMESTAMP
         )
         "#,
     )
@@ -34,4 +36,28 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
 
 pub fn get_db_pool() -> &'static SqlitePool {
     DB_POOL.get().expect("Database pool is not initialized")
+}
+
+pub async fn insert_http_request(
+    method: &str,
+    source: &str,
+    endpoint: &str,
+    user_agent: &str,
+    status_code: u16,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        INSERT INTO http_requests (method, source, endpoint, user_agent, status_code)
+        VALUES (?, ?, ?, ?, ?)
+        "#,
+    )
+    .bind(method)
+    .bind(source)
+    .bind(endpoint)
+    .bind(user_agent)
+    .bind(status_code)
+    .execute(get_db_pool())
+    .await?;
+
+    Ok(())
 }

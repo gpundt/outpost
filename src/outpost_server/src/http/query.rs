@@ -15,7 +15,6 @@ pub struct HealthCheckResponse {
 }
 
 pub async fn health_check_response() -> Json<HealthCheckResponse> {
-    trace!("HTTP GET: {}", HEALTH_CHECK_ENDPOINT);
     let payload = HealthCheckResponse {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),
@@ -34,7 +33,6 @@ pub struct ConfigResponse {
 }
 
 pub async fn config_query_response() -> Json<ConfigResponse> {
-    trace!("HTTP GET: {}", CONFIG_QUERY_ENDPOINT);
     let payload = ConfigResponse {
         debug: get_arguments().debug,
         http_port: get_arguments().http_port,
@@ -59,7 +57,6 @@ pub struct StatusResponse {
 }
 
 pub async fn status_query_response() -> Json<StatusResponse> {
-    trace!("HTTP GET: {}", STATUS_QUERY_ENDPOINT);
     let payload = StatusResponse {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),

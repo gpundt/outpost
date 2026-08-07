@@ -1,11 +1,14 @@
 use super::query::{health_check_response, status_query_response};
+use crate::http::middleware::log_request_middleware;
 use crate::{arguments::get_arguments, http::query::config_query_response};
+use axum::middleware::from_fn;
 use axum::{
-    Router,
+    Router, middleware,
     routing::{MethodRouter, get},
 };
 use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
 use log::{LevelFilter, debug, error, info, trace, warn};
+use std::net::SocketAddr;
 
 pub async fn initialize_http_listener() {
     let app = Router::new();
@@ -32,14 +35,19 @@ pub async fn initialize_http_listener() {
         _ => app,
     };
 
+    let app = app.layer(middleware::from_fn(log_request_middleware));
+
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", get_arguments().http_port))
         .await
         .unwrap();
     info!("Listening on 0.0.0.0:{}", get_arguments().http_port);
-    axum::serve(listener, app)
-        .with_graceful_shutdown(graceful_exit())
-        .await
-        .unwrap();
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(graceful_exit())
+    .await
+    .unwrap();
 }
 
 pub fn initialize_query_endpoint(app: Router, path: String, response_func: MethodRouter) -> Router {
