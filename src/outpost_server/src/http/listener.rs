@@ -1,13 +1,12 @@
 use super::query::{health_check_response, status_query_response};
 use crate::http::middleware::log_request_middleware;
 use crate::{arguments::get_arguments, http::query::config_query_response};
-use axum::middleware::from_fn;
 use axum::{
     Router, middleware,
     routing::{MethodRouter, get},
 };
 use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
-use log::{LevelFilter, debug, error, info, trace, warn};
+use log::{LevelFilter, debug, info};
 use std::net::SocketAddr;
 
 pub async fn initialize_http_listener() {

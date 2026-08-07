@@ -1,10 +1,8 @@
 use crate::arguments::get_arguments;
 use crate::meshtastic::connection::global_connection;
 use axum::Json;
-use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
 use config::logging::get_log_filename;
 use config::time::get_uptime_str;
-use log::{debug, error, info, trace, warn};
 use serde::Serialize;
 
 #[derive(Serialize)]

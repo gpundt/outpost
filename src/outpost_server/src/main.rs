@@ -4,13 +4,13 @@ pub mod database;
 pub mod http;
 pub mod meshtastic;
 use crate::http::initialize_http_listener;
-use crate::meshtastic::connection::{global_connection, global_runtime};
+use crate::meshtastic::connection::global_connection;
 use arguments::{get_arguments, init_arguments};
 use config::files::create_output_directories;
 use config::logging::initialize_logger;
 use config::time::start_time;
 use database::init_database;
-use log::{debug, error, info, trace, warn};
+use log::{error, info};
 use meshtastic::device::{enumerate_serial_devices, list_serial_devices};
 
 #[tokio::main]

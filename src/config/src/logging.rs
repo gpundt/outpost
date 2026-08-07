@@ -76,6 +76,10 @@ pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std:
             true => LevelFilter::Trace,
             false => LevelFilter::Info,
         })
+        .filter_module("hyper", log::LevelFilter::Info)
+        .filter_module("axum", log::LevelFilter::Info)
+        .filter_module("tower", log::LevelFilter::Info)
+        .filter_module("mio", log::LevelFilter::Info)
         .init();
 
     Ok(())
