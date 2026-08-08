@@ -1,6 +1,10 @@
+use chrono::Utc;
 use config::files::DATABASE_DIR;
 use log::debug;
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePool};
+use sqlx::{
+    QueryBuilder, Sqlite,
+    sqlite::{SqliteConnectOptions, SqlitePool},
+};
 use std::{str::FromStr, sync::OnceLock};
 // Static container for the global
 static DB_POOL: OnceLock<SqlitePool> = OnceLock::new();
@@ -60,4 +64,21 @@ pub async fn insert_http_request(
     .await?;
 
     Ok(())
+}
+
+pub async fn backup_database() -> Result<String, sqlx::Error> {
+    let path_str = format!(
+        "{}outpost_server_{}.db",
+        DATABASE_DIR,
+        Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string()
+    );
+
+    let mut vacuum_query: QueryBuilder<Sqlite> = QueryBuilder::new("VACUUM INTO ");
+    let escaped_path = path_str.replace('\'', "''");
+    vacuum_query.push(format!("'{}'", escaped_path));
+    let query = vacuum_query.build();
+
+    query.execute(get_db_pool()).await?;
+
+    Ok(path_str.to_string())
 }

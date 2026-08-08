@@ -1,11 +1,15 @@
 use super::query::{health_check_response, status_query_response};
 use crate::http::middleware::log_request_middleware;
+use crate::http::submit::submit_task_response;
 use crate::{arguments::get_arguments, http::query::config_query_response};
+use axum::routing::post;
 use axum::{
     Router, middleware,
     routing::{MethodRouter, get},
 };
-use config::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
+use config::endpoints::{
+    CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT, SUBMIT_TASK_ENDPOINT,
+};
 use log::{LevelFilter, debug, info};
 use std::net::SocketAddr;
 
@@ -20,6 +24,12 @@ pub async fn initialize_http_listener() {
         app,
         STATUS_QUERY_ENDPOINT.to_string(),
         get(status_query_response),
+    );
+
+    let app = initialize_submission_endpoint(
+        app,
+        SUBMIT_TASK_ENDPOINT.to_string(),
+        post(submit_task_response),
     );
 
     let app = match log::max_level() {
@@ -50,7 +60,16 @@ pub async fn initialize_http_listener() {
 }
 
 pub fn initialize_query_endpoint(app: Router, path: String, response_func: MethodRouter) -> Router {
-    debug!("Initialized {} Endpoint", path);
+    debug!("Initialized Endpoint: {}", path);
+    app.route(&path, response_func)
+}
+
+pub fn initialize_submission_endpoint(
+    app: Router,
+    path: String,
+    response_func: MethodRouter,
+) -> Router {
+    debug!("Initialized Endpoint: {}", path);
     app.route(&path, response_func)
 }
 
