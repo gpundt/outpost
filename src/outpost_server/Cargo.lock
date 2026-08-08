@@ -415,6 +415,7 @@ dependencies = [
  "env_logger",
  "log",
  "serde",
+ "serde_json",
  "strip-ansi-escapes",
 ]
 

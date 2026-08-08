@@ -22,3 +22,16 @@ pub enum OutpostTask {
     Backup,
     Beacon,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct TaskRequest {
+    pub task: OutpostTask,
+    pub parameters: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct TaskResponse {
+    pub task: OutpostTask,
+    pub success: bool,
+    pub message: String,
+}

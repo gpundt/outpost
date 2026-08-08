@@ -1,6 +1,6 @@
 use chrono::Utc;
 use config::files::DATABASE_DIR;
-use log::debug;
+use log::{debug, info};
 use sqlx::{
     QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
@@ -80,5 +80,6 @@ pub async fn backup_database() -> Result<String, sqlx::Error> {
 
     query.execute(get_db_pool()).await?;
 
+    info!("Database backup created: {}", path_str);
     Ok(path_str.to_string())
 }
