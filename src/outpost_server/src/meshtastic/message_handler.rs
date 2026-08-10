@@ -14,10 +14,10 @@ use crate::database::{
 pub async fn handle_from_radio_packet(from_radio: meshtastic::protobufs::FromRadio) {
     match from_radio.payload_variant {
         Some(from_radio::PayloadVariant::Packet(mesh_packet)) => {
-            handle_mesh_packet(mesh_packet);
+            let _ = handle_mesh_packet(mesh_packet);
         }
         Some(from_radio::PayloadVariant::NodeInfo(node_info)) => {
-            insert_meshtastic_node(node_info).await;
+            let _ = insert_meshtastic_node(node_info).await;
         }
         Some(from_radio::PayloadVariant::MyInfo(_my_info)) => {
             //println!("My node info: {:#?}", my_info);
@@ -41,7 +41,7 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
             match portnum {
                 PortNum::TextMessageApp => {
                     if let Ok(text) = String::from_utf8(data.payload.clone()) {
-                        insert_meshtastic_text(
+                        let _ = insert_meshtastic_text(
                             format!("{}", data.source),
                             format!("{}", data.dest),
                             &text,
@@ -50,24 +50,24 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                     }
                 }
                 PortNum::PositionApp => {
-                    insert_meshtastic_position().await;
+                    let _ = insert_meshtastic_position().await;
                 }
                 PortNum::NodeinfoApp => match NodeInfo::decode(data.payload.as_slice()) {
                     Ok(n) => {
-                        insert_meshtastic_node(n).await;
+                        let _ = insert_meshtastic_node(n).await;
                     }
                     Err(e) => error!("Failed to decode PortNum::NodeinfoApp: {}", e),
                 },
                 PortNum::TelemetryApp => {
-                    insert_meshtastic_telemetry().await;
+                    let _ = insert_meshtastic_telemetry().await;
                 }
                 _ => {
-                    insert_meshtastic_raw(mesh_packet, false);
+                    let _ = insert_meshtastic_raw(mesh_packet, false);
                 }
             }
         }
         Some(mesh_packet::PayloadVariant::Encrypted(_)) => {
-            insert_meshtastic_raw(mesh_packet, true).await;
+            let _ = insert_meshtastic_raw(mesh_packet, true).await;
         }
         None => {}
     }
