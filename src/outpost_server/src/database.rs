@@ -1,8 +1,8 @@
-use chrono::Utc;
+use chrono::{NaiveDateTime, Utc};
 use config::files::DATABASE_DIR;
 use log::{debug, info};
 use sqlx::{
-    QueryBuilder, Sqlite,
+    Pool, QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
 };
 use std::{str::FromStr, sync::OnceLock};
@@ -20,6 +20,7 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
         .set(pool)
         .map_err(|_| sqlx::Error::Configuration("Pool already set".into()))?;
 
+    // ── http_requests Table ─────
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS http_requests (
@@ -35,11 +36,40 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
     )
     .execute(get_db_pool())
     .await?;
+
+    // ── tasks Table ────────────
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS tasks (
+            id            INTEGER  PRIMARY KEY AUTOINCREMENT,
+            type          TEXT     NOT_NULL,
+            requested_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+            finished_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+            successful    INTEGER  NOT NULL DEFAULT 0 CHECK (successful IN (0, 1))
+        )
+        "#,
+    )
+    .execute(get_db_pool())
+    .await?;
+
     Ok(database_url)
 }
 
 pub fn get_db_pool() -> &'static SqlitePool {
     DB_POOL.get().expect("Database pool is not initialized")
+}
+
+pub async fn is_db_connected() -> bool {
+    let pool: &Pool<Sqlite> = get_db_pool();
+
+    if pool.is_closed() {
+        return false;
+    }
+
+    match sqlx::query("SELECT 1").execute(pool).await {
+        Ok(_) => true,
+        Err(_) => false,
+    }
 }
 
 pub async fn insert_http_request(
@@ -60,6 +90,43 @@ pub async fn insert_http_request(
     .bind(endpoint)
     .bind(user_agent)
     .bind(status_code)
+    .execute(get_db_pool())
+    .await?;
+
+    Ok(())
+}
+
+pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Error> {
+    let requested_at: chrono::DateTime<Utc> = Utc::now();
+
+    let result = sqlx::query(
+        r#"
+        INSERT INTO tasks (type, requested_at)
+        VALUES (?, ?)
+        "#,
+    )
+    .bind(task_type)
+    .bind(requested_at)
+    .execute(get_db_pool())
+    .await?;
+
+    let generated_id = result.last_insert_rowid();
+
+    Ok(generated_id)
+}
+
+pub async fn insert_task_request_finish(row_id: i64, successful: bool) -> Result<(), sqlx::Error> {
+    let finished_at: chrono::DateTime<Utc> = Utc::now();
+
+    sqlx::query(
+        r#"
+        UPDATE tasks SET finished_at = ?, successful = ?
+        WHERE id = ?
+        "#,
+    )
+    .bind(finished_at)
+    .bind(successful)
+    .bind(row_id)
     .execute(get_db_pool())
     .await?;
 

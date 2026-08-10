@@ -1,4 +1,5 @@
 use crate::arguments::get_arguments;
+use crate::database::is_db_connected;
 use crate::meshtastic::connection::global_connection;
 use axum::Json;
 use config::logging::get_log_filename;
@@ -55,13 +56,15 @@ pub struct StatusResponse {
 }
 
 pub async fn status_query_response() -> Json<StatusResponse> {
+    let db_connection = is_db_connected().await;
+
     let payload = StatusResponse {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),
         version: env!("CARGO_PKG_VERSION").to_string(),
         serial_connected: global_connection().lock().unwrap().is_connected(),
         serial_port: get_arguments().serial_port.clone(),
-        database_reachable: false,
+        database_reachable: db_connection,
         packets_received: 0,
         last_packet_received: "".to_string(),
         connected_peers: 0,
