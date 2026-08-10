@@ -110,12 +110,7 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
     .await?;
 
     // ── meshtastic_telemetry Table ──
-    sqlx::query(
-        r#"
-        "#,
-    )
-    .execute(get_db_pool())
-    .await?;
+    // NOT SUPPORTED AT THIS TIME
 
     // ── meshtastic_raw Table ──────
     sqlx::query(
@@ -240,7 +235,13 @@ pub async fn insert_meshtastic_position(
     };
 }
 
-pub async fn insert_meshtastic_telemetry(telemetry: Telemetry) -> Result<(), sqlx::Error> {
+pub async fn insert_meshtastic_telemetry(
+    src_node: u32,
+    dst_node: u32,
+    channel: u32,
+    telemetry: Telemetry,
+) -> Result<(), sqlx::Error> {
+    debug!("Telemetry packet intercepted... Not adding to database");
     Ok(())
 }
 
