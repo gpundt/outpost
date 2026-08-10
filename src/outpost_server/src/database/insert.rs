@@ -1,6 +1,8 @@
 use super::schema::get_db_pool;
 use chrono::Utc;
 use log::{debug, error};
+use meshtastic::protobufs::{DeviceMetrics, NodeInfo, PortNum::NodeinfoApp, User};
+use sqlx::encode::IsNull::No;
 
 pub async fn insert_meshtastic_text(
     src_id: String,
@@ -34,21 +36,18 @@ pub async fn insert_meshtastic_node(
 ) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
-        INSERT INTO meshtastic_nodes (node_num, node_id, node_long_name, node_short_name, hw_model, role, is_unmessagable, latitude, longitude, last_heard, uptime, channel, hops_away)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+        INSERT INTO meshtastic_nodes (node_num, node_id, node_long_name, node_short_name, hw_model, role, last_heard, uptime, channel, hops_away)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
         "#
     )
         .bind(node_info.num)
-        .bind(node_info.clone().user.unwrap().id)
-        .bind(node_info.clone().user.unwrap().long_name)
-        .bind(node_info.clone().user.unwrap().short_name)
-        .bind(node_info.clone().user.unwrap().hw_model)
-        .bind(node_info.clone().user.unwrap().role)
-        .bind(node_info.clone().user.unwrap().is_unmessagable)
-        .bind(node_info.position.unwrap().latitude_i)
-        .bind(node_info.position.unwrap().longitude_i)
+        .bind(node_info.clone().user.unwrap_or(User::default()).id)
+        .bind(node_info.clone().user.unwrap_or(User::default()).long_name)
+        .bind(node_info.clone().user.unwrap_or(User::default()).short_name)
+        .bind(node_info.clone().user.unwrap_or(User::default()).hw_model)
+        .bind(node_info.clone().user.unwrap_or(User::default()).role)
         .bind(node_info.last_heard)
-        .bind(node_info.device_metrics.unwrap().uptime_seconds)
+        .bind(node_info.device_metrics.unwrap_or(DeviceMetrics::default()).uptime_seconds)
         .bind(node_info.channel)
         .bind(node_info.hops_away)
         .execute(get_db_pool())
@@ -70,9 +69,9 @@ pub async fn insert_meshtastic_position(
         VALUES (?, ?, ?, ?, ?, ?)
         "#,
     )
-    .bind(position.latitude_i.unwrap())
-    .bind(position.longitude_i.unwrap())
-    .bind(position.altitude.unwrap())
+    .bind(position.latitude_i.unwrap_or(0))
+    .bind(position.longitude_i.unwrap_or(0))
+    .bind(position.altitude.unwrap_or(0))
     .bind(position.time)
     .bind(position.timestamp)
     .bind(position.next_update)

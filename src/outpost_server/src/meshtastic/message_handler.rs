@@ -12,7 +12,7 @@ use crate::database::{
 pub async fn handle_from_radio_packet(from_radio: meshtastic::protobufs::FromRadio) {
     match from_radio.payload_variant {
         Some(from_radio::PayloadVariant::Packet(mesh_packet)) => {
-            let _ = handle_mesh_packet(mesh_packet);
+            handle_mesh_packet(mesh_packet).await;
         }
         Some(from_radio::PayloadVariant::NodeInfo(node_info)) => {
             let _ = insert_meshtastic_node(node_info).await;
@@ -37,8 +37,9 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
             let portnum = PortNum::try_from(data.portnum).unwrap_or(PortNum::UnknownApp);
 
             match portnum {
-                PortNum::TextMessageApp => {
-                    if let Ok(text) = String::from_utf8(data.payload.clone()) {
+                PortNum::TextMessageApp => match String::from_utf8(data.payload.clone()) {
+                    Ok(text) => {
+                        error!("TEXT RECEIVED: {}", text);
                         let _ = insert_meshtastic_text(
                             format!("{}", data.source),
                             format!("{}", data.dest),
@@ -46,20 +47,26 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                         )
                         .await;
                     }
-                }
+                    Err(e) => {
+                        error!("Failed to decode PortNum::TextMessageApp: {}", e);
+                    }
+                },
                 PortNum::PositionApp => match Position::decode(data.payload.as_slice()) {
                     Ok(p) => {
+                        error!("POSITON RECEIVED: {:?}", p);
                         let _ = insert_meshtastic_position(p).await;
                     }
                     Err(e) => error!("Failed to decode Portnum::PositionApp: {}", e),
                 },
                 PortNum::NodeinfoApp => match NodeInfo::decode(data.payload.as_slice()) {
                     Ok(n) => {
+                        error!("NODE RECEIVED: {:?}", n);
                         let _ = insert_meshtastic_node(n).await;
                     }
                     Err(e) => error!("Failed to decode PortNum::NodeinfoApp: {}", e),
                 },
                 PortNum::TelemetryApp => {
+                    error!("TELEMETRY RECEIVED");
                     let _ = insert_meshtastic_telemetry().await;
                 }
                 _ => {
@@ -68,6 +75,7 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
             }
         }
         Some(mesh_packet::PayloadVariant::Encrypted(_)) => {
+            error!("ENCRYPTED RECEIVED");
             let _ = insert_meshtastic_raw(mesh_packet, true).await;
         }
         None => {}
