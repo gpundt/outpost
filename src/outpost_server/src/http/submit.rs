@@ -1,13 +1,12 @@
 use crate::database::{backup_database, insert_task_request_finish, insert_task_request_start};
-use axum::{Json, Router, http::StatusCode, routing::post};
+use axum::{Json, http::StatusCode};
 use config::endpoints::{OutpostTask, TaskRequest, TaskResponse};
-use log::{error, info, warn};
-use serde::Deserialize;
+use log::info;
 
 pub async fn submit_task_response(
     Json(request): Json<TaskRequest>,
 ) -> (StatusCode, Json<TaskResponse>) {
-    info!("Task received: {:?}", request.task);
+    info!("Task submission received: {:?}", request.task);
     match request.task {
         OutpostTask::Backup => handle_backup().await,
         OutpostTask::Beacon => handle_beacon().await,
@@ -18,7 +17,6 @@ async fn handle_backup() -> (StatusCode, Json<TaskResponse>) {
     let row_id = match insert_task_request_start("backup").await {
         Ok(i) => i,
         Err(e) => {
-            error!("Error inserting task into database: {}", e);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
@@ -41,7 +39,6 @@ async fn handle_backup() -> (StatusCode, Json<TaskResponse>) {
             }),
         ),
         Err(e) => {
-            error!("Database backup failed: {}", e);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {

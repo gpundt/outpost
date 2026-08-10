@@ -1,6 +1,6 @@
-use chrono::{NaiveDateTime, Utc};
+use chrono::Utc;
 use config::files::DATABASE_DIR;
-use log::{debug, info};
+use log::{debug, error, info};
 use sqlx::{
     Pool, QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
@@ -79,7 +79,7 @@ pub async fn insert_http_request(
     user_agent: &str,
     status_code: u16,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(
+    match sqlx::query(
         r#"
         INSERT INTO http_requests (method, source, endpoint, user_agent, status_code)
         VALUES (?, ?, ?, ?, ?)
@@ -91,15 +91,20 @@ pub async fn insert_http_request(
     .bind(user_agent)
     .bind(status_code)
     .execute(get_db_pool())
-    .await?;
-
-    Ok(())
+    .await
+    {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            error!("Failed to insert into http_requests table: {}", e);
+            return Err(e);
+        }
+    };
 }
 
 pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Error> {
     let requested_at: chrono::DateTime<Utc> = Utc::now();
 
-    let result = sqlx::query(
+    let result = match sqlx::query(
         r#"
         INSERT INTO tasks (type, requested_at)
         VALUES (?, ?)
@@ -108,7 +113,14 @@ pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Err
     .bind(task_type)
     .bind(requested_at)
     .execute(get_db_pool())
-    .await?;
+    .await
+    {
+        Ok(r) => r,
+        Err(e) => {
+            error!("Failed to insert into tasks table: {}", e);
+            return Err(e);
+        }
+    };
 
     let generated_id = result.last_insert_rowid();
 
@@ -118,7 +130,7 @@ pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Err
 pub async fn insert_task_request_finish(row_id: i64, successful: bool) -> Result<(), sqlx::Error> {
     let finished_at: chrono::DateTime<Utc> = Utc::now();
 
-    sqlx::query(
+    match sqlx::query(
         r#"
         UPDATE tasks SET finished_at = ?, successful = ?
         WHERE id = ?
@@ -128,9 +140,14 @@ pub async fn insert_task_request_finish(row_id: i64, successful: bool) -> Result
     .bind(successful)
     .bind(row_id)
     .execute(get_db_pool())
-    .await?;
-
-    Ok(())
+    .await
+    {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            error!("Failed to update tasks table with finished task: {}", e);
+            return Err(e);
+        }
+    };
 }
 
 pub async fn backup_database() -> Result<String, sqlx::Error> {
@@ -145,8 +162,14 @@ pub async fn backup_database() -> Result<String, sqlx::Error> {
     vacuum_query.push(format!("'{}'", escaped_path));
     let query = vacuum_query.build();
 
-    query.execute(get_db_pool()).await?;
-
-    info!("Database backup created: {}", path_str);
-    Ok(path_str.to_string())
+    match query.execute(get_db_pool()).await {
+        Ok(_) => {
+            info!("Database backup created: {}", path_str);
+            return Ok(path_str.to_string());
+        }
+        Err(e) => {
+            error!("Failed to create database backup: {}", e);
+            return Err(e);
+        }
+    };
 }
