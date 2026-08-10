@@ -61,20 +61,9 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                     }
                     Err(e) => error!("Failed to decode PortNum::NodeinfoApp: {}", e),
                 },
-                PortNum::TelemetryApp => match Telemetry::decode(data.payload.as_slice()) {
-                    Ok(telemetry) => {
-                        let _ = insert_meshtastic_telemetry(
-                            mesh_packet.from,
-                            mesh_packet.to,
-                            mesh_packet.channel,
-                            telemetry,
-                        )
-                        .await;
-                    }
-                    Err(e) => {
-                        error!("Failed to decode PortNum::TelemetryApp: {}", e);
-                    }
-                },
+                PortNum::TelemetryApp => {
+                    let _ = insert_meshtastic_telemetry().await;
+                }
                 _ => {
                     let _ = insert_meshtastic_raw(mesh_packet, false);
                 }

@@ -235,12 +235,7 @@ pub async fn insert_meshtastic_position(
     };
 }
 
-pub async fn insert_meshtastic_telemetry(
-    src_node: u32,
-    dst_node: u32,
-    channel: u32,
-    telemetry: Telemetry,
-) -> Result<(), sqlx::Error> {
+pub async fn insert_meshtastic_telemetry() -> Result<(), sqlx::Error> {
     debug!("Telemetry packet intercepted... Not adding to database");
     Ok(())
 }
