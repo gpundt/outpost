@@ -27,7 +27,7 @@ pub struct Args {
 // static global storage
 static ARGS: OnceLock<Args> = OnceLock::new();
 
-pub fn init_arguments() {
+pub fn initialize_arguments() {
     let args = Args::parse();
     ARGS.set(args)
         .expect("Failed to set global arguments storage")

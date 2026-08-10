@@ -5,18 +5,18 @@ pub mod http;
 pub mod meshtastic;
 use crate::http::initialize_http_listener;
 use crate::meshtastic::connection::global_connection;
-use arguments::{get_arguments, init_arguments};
+use arguments::{get_arguments, initialize_arguments};
 use config::files::create_output_directories;
 use config::logging::initialize_logger;
 use config::time::start_time;
-use database::init_database;
+use database::initialize_database;
 use log::{error, info};
 use meshtastic::device::{enumerate_serial_devices, list_serial_devices};
 
 #[tokio::main]
 async fn main() {
     start_time();
-    init_arguments();
+    initialize_arguments();
 
     if get_arguments().enumerate {
         list_serial_devices(enumerate_serial_devices());
@@ -43,7 +43,7 @@ async fn main() {
         return;
     }
 
-    match init_database().await {
+    match initialize_database().await {
         Ok(database_url) => info!("Database initialized: {}", database_url),
         Err(e) => {
             error!("Database Initialization Failure: {}", e.to_string());
