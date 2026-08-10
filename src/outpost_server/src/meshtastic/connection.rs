@@ -54,7 +54,7 @@ impl DeviceConnection {
 
         let handler = tokio::spawn(async move {
             while let Some(from_radio_packet) = packet_receiver.recv().await {
-                handle_from_radio_packet(from_radio_packet);
+                handle_from_radio_packet(from_radio_packet).await;
             }
 
             connected.store(false, Ordering::SeqCst);

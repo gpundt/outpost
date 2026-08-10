@@ -1,6 +1,7 @@
 use chrono::Utc;
 use config::files::DATABASE_DIR;
 use log::{debug, error, info};
+use meshtastic::protobufs::Telemetry;
 use sqlx::{
     Pool, QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
@@ -45,7 +46,7 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
             type          TEXT     NOT NULL,
             requested_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
             finished_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-            successful    INTEGER  NOT NULL DEFAULT 0 CHECK (successful IN (0, 1))
+            successful    INTEGER  DEFAULT 0 CHECK (successful IN (0, 1))
         )
         "#,
     )
@@ -70,6 +71,15 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
     // ── meshtastic_position Table ───
     sqlx::query(
         r#"
+        CREATE TABLE IF NOT EXISTS meshtastic_position (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            latitude       INTEGER DEFAULT 0,
+            longitude      INTEGER DEFAULT 0,
+            altitude       INTEGER DEFAULT 0,
+            time           INTEGER NOT NULL,
+            timestamp      INTEGER NOT NULL,
+            next_update    INTEGER NOT NULL
+        )
         "#,
     )
     .execute(get_db_pool())
@@ -86,9 +96,9 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
             node_short_name TEXT     DEFAULT 'N/A',
             hw_model        TEXT     DEFAULT 'N/A',
             role            TEXT     DEFAULT 'N/A',
-            is_unmessagable INTEGER  NOT NULL DEFAULT 0 CHECK (successful IN (0, 1)),
-            latitude        TEXT     DEFAULT 'N/A',
-            longitude       TEXT     DEFAULT 'N/A',
+            is_unmessagable INTEGER  DEFAULT 0 CHECK (is_unmessagable IN (0, 1)),
+            latitude        INTEGER  DEFAULT 0,
+            longitude       INTEGER  DEFAULT 0,
             last_heard      INTEGER  DEFAULT 0,
             uptime          INTEGER  DEFAULT 0,
             channel         INTEGER  NOT NULL,
@@ -110,6 +120,16 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
     // ── meshtastic_raw Table ──────
     sqlx::query(
         r#"
+        CREATE TABLE IF NOT EXISTS mestastic_raw (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            src_node  INTEGER NOT NULL,
+            dst_node  INTEGER NOT NULL,
+            channel   INTEGER NOT NULL,
+            hop_limit INTEGER NOT NULL,
+            hop_start INTEGER NOT NULL,
+            next_hop  INTEGER NOT NULL,
+            encrypted INTEGER DEFAULT 0 CHECK (encrypted IN (0, 1))
+        )
         "#,
     )
     .execute(get_db_pool())
@@ -188,17 +208,39 @@ pub async fn insert_meshtastic_node(
         .await {
         Ok(_) => return Ok(()),
         Err(e) => {
-            error!("Failed to insert into meshtastic_nodes: {}", e);
+            error!("Failed to insert into 'meshtastic_nodes' table: {}", e);
             return Err(e);
         }
     };
 }
 
-pub async fn insert_meshtastic_position() -> Result<(), sqlx::Error> {
-    Ok(())
+pub async fn insert_meshtastic_position(
+    position: meshtastic::protobufs::Position,
+) -> Result<(), sqlx::Error> {
+    match sqlx::query(
+        r#"
+        INSERT INTO meshtastic_position (latitude, longitude, altitude, time, timestamp, next_update)
+        VALUES (?, ?, ?, ?, ?, ?)
+        "#,
+    )
+    .bind(position.latitude_i.unwrap())
+    .bind(position.longitude_i.unwrap())
+    .bind(position.altitude.unwrap())
+    .bind(position.time)
+    .bind(position.timestamp)
+    .bind(position.next_update)
+    .execute(get_db_pool())
+    .await
+    {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            error!("Failed to insert into 'meshastic_position' table: {}", e);
+            return Err(e);
+        }
+    };
 }
 
-pub async fn insert_meshtastic_telemetry() -> Result<(), sqlx::Error> {
+pub async fn insert_meshtastic_telemetry(telemetry: Telemetry) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
@@ -206,7 +248,28 @@ pub async fn insert_meshtastic_raw(
     mesh_packet: meshtastic::protobufs::MeshPacket,
     encrypted: bool,
 ) -> Result<(), sqlx::Error> {
-    Ok(())
+    match sqlx::query(
+        r#"
+        INSERT INTO meshtastic_raw (src_node, dst_node, channel, hop_limit, hop_start, next_hop, encrypted)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        "#,
+    )
+    .bind(mesh_packet.from)
+    .bind(mesh_packet.to)
+    .bind(mesh_packet.channel)
+    .bind(mesh_packet.hop_limit)
+    .bind(mesh_packet.hop_start)
+    .bind(mesh_packet.next_hop)
+    .bind(encrypted)
+    .execute(get_db_pool())
+    .await
+    {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            error!("Failed to insert into 'meshtastic_raw' table: {}", e);
+            return Err(e);
+        }
+    }
 }
 
 pub async fn insert_http_request(
@@ -232,7 +295,7 @@ pub async fn insert_http_request(
     {
         Ok(_) => return Ok(()),
         Err(e) => {
-            error!("Failed to insert into http_requests table: {}", e);
+            error!("Failed to insert into 'http_requests' table: {}", e);
             return Err(e);
         }
     };
@@ -254,7 +317,7 @@ pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Err
     {
         Ok(r) => r,
         Err(e) => {
-            error!("Failed to insert into tasks table: {}", e);
+            error!("Failed to insert into 'tasks' table: {}", e);
             return Err(e);
         }
     };
@@ -281,7 +344,7 @@ pub async fn insert_task_request_finish(row_id: i64, successful: bool) -> Result
     {
         Ok(_) => return Ok(()),
         Err(e) => {
-            error!("Failed to update tasks table with finished task: {}", e);
+            error!("Failed to update 'tasks' table with finished task: {}", e);
             return Err(e);
         }
     };

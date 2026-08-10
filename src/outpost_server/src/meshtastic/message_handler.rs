@@ -49,18 +49,26 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                         .await;
                     }
                 }
-                PortNum::PositionApp => {
-                    let _ = insert_meshtastic_position().await;
-                }
+                PortNum::PositionApp => match Position::decode(data.payload.as_slice()) {
+                    Ok(p) => {
+                        let _ = insert_meshtastic_position(p).await;
+                    }
+                    Err(e) => error!("Failed to decode Portnum::PositionApp: {}", e),
+                },
                 PortNum::NodeinfoApp => match NodeInfo::decode(data.payload.as_slice()) {
                     Ok(n) => {
                         let _ = insert_meshtastic_node(n).await;
                     }
                     Err(e) => error!("Failed to decode PortNum::NodeinfoApp: {}", e),
                 },
-                PortNum::TelemetryApp => {
-                    let _ = insert_meshtastic_telemetry().await;
-                }
+                PortNum::TelemetryApp => match Telemetry::decode(data.payload.as_slice()) {
+                    Ok(t) => {
+                        let _ = insert_meshtastic_telemetry(t).await;
+                    }
+                    Err(e) => {
+                        error!("Failed to decode PortNum::TelemetryAp: {}", e);
+                    }
+                },
                 _ => {
                     let _ = insert_meshtastic_raw(mesh_packet, false);
                 }
