@@ -8,7 +8,6 @@ use tokio::task::JoinHandle;
 
 use crate::meshtastic::errors::ConnectionError;
 use crate::meshtastic::message_handler::handle_from_radio_packet;
-use crate::meshtastic::storage::{MessageStorage, message_storage};
 pub struct DeviceConnection {
     handler: Option<JoinHandle<()>>,
     connected: Arc<AtomicBool>,
@@ -33,8 +32,6 @@ impl DeviceConnection {
         if let None = port {
             return Err(ConnectionError::PortNotFound("None".to_string()));
         }
-
-        *message_storage().write().unwrap() = MessageStorage::default();
 
         let serial_stream = utils::stream::build_serial_stream(
             port.unwrap().clone(),

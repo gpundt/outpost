@@ -1,24 +1,23 @@
-use meshtastic::protobufs::{PortNum, Position, Telemetry, User, from_radio, mesh_packet};
+use log::error;
+use meshtastic::protobufs::{
+    NodeInfo, PortNum, Position, Telemetry, User, from_radio, mesh_packet,
+};
 use prost::Message;
 
-use crate::meshtastic::MessageContent;
-
-use super::storage::{ReceivedMessage, message_storage};
+use crate::database::{
+    insert_meshtastic_node, insert_meshtastic_position, insert_meshtastic_raw,
+    insert_meshtastic_telemetry, insert_meshtastic_text,
+};
 
 /// `packet_receiver` yields `FromRadio` messages. These wrap several different
 /// kinds of updates (mesh packets, node info, config, etc.) in `payload_variant`.
-pub fn handle_from_radio_packet(from_radio: meshtastic::protobufs::FromRadio) {
+pub async fn handle_from_radio_packet(from_radio: meshtastic::protobufs::FromRadio) {
     match from_radio.payload_variant {
         Some(from_radio::PayloadVariant::Packet(mesh_packet)) => {
             handle_mesh_packet(mesh_packet);
         }
         Some(from_radio::PayloadVariant::NodeInfo(node_info)) => {
-            if let Some(user) = node_info.user {
-                message_storage()
-                    .write()
-                    .unwrap()
-                    .store_message(node_info.num, MessageContent::Node(user));
-            }
+            insert_meshtastic_node(node_info).await;
         }
         Some(from_radio::PayloadVariant::MyInfo(_my_info)) => {
             //println!("My node info: {:#?}", my_info);
@@ -34,86 +33,42 @@ pub fn handle_from_radio_packet(from_radio: meshtastic::protobufs::FromRadio) {
 /// A `MeshPacket` is either `Decoded` (plaintext `Data`, portnum tells you the payload type)
 /// or `Encrypted` (raw bytes — only decryptable if you have the channel key, which the
 /// radio normally handles for you before it reaches this API).
-fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
-    let from = mesh_packet.from;
-    match mesh_packet.payload_variant {
+async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
+    match mesh_packet.clone().payload_variant {
         Some(mesh_packet::PayloadVariant::Decoded(data)) => {
             let portnum = PortNum::try_from(data.portnum).unwrap_or(PortNum::UnknownApp);
 
             match portnum {
                 PortNum::TextMessageApp => {
                     if let Ok(text) = String::from_utf8(data.payload.clone()) {
-                        message_storage()
-                            .write()
-                            .unwrap()
-                            .store_message(from, MessageContent::Text(text));
+                        insert_meshtastic_text(
+                            format!("{}", data.source),
+                            format!("{}", data.dest),
+                            &text,
+                        )
+                        .await;
                     }
                 }
                 PortNum::PositionApp => {
-                    if let Ok(position) = Position::decode(data.payload.as_slice()) {
-                        message_storage()
-                            .write()
-                            .unwrap()
-                            .store_message(from, MessageContent::Position(position));
-                    }
+                    insert_meshtastic_position().await;
                 }
-                PortNum::NodeinfoApp => {
-                    if let Ok(user) = User::decode(data.payload.as_slice()) {
-                        message_storage()
-                            .write()
-                            .unwrap()
-                            .store_message(from, MessageContent::Node(user));
+                PortNum::NodeinfoApp => match NodeInfo::decode(data.payload.as_slice()) {
+                    Ok(n) => {
+                        insert_meshtastic_node(n).await;
                     }
-                }
+                    Err(e) => error!("Failed to decode PortNum::NodeinfoApp: {}", e),
+                },
                 PortNum::TelemetryApp => {
-                    if let Ok(telemetry) = Telemetry::decode(data.payload.as_slice()) {
-                        message_storage()
-                            .write()
-                            .unwrap()
-                            .store_message(from, MessageContent::Telemetry(telemetry));
-                    }
+                    insert_meshtastic_telemetry().await;
                 }
-                other => {
-                    message_storage().write().unwrap().store_message(
-                        from,
-                        MessageContent::Raw {
-                            portnum: format!("{:?}", other),
-                            bytes: data.payload,
-                        },
-                    );
+                _ => {
+                    insert_meshtastic_raw(mesh_packet, false);
                 }
             }
         }
         Some(mesh_packet::PayloadVariant::Encrypted(_)) => {
-            message_storage().write().unwrap().store_message(
-                from,
-                MessageContent::Raw {
-                    portnum: "Encrypted".to_string(),
-                    bytes: Vec::new(),
-                },
-            );
+            insert_meshtastic_raw(mesh_packet, true).await;
         }
         None => {}
-    }
-}
-
-pub fn format_message(message: &ReceivedMessage) -> String {
-    let time = message.timestamp.format("%H:%M:%S");
-    let from = format!("{:#010x}", message.from);
-
-    match &message.content {
-        MessageContent::Text(text) => format!("[{time}] {from}: {text}"),
-        MessageContent::Telemetry(t) => format!("[{time}] {from}: {:?}", t),
-        MessageContent::Node(user) => {
-            format!("[{time}] {from}: {} ({})", user.long_name, user.short_name,)
-        }
-        MessageContent::Position(pos) => {
-            let lat = pos.latitude_i.map(|x| x as f64).unwrap() / 1e7;
-            let lon = pos.longitude_i.map(|x| x as f64).unwrap() / 1e7;
-            format!("[{time}] {from}: lat={lat:.5}, lon={lon:.5}")
-        }
-        MessageContent::Raw { portnum, bytes } => {
-            format!("[{time}] {from}: {portnum} ({} bytes)", bytes.len())
-        }
     }
 }

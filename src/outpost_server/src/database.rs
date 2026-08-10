@@ -42,11 +42,74 @@ pub async fn init_database() -> Result<String, sqlx::Error> {
         r#"
         CREATE TABLE IF NOT EXISTS tasks (
             id            INTEGER  PRIMARY KEY AUTOINCREMENT,
-            type          TEXT     NOT_NULL,
+            type          TEXT     NOT NULL,
             requested_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
             finished_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
             successful    INTEGER  NOT NULL DEFAULT 0 CHECK (successful IN (0, 1))
         )
+        "#,
+    )
+    .execute(get_db_pool())
+    .await?;
+
+    // ── meshtastic_texts Table ──────
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS meshtastic_texts (
+            id         INTEGER  PRIMARY KEY AUTOINCREMENT,
+            timestamp  DATETIME DEFAULT CURRENT_TIMESTAMP,
+            src_id     TEXT     NOT NULL,
+            dst_id     TEXT     NOT NULL,
+            message    TEXT     NOT NULL
+        )
+        "#,
+    )
+    .execute(get_db_pool())
+    .await?;
+
+    // ── meshtastic_position Table ───
+    sqlx::query(
+        r#"
+        "#,
+    )
+    .execute(get_db_pool())
+    .await?;
+
+    // ── meshtastic_nodes Table ──────
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS meshtastic_nodes (
+            id              INTEGER  PRIMARY KEY AUTOINCREMENT,
+            node_num        TEXT     NOT NULL,
+            node_id         TEXT     DEFAULT 'N/A',
+            node_long_name  TEXT     DEFAULT 'N/A',
+            node_short_name TEXT     DEFAULT 'N/A',
+            hw_model        TEXT     DEFAULT 'N/A',
+            role            TEXT     DEFAULT 'N/A',
+            is_unmessagable INTEGER  NOT NULL DEFAULT 0 CHECK (successful IN (0, 1)),
+            latitude        TEXT     DEFAULT 'N/A',
+            longitude       TEXT     DEFAULT 'N/A',
+            last_heard      INTEGER  DEFAULT 0,
+            uptime          INTEGER  DEFAULT 0,
+            channel         INTEGER  NOT NULL,
+            hops_away       INTEGER  DEFAULT 0
+        )
+        "#,
+    )
+    .execute(get_db_pool())
+    .await?;
+
+    // ── meshtastic_telemetry Table ──
+    sqlx::query(
+        r#"
+        "#,
+    )
+    .execute(get_db_pool())
+    .await?;
+
+    // ── meshtastic_raw Table ──────
+    sqlx::query(
+        r#"
         "#,
     )
     .execute(get_db_pool())
@@ -70,6 +133,80 @@ pub async fn is_db_connected() -> bool {
         Ok(_) => true,
         Err(_) => false,
     }
+}
+
+pub async fn insert_meshtastic_text(
+    src_id: String,
+    dst_id: String,
+    message: &str,
+) -> Result<(), sqlx::Error> {
+    let timestamp: chrono::DateTime<Utc> = Utc::now();
+    match sqlx::query(
+        r#"
+        INSERT INTO meshtastic_texts (timestamp, src_id, dst_id, message)
+        VALUES (?, ?, ?, ?)
+        "#,
+    )
+    .bind(timestamp)
+    .bind(src_id)
+    .bind(dst_id)
+    .bind(message)
+    .execute(get_db_pool())
+    .await
+    {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            error!("Failed to insert into meshtastic_texts: {}", e);
+            return Err(e);
+        }
+    }
+}
+
+pub async fn insert_meshtastic_node(
+    node_info: meshtastic::protobufs::NodeInfo,
+) -> Result<(), sqlx::Error> {
+    match sqlx::query(
+        r#"
+        INSERT INTO meshtastic_nodes (node_num, node_id, node_long_name, node_short_name, hw_model, role, is_unmessagable, latitude, longitude, last_heard, uptime, channel, hops_away)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+        "#
+    )
+        .bind(node_info.num)
+        .bind(node_info.clone().user.unwrap().id)
+        .bind(node_info.clone().user.unwrap().long_name)
+        .bind(node_info.clone().user.unwrap().short_name)
+        .bind(node_info.clone().user.unwrap().hw_model)
+        .bind(node_info.clone().user.unwrap().role)
+        .bind(node_info.clone().user.unwrap().is_unmessagable)
+        .bind(node_info.position.unwrap().latitude_i)
+        .bind(node_info.position.unwrap().longitude_i)
+        .bind(node_info.last_heard)
+        .bind(node_info.device_metrics.unwrap().uptime_seconds)
+        .bind(node_info.channel)
+        .bind(node_info.hops_away)
+        .execute(get_db_pool())
+        .await {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            error!("Failed to insert into meshtastic_nodes: {}", e);
+            return Err(e);
+        }
+    };
+}
+
+pub async fn insert_meshtastic_position() -> Result<(), sqlx::Error> {
+    Ok(())
+}
+
+pub async fn insert_meshtastic_telemetry() -> Result<(), sqlx::Error> {
+    Ok(())
+}
+
+pub async fn insert_meshtastic_raw(
+    mesh_packet: meshtastic::protobufs::MeshPacket,
+    encrypted: bool,
+) -> Result<(), sqlx::Error> {
+    Ok(())
 }
 
 pub async fn insert_http_request(
