@@ -1,7 +1,6 @@
 use chrono::Utc;
 use config::files::DATABASE_DIR;
 use log::{debug, error, info};
-use meshtastic::protobufs::Telemetry;
 use sqlx::{
     Pool, QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},

@@ -1,7 +1,5 @@
 use log::error;
-use meshtastic::protobufs::{
-    NodeInfo, PortNum, Position, Telemetry, User, from_radio, mesh_packet,
-};
+use meshtastic::protobufs::{NodeInfo, PortNum, Position, from_radio, mesh_packet};
 use prost::Message;
 
 use crate::database::{
