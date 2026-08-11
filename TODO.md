@@ -4,10 +4,8 @@
     - HTTP endpoint
     - API authentication (mTLS)
     - Webpage
-    - Serial connection
-    - Send and receive Meshtastic packets
+    - Send Meshtastic packets
         - Scheduled messages?
-    - Database storage
 
 - Client (Rust)
     - Arguments

@@ -21,6 +21,7 @@ pub const TRANSMIT_TEXT_ENDPOINT: &str = formatcp!("{}/text", TRANSMISSION_ENDPO
 pub enum OutpostTask {
     Backup,
     Beacon,
+    RefreshNodes,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
