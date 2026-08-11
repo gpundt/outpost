@@ -1,8 +1,8 @@
-use chrono::Utc;
+use chrono::{NaiveDateTime, Utc};
 use config::files::DATABASE_DIR;
 use log::{debug, error, info};
 use sqlx::{
-    Pool, QueryBuilder, Sqlite,
+    FromRow, Pool, QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
 };
 use std::{str::FromStr, sync::OnceLock};
@@ -29,7 +29,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
             source      TEXT     NOT NULL,
             endpoint    TEXT     NOT NULL,
             user_agent  TEXT     NOT NULL,
-            status_code INTEGER  NOT NULL DEFAULT 0,
+            status_code INTEGER  NOT NULL,
             timestamp   DATETIME DEFAULT CURRENT_TIMESTAMP
         )
         "#,
@@ -45,7 +45,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
             type          TEXT     NOT NULL,
             requested_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
             finished_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-            successful    INTEGER  DEFAULT 0 CHECK (successful IN (0, 1))
+            successful    BOOLEAN  NOT NULL
         )
         "#,
     )
@@ -58,8 +58,8 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
         CREATE TABLE IF NOT EXISTS meshtastic_texts (
             id         INTEGER  PRIMARY KEY AUTOINCREMENT,
             timestamp  DATETIME DEFAULT CURRENT_TIMESTAMP,
-            src_id     TEXT     NOT NULL,
-            dst_id     TEXT     NOT NULL,
+            src_id     INTEGER  NOT NULL,
+            dst_id     INTEGER  NOT NULL,
             message    TEXT     NOT NULL
         )
         "#,
@@ -72,9 +72,9 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
         r#"
         CREATE TABLE IF NOT EXISTS meshtastic_positions (
             id             INTEGER PRIMARY KEY AUTOINCREMENT,
-            latitude       INTEGER DEFAULT 0,
-            longitude      INTEGER DEFAULT 0,
-            altitude       INTEGER DEFAULT 0,
+            latitude       INTEGER NOT NULL,
+            longitude      INTEGER NOT NULL,
+            altitude       INTEGER NOT NULL,
             time           INTEGER NOT NULL,
             timestamp      INTEGER NOT NULL,
             next_update    INTEGER NOT NULL
@@ -89,16 +89,16 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
         r#"
         CREATE TABLE IF NOT EXISTS meshtastic_nodes (
             id              INTEGER  PRIMARY KEY AUTOINCREMENT,
-            node_num        TEXT     NOT NULL,
-            node_id         TEXT     DEFAULT 'N/A',
-            node_long_name  TEXT     DEFAULT 'N/A',
-            node_short_name TEXT     DEFAULT 'N/A',
-            hw_model        INTEGER  DEFAULT 0,
-            role            INTEGER  DEFAULT 0,
-            last_heard      INTEGER  DEFAULT 0,
-            uptime          INTEGER  DEFAULT 0,
+            node_num        INTEGER  NOT NULL,
+            node_id         TEXT     NOT NULL,
+            node_long_name  TEXT     NOT NULL,
+            node_short_name TEXT     NOT NULL,
+            hw_model        INTEGER  NOT NULL,
+            role            INTEGER  NOT NULL,
+            last_heard      INTEGER  NOT NULL,
+            uptime          INTEGER  NOT NULL,
             channel         INTEGER  NOT NULL,
-            hops_away       INTEGER  DEFAULT 0
+            hops_away       INTEGER  NOT NULL
         )
         "#,
     )
@@ -119,7 +119,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
             hop_limit INTEGER NOT NULL,
             hop_start INTEGER NOT NULL,
             next_hop  INTEGER NOT NULL,
-            encrypted INTEGER DEFAULT 0 CHECK (encrypted IN (0, 1))
+            encrypted BOOLEAN NOT NULL
         )
         "#,
     )
@@ -129,12 +129,68 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
     Ok(database_url)
 }
 
-pub struct HTTPRequestEntry {}
-pub struct TaskRequestEntry {}
-pub struct MeshtasticTextEntry {}
-pub struct MeshtasticPositionEntry {}
-pub struct MeshtasticNodeEntry {}
-pub struct MeshtasticRawEntry {}
+#[derive(Debug, Default, FromRow)]
+pub struct HTTPRequestEntry {
+    pub id: i32,
+    pub method: String,
+    pub source: String,
+    pub endpoint: String,
+    pub user_agent: String,
+    pub status_code: u16,
+    pub timestamp: NaiveDateTime,
+}
+
+#[derive(Debug, Default, FromRow)]
+pub struct TaskRequestEntry {
+    pub id: i32,
+    pub task_type: String,
+    pub requested_at: NaiveDateTime,
+    pub finished_at: NaiveDateTime,
+    pub successful: bool,
+}
+#[derive(Debug, Default, FromRow)]
+pub struct MeshtasticTextEntry {
+    pub id: i32,
+    pub timestamp: NaiveDateTime,
+    pub src_id: u32,
+    pub dst_id: u32,
+    pub message: String,
+}
+#[derive(Debug, Default, FromRow)]
+pub struct MeshtasticPositionEntry {
+    pub id: i32,
+    pub latitude: i32,
+    pub longitude: i32,
+    pub altitude: i32,
+    pub time: u32,
+    pub timestamp: u32,
+    pub next_update: u32,
+}
+#[derive(Debug, Default, FromRow)]
+pub struct MeshtasticNodeEntry {
+    pub id: i32,
+    pub node_num: u32,
+    pub node_id: String,
+    pub long_name: String,
+    pub short_name: String,
+    pub hw_model: i32,
+    pub role: i32,
+    pub last_heard: u32,
+    pub uptime: u32,
+    pub channel: u32,
+    pub hops_away: u32,
+}
+#[derive(Debug, Default, FromRow)]
+pub struct MeshtasticRawEntry {
+    pub id: i32,
+    pub src_node: u32,
+    pub dst_node: u32,
+    pub channel: u32,
+    pub hop_limit: u32,
+    pub hop_start: u32,
+    pub next_hop: u32,
+    pub encrypted: bool,
+}
 
 pub fn get_db_pool() -> &'static SqlitePool {
     DB_POOL.get().expect("Database pool is not initialized")

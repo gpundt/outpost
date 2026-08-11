@@ -1,25 +1,22 @@
 use super::schema::get_db_pool;
+use super::schema::{
+    HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
+    MeshtasticTextEntry,
+};
 use chrono::Utc;
 use log::{debug, error};
-use meshtastic::protobufs::{DeviceMetrics, NodeInfo, PortNum::NodeinfoApp, User};
-use sqlx::encode::IsNull::No;
 
-pub async fn insert_meshtastic_text(
-    src_id: String,
-    dst_id: String,
-    message: &str,
-) -> Result<(), sqlx::Error> {
-    let timestamp: chrono::DateTime<Utc> = Utc::now();
+pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
         INSERT INTO meshtastic_texts (timestamp, src_id, dst_id, message)
         VALUES (?, ?, ?, ?)
         "#,
     )
-    .bind(timestamp)
-    .bind(src_id)
-    .bind(dst_id)
-    .bind(message)
+    .bind(text_entry.timestamp)
+    .bind(text_entry.src_id)
+    .bind(text_entry.dst_id)
+    .bind(text_entry.message.as_str())
     .execute(get_db_pool())
     .await
     {
@@ -31,25 +28,23 @@ pub async fn insert_meshtastic_text(
     }
 }
 
-pub async fn insert_meshtastic_node(
-    node_info: meshtastic::protobufs::NodeInfo,
-) -> Result<(), sqlx::Error> {
+pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
         INSERT INTO meshtastic_nodes (node_num, node_id, node_long_name, node_short_name, hw_model, role, last_heard, uptime, channel, hops_away)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
         "#
     )
-        .bind(node_info.num)
-        .bind(node_info.clone().user.unwrap_or(User::default()).id)
-        .bind(node_info.clone().user.unwrap_or(User::default()).long_name)
-        .bind(node_info.clone().user.unwrap_or(User::default()).short_name)
-        .bind(node_info.clone().user.unwrap_or(User::default()).hw_model)
-        .bind(node_info.clone().user.unwrap_or(User::default()).role)
-        .bind(node_info.last_heard)
-        .bind(node_info.device_metrics.unwrap_or(DeviceMetrics::default()).uptime_seconds)
-        .bind(node_info.channel)
-        .bind(node_info.hops_away)
+        .bind(node_entry.node_num)
+        .bind(node_entry.node_id)
+        .bind(node_entry.long_name)
+        .bind(node_entry.short_name)
+        .bind(node_entry.hw_model)
+        .bind(node_entry.role)
+        .bind(node_entry.last_heard)
+        .bind(node_entry.uptime)
+        .bind(node_entry.channel)
+        .bind(node_entry.hops_away)
         .execute(get_db_pool())
         .await {
         Ok(_) => return Ok(()),
@@ -61,7 +56,7 @@ pub async fn insert_meshtastic_node(
 }
 
 pub async fn insert_meshtastic_position(
-    position: meshtastic::protobufs::Position,
+    position_entry: MeshtasticPositionEntry,
 ) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
@@ -69,12 +64,12 @@ pub async fn insert_meshtastic_position(
         VALUES (?, ?, ?, ?, ?, ?)
         "#,
     )
-    .bind(position.latitude_i.unwrap_or(0))
-    .bind(position.longitude_i.unwrap_or(0))
-    .bind(position.altitude.unwrap_or(0))
-    .bind(position.time)
-    .bind(position.timestamp)
-    .bind(position.next_update)
+    .bind(position_entry.latitude)
+    .bind(position_entry.longitude)
+    .bind(position_entry.altitude)
+    .bind(position_entry.time)
+    .bind(position_entry.timestamp)
+    .bind(position_entry.next_update)
     .execute(get_db_pool())
     .await
     {
@@ -91,23 +86,20 @@ pub async fn insert_meshtastic_telemetry() -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-pub async fn insert_meshtastic_raw(
-    mesh_packet: meshtastic::protobufs::MeshPacket,
-    encrypted: bool,
-) -> Result<(), sqlx::Error> {
+pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
         INSERT INTO meshtastic_raw (src_node, dst_node, channel, hop_limit, hop_start, next_hop, encrypted)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         "#,
     )
-    .bind(mesh_packet.from)
-    .bind(mesh_packet.to)
-    .bind(mesh_packet.channel)
-    .bind(mesh_packet.hop_limit)
-    .bind(mesh_packet.hop_start)
-    .bind(mesh_packet.next_hop)
-    .bind(encrypted)
+    .bind(raw_entry.src_node)
+    .bind(raw_entry.dst_node)
+    .bind(raw_entry.channel)
+    .bind(raw_entry.hop_limit)
+    .bind(raw_entry.hop_start)
+    .bind(raw_entry.next_hop)
+    .bind(raw_entry.encrypted)
     .execute(get_db_pool())
     .await
     {
@@ -119,24 +111,19 @@ pub async fn insert_meshtastic_raw(
     }
 }
 
-pub async fn insert_http_request(
-    method: &str,
-    source: &str,
-    endpoint: &str,
-    user_agent: &str,
-    status_code: u16,
-) -> Result<(), sqlx::Error> {
+pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
-        INSERT INTO http_requests (method, source, endpoint, user_agent, status_code)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO http_requests (method, source, endpoint, user_agent, status_code, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?)
         "#,
     )
-    .bind(method)
-    .bind(source)
-    .bind(endpoint)
-    .bind(user_agent)
-    .bind(status_code)
+    .bind(request_entry.method)
+    .bind(request_entry.source)
+    .bind(request_entry.endpoint)
+    .bind(request_entry.user_agent)
+    .bind(request_entry.status_code)
+    .bind(request_entry.timestamp)
     .execute(get_db_pool())
     .await
     {
