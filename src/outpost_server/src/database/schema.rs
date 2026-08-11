@@ -111,7 +111,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
     // ── meshtastic_raw Table ──────
     sqlx::query(
         r#"
-        CREATE TABLE IF NOT EXISTS mestastic_raw (
+        CREATE TABLE IF NOT EXISTS meshtastic_raw (
             id        INTEGER PRIMARY KEY AUTOINCREMENT,
             src_node  INTEGER NOT NULL,
             dst_node  INTEGER NOT NULL,
