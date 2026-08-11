@@ -1,5 +1,4 @@
 use const_format::formatcp;
-use serde::{Deserialize, Serialize};
 
 pub const API_VERSION: &str = "v1";
 pub const API_ENDPOINT: &str = formatcp!("/api/{}", API_VERSION);
@@ -15,24 +14,3 @@ pub const SUBMIT_TASK_ENDPOINT: &str = formatcp!("{}/task", SUBMISSION_ENDPOINT)
 
 pub const TRANSMISSION_ENDPOINT: &str = formatcp!("{}/transmit", API_ENDPOINT);
 pub const TRANSMIT_TEXT_ENDPOINT: &str = formatcp!("{}/text", TRANSMISSION_ENDPOINT);
-
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum OutpostTask {
-    Backup,
-    Beacon,
-    RefreshNodes,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct TaskRequest {
-    pub task: OutpostTask,
-    pub parameters: Option<serde_json::Value>,
-}
-
-#[derive(Serialize, Debug)]
-pub struct TaskResponse {
-    pub task: OutpostTask,
-    pub success: bool,
-    pub message: String,
-}
