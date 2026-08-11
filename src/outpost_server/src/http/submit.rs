@@ -294,10 +294,10 @@ async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Backup,
+                    task: OutpostTask::RefreshPositions,
                     success: false,
                     message: format!(
-                        "Database backup successful, tasks table update failed: {}",
+                        "Meshtastic positions list refresh successful, tasks table update failed: {}",
                         e.to_string(),
                     ),
                 }),
