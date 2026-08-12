@@ -1,9 +1,7 @@
-use super::query::{
-    config_query_response, health_check_response, nodes_query_response, positions_query_response,
-    raw_packets_query_response, status_query_response,
-};
+use super::query::{config_query_response, health_check_response, status_query_response};
 use crate::arguments::get_arguments;
 use crate::http::middleware::log_request_middleware;
+use crate::http::query::query_response;
 use crate::http::submit::submit_task_response;
 use axum::routing::post;
 use axum::{
@@ -11,8 +9,8 @@ use axum::{
     routing::{MethodRouter, get},
 };
 use config::endpoints::{
-    CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, NODES_QUERY_ENDPOINT, POSITIONS_QUERY_ENDPOINT,
-    RAW_PACKETS_QUERY_ENDPOINT, STATUS_QUERY_ENDPOINT, SUBMIT_TASK_ENDPOINT,
+    CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, QUERY_ENDPOINT, STATUS_QUERY_ENDPOINT,
+    SUBMIT_TASK_ENDPOINT,
 };
 use log::{LevelFilter, debug, info};
 use std::net::SocketAddr;
@@ -29,21 +27,7 @@ pub async fn initialize_http_listener() {
         STATUS_QUERY_ENDPOINT.to_string(),
         get(status_query_response),
     );
-    let app = initialize_query_endpoint(
-        app,
-        NODES_QUERY_ENDPOINT.to_string(),
-        get(nodes_query_response),
-    );
-    let app = initialize_query_endpoint(
-        app,
-        POSITIONS_QUERY_ENDPOINT.to_string(),
-        get(positions_query_response),
-    );
-    let app = initialize_query_endpoint(
-        app,
-        RAW_PACKETS_QUERY_ENDPOINT.to_string(),
-        get(raw_packets_query_response),
-    );
+    let app = initialize_query_endpoint(app, QUERY_ENDPOINT.to_string(), get(query_response));
 
     let app = initialize_submission_endpoint(
         app,

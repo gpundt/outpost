@@ -1,15 +1,27 @@
 use crate::arguments::get_arguments;
 use crate::database::is_db_connected;
 use crate::database::select::{
-    select_meshtastic_nodes, select_meshtastic_positions, select_meshtastic_raw_by_count,
-    select_meshtastic_texts_by_count,
+    select_http_requests_by_count, select_meshtastic_nodes, select_meshtastic_positions,
+    select_meshtastic_raw_by_count, select_meshtastic_texts_by_count,
 };
 use crate::http::errors::{QueryError, SerializeError};
 use crate::meshtastic::connection::global_connection;
 use axum::Json;
+use axum::http::StatusCode;
 use config::logging::get_log_filename;
+use config::query::{QueryRequest, QueryType, extract_count_parameter};
 use config::time::get_uptime_str;
 use serde::Serialize;
+
+pub async fn query_response(Json(request): Json<QueryRequest>) -> (StatusCode, String) {
+    match request.query_type {
+        QueryType::HTTPRequests => http_requests_query_response(request.parameters).await,
+        QueryType::Nodes => nodes_query_response(request.parameters).await,
+        QueryType::Positions => positions_query_response(request.parameters).await,
+        QueryType::RawPackets => raw_packets_query_response(request.parameters).await,
+        QueryType::Texts => texts_query_response(request.parameters).await,
+    }
+}
 
 #[derive(Serialize)]
 pub struct HealthCheckResponse {
@@ -77,89 +89,148 @@ pub async fn status_query_response() -> Json<StatusResponse> {
     return Json(payload);
 }
 
-pub async fn nodes_query_response() -> String {
+pub async fn http_requests_query_response(
+    parameters: Option<serde_json::Value>,
+) -> (StatusCode, String) {
+    let requests = match select_http_requests_by_count(100).await {
+        Ok(r) => r,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                QueryError::new(
+                    "http_requests".to_string(),
+                    "http_requests_query_response".to_string(),
+                    e.to_string(),
+                )
+                .jsonify(),
+            );
+        }
+    };
+
+    match serde_json::to_string(&requests) {
+        Ok(s) => (StatusCode::OK, s),
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("http_requests_query_response".to_string(), e.to_string())
+                    .jsonify(),
+            );
+        }
+    }
+}
+
+pub async fn nodes_query_response(parameters: Option<serde_json::Value>) -> (StatusCode, String) {
     let nodes = match select_meshtastic_nodes().await {
         Ok(n) => n,
         Err(e) => {
-            return QueryError::new(
-                "meshtastic_nodes".to_string(),
-                "nodes_query_response".to_string(),
-                e.to_string(),
-            )
-            .jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                QueryError::new(
+                    "meshtastic_nodes".to_string(),
+                    "nodes_query_response".to_string(),
+                    e.to_string(),
+                )
+                .jsonify(),
+            );
         }
     };
 
     match serde_json::to_string(&nodes) {
-        Ok(s) => s,
+        Ok(s) => (StatusCode::OK, s),
         Err(e) => {
-            return SerializeError::new("nodes_query_response".to_string(), e.to_string())
-                .jsonify();
+            return (
+                StatusCode::OK,
+                SerializeError::new("nodes_query_response".to_string(), e.to_string()).jsonify(),
+            );
         }
     }
 }
 
-pub async fn positions_query_response() -> String {
+pub async fn positions_query_response(
+    parameters: Option<serde_json::Value>,
+) -> (StatusCode, String) {
     let positions = match select_meshtastic_positions().await {
         Ok(p) => p,
         Err(e) => {
-            return QueryError::new(
-                "meshtastic_positions".to_string(),
-                "positions_query_response".to_string(),
-                e.to_string(),
-            )
-            .jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                QueryError::new(
+                    "meshtastic_positions".to_string(),
+                    "positions_query_response".to_string(),
+                    e.to_string(),
+                )
+                .jsonify(),
+            );
         }
     };
 
     match serde_json::to_string(&positions) {
-        Ok(s) => s,
+        Ok(s) => (StatusCode::OK, s),
         Err(e) => {
-            return SerializeError::new("positions_query_response".to_string(), e.to_string())
-                .jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("positions_query_response".to_string(), e.to_string())
+                    .jsonify(),
+            );
         }
     }
 }
 
-pub async fn raw_packets_query_response() -> String {
-    let raw_packets = match select_meshtastic_positions().await {
+pub async fn raw_packets_query_response(
+    parameters: Option<serde_json::Value>,
+) -> (StatusCode, String) {
+    let row_count = extract_count_parameter(&parameters, 100);
+
+    let raw_packets = match select_meshtastic_raw_by_count(row_count).await {
         Ok(r) => r,
         Err(e) => {
-            return QueryError::new(
-                "meshtastic_raw".to_string(),
-                "raw_query_response".to_string(),
-                e.to_string(),
-            )
-            .jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                QueryError::new(
+                    "meshtastic_raw".to_string(),
+                    "raw_query_response".to_string(),
+                    e.to_string(),
+                )
+                .jsonify(),
+            );
         }
     };
 
     match serde_json::to_string(&raw_packets) {
-        Ok(s) => s,
+        Ok(s) => (StatusCode::OK, s),
         Err(e) => {
-            return SerializeError::new("raw_query_response".to_string(), e.to_string()).jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("raw_query_response".to_string(), e.to_string()).jsonify(),
+            );
         }
     }
 }
 
-pub async fn texts_query_response() -> String {
-    let texts = match select_meshtastic_positions().await {
+pub async fn texts_query_response(parameters: Option<serde_json::Value>) -> (StatusCode, String) {
+    let row_count = extract_count_parameter(&parameters, 100);
+    let texts = match select_meshtastic_texts_by_count(row_count).await {
         Ok(t) => t,
         Err(e) => {
-            return QueryError::new(
-                "meshtastic_texts".to_string(),
-                "texts_query_response".to_string(),
-                e.to_string(),
-            )
-            .jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                QueryError::new(
+                    "meshtastic_texts".to_string(),
+                    "texts_query_response".to_string(),
+                    e.to_string(),
+                )
+                .jsonify(),
+            );
         }
     };
 
     match serde_json::to_string(&texts) {
-        Ok(s) => s,
+        Ok(s) => (StatusCode::OK, s),
         Err(e) => {
-            return SerializeError::new("texts_query_response".to_string(), e.to_string())
-                .jsonify();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("texts_query_response".to_string(), e.to_string()).jsonify(),
+            );
         }
     }
 }
