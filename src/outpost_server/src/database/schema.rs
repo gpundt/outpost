@@ -47,7 +47,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
             type          TEXT     NOT NULL,
             requested_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
             finished_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-            successful    BOOLEAN  NOT NULL
+            successful    BOOLEAN  DEFAULT false
         )
         "#,
     )
