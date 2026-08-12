@@ -1,4 +1,4 @@
-use log::{error, warn};
+use log::{error, trace, warn};
 use sqlx::{QueryBuilder, Sqlite};
 
 use super::schema::get_db_pool;
@@ -10,6 +10,7 @@ pub async fn delete_from_table(table_name: &str) -> Result<(), sqlx::Error> {
 
     match query.execute(get_db_pool()).await {
         Ok(_) => {
+            trace!("DELETE FROM {}", table_name);
             warn!("Deleted all entries in '{}' table", table_name);
             Ok(())
         }
