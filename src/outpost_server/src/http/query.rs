@@ -141,3 +141,25 @@ pub async fn raw_packets_query_response() -> String {
         }
     }
 }
+
+pub async fn texts_query_response() -> String {
+    let texts = match select_meshtastic_positions().await {
+        Ok(t) => t,
+        Err(e) => {
+            return QueryError::new(
+                "meshtastic_texts".to_string(),
+                "texts_query_response".to_string(),
+                e.to_string(),
+            )
+            .jsonify();
+        }
+    };
+
+    match serde_json::to_string(&texts) {
+        Ok(s) => s,
+        Err(e) => {
+            return SerializeError::new("texts_query_response".to_string(), e.to_string())
+                .jsonify();
+        }
+    }
+}
