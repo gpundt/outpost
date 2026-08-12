@@ -2,7 +2,7 @@ use crate::database::insert_http_request;
 use crate::database::schema::HTTPRequestEntry;
 use axum::{body::Body, extract::ConnectInfo, http::Request, middleware::Next, response::Response};
 use chrono::Utc;
-use log::info;
+use log::{debug, info};
 use std::net::SocketAddr;
 
 pub async fn log_request_middleware(
@@ -25,7 +25,7 @@ pub async fn log_request_middleware(
     let response = next.run(req).await;
     let status_code = response.status().as_u16();
 
-    info!(
+    debug!(
         "HTTP {} {} from {} ({}) -> {}",
         method, endpoint, source, user_agent, status_code
     );

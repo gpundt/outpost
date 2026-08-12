@@ -4,7 +4,7 @@ use super::schema::{
     MeshtasticTextEntry,
 };
 use chrono::Utc;
-use log::{debug, error};
+use log::{debug, error, trace};
 
 pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
@@ -20,7 +20,10 @@ pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<
     .execute(get_db_pool())
     .await
     {
-        Ok(_) => return Ok(()),
+        Ok(_) => {
+            trace!("{:?} -> meshtastic_texts", text_entry);
+            return Ok(());
+        }
         Err(e) => {
             error!("Failed to insert into meshtastic_texts: {}", e);
             return Err(e);
@@ -29,6 +32,7 @@ pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<
 }
 
 pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(), sqlx::Error> {
+    let entry_clone = node_entry.clone();
     match sqlx::query(
         r#"
         INSERT INTO meshtastic_nodes (node_num, node_id, node_long_name, node_short_name, hw_model, role, last_heard, uptime, channel, hops_away)
@@ -47,7 +51,11 @@ pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(
         .bind(node_entry.hops_away)
         .execute(get_db_pool())
         .await {
-        Ok(_) => return Ok(()),
+        Ok(_) => {
+            trace!("{:?} -> meshtastic_nodes", entry_clone);
+            return Ok(());
+        }
+            ,
         Err(e) => {
             error!("Failed to insert into 'meshtastic_nodes' table: {}", e);
             return Err(e);
@@ -73,7 +81,10 @@ pub async fn insert_meshtastic_position(
     .execute(get_db_pool())
     .await
     {
-        Ok(_) => return Ok(()),
+        Ok(_) => {
+            trace!("{:?} -> meshtastic_positions", position_entry);
+            return Ok(());
+        },
         Err(e) => {
             error!("Failed to insert into 'meshastic_position' table: {}", e);
             return Err(e);
@@ -103,7 +114,10 @@ pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), 
     .execute(get_db_pool())
     .await
     {
-        Ok(_) => return Ok(()),
+        Ok(_) => {
+            trace!("{:?} -> meshtastic_raw", raw_entry);
+            return Ok(());
+        },
         Err(e) => {
             error!("Failed to insert into 'meshtastic_raw' table: {}", e);
             return Err(e);
@@ -112,6 +126,7 @@ pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), 
 }
 
 pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), sqlx::Error> {
+    let entry_clone = request_entry.clone();
     match sqlx::query(
         r#"
         INSERT INTO http_requests (method, source, endpoint, user_agent, status_code, timestamp)
@@ -127,7 +142,10 @@ pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), 
     .execute(get_db_pool())
     .await
     {
-        Ok(_) => return Ok(()),
+        Ok(_) => {
+            trace!("{:?} -> http_requests", entry_clone);
+            return Ok(());
+        }
         Err(e) => {
             error!("Failed to insert into 'http_requests' table: {}", e);
             return Err(e);

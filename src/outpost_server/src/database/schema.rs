@@ -131,7 +131,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
     Ok(database_url)
 }
 
-#[derive(Debug, Default, FromRow, Serialize)]
+#[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct HTTPRequestEntry {
     pub id: i32,
     pub method: String,
@@ -142,7 +142,7 @@ pub struct HTTPRequestEntry {
     pub timestamp: NaiveDateTime,
 }
 
-#[derive(Debug, Default, FromRow, Serialize)]
+#[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct TaskRequestEntry {
     pub id: i32,
     pub task_type: String,
@@ -151,7 +151,7 @@ pub struct TaskRequestEntry {
     pub successful: bool,
 }
 
-#[derive(Debug, Default, FromRow, Serialize)]
+#[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticTextEntry {
     pub id: i32,
     pub timestamp: NaiveDateTime,
@@ -160,7 +160,7 @@ pub struct MeshtasticTextEntry {
     pub message: String,
 }
 
-#[derive(Debug, Default, FromRow, Serialize)]
+#[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticPositionEntry {
     pub id: i32,
     pub latitude: i32,
@@ -171,7 +171,7 @@ pub struct MeshtasticPositionEntry {
     pub next_update: u32,
 }
 
-#[derive(Debug, Default, FromRow, Serialize)]
+#[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticNodeEntry {
     pub id: i32,
     pub node_num: u32,
@@ -186,7 +186,7 @@ pub struct MeshtasticNodeEntry {
     pub hops_away: u32,
 }
 
-#[derive(Debug, Default, FromRow, Serialize)]
+#[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticRawEntry {
     pub id: i32,
     pub src_node: u32,

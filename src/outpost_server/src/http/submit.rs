@@ -8,7 +8,7 @@ use log::info;
 pub async fn submit_task_response(
     Json(request): Json<TaskRequest>,
 ) -> (StatusCode, Json<TaskResponse>) {
-    info!("Task submission received: {:?}", request.task);
+    info!("Task Received: {:?}", request.task);
     match request.task {
         OutpostTask::Backup => handle_backup().await,
         OutpostTask::Beacon => handle_beacon().await,
