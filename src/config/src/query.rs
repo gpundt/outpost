@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 pub enum QueryType {
     Texts,
     Nodes,
-    RawPackets,
+    Raw_Packets,
     Positions,
-    HTTPRequests,
+    HTTP_Requests,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

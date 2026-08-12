@@ -21,7 +21,7 @@ pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<
     .await
     {
         Ok(_) => {
-            trace!("{:?} -> meshtastic_texts", text_entry);
+            trace!("INSERT INTO meshastic_texts VALUES {:?}", text_entry);
             return Ok(());
         }
         Err(e) => {
@@ -52,7 +52,7 @@ pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(
         .execute(get_db_pool())
         .await {
         Ok(_) => {
-            trace!("{:?} -> meshtastic_nodes", entry_clone);
+            trace!("INSERT INTO meshtastic_nodes VALUES{:?}", entry_clone);
             return Ok(());
         }
             ,
@@ -82,7 +82,7 @@ pub async fn insert_meshtastic_position(
     .await
     {
         Ok(_) => {
-            trace!("{:?} -> meshtastic_positions", position_entry);
+            trace!("INSERT INTO meshtastic_positions VALUES {:?}", position_entry);
             return Ok(());
         },
         Err(e) => {
@@ -115,7 +115,7 @@ pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), 
     .await
     {
         Ok(_) => {
-            trace!("{:?} -> meshtastic_raw", raw_entry);
+            trace!("INSERT INTO meshtastic_raw VALUES {:?}", raw_entry);
             return Ok(());
         },
         Err(e) => {
@@ -143,7 +143,7 @@ pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), 
     .await
     {
         Ok(_) => {
-            trace!("{:?} -> http_requests", entry_clone);
+            trace!("INSERT INTO http_requests VALUES {:?}", entry_clone);
             return Ok(());
         }
         Err(e) => {

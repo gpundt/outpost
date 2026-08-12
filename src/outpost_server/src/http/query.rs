@@ -15,10 +15,10 @@ use serde::Serialize;
 
 pub async fn query_response(Json(request): Json<QueryRequest>) -> (StatusCode, String) {
     match request.query_type {
-        QueryType::HTTPRequests => http_requests_query_response(request.parameters).await,
+        QueryType::HTTP_Requests => http_requests_query_response(request.parameters).await,
         QueryType::Nodes => nodes_query_response(request.parameters).await,
         QueryType::Positions => positions_query_response(request.parameters).await,
-        QueryType::RawPackets => raw_packets_query_response(request.parameters).await,
+        QueryType::Raw_Packets => raw_packets_query_response(request.parameters).await,
         QueryType::Texts => texts_query_response(request.parameters).await,
     }
 }
