@@ -1,8 +1,9 @@
-use super::query::{config_query_response, health_check_response, status_query_response};
 use crate::arguments::get_arguments;
-use crate::http::middleware::log_request_middleware;
-use crate::http::query::query_response;
-use crate::http::submit::submit_task_response;
+use crate::http::{
+    middleware::log_request_middleware,
+    query::{config_query_response, health_check_response, query_response, status_query_response},
+    submit::task_submission_response,
+};
 use axum::routing::post;
 use axum::{
     Router, middleware,
@@ -32,7 +33,7 @@ pub async fn initialize_http_listener() {
     let app = initialize_submission_endpoint(
         app,
         SUBMIT_TASK_ENDPOINT.to_string(),
-        post(submit_task_response),
+        post(task_submission_response),
     );
 
     let app = match log::max_level() {

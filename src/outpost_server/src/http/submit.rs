@@ -1,11 +1,14 @@
 use crate::database::{
-    backup_database, delete_from_table, insert_task_request_finish, insert_task_request_start,
+    delete::delete_from_table,
+    insert::{insert_task_request_finish, insert_task_request_start},
+    schema::backup_database,
 };
+
 use axum::{Json, http::StatusCode};
 use config::tasks::{OutpostTask, TaskRequest, TaskResponse};
 use log::info;
 
-pub async fn submit_task_response(
+pub async fn task_submission_response(
     Json(request): Json<TaskRequest>,
 ) -> (StatusCode, Json<TaskResponse>) {
     info!("Task Received: {:?}", request.task);

@@ -1,11 +1,14 @@
 use crate::arguments::get_arguments;
-use crate::database::is_db_connected;
-use crate::database::select::{
-    select_http_requests_by_count, select_meshtastic_nodes, select_meshtastic_positions,
-    select_meshtastic_raw_by_count, select_meshtastic_texts_by_count,
+use crate::database::{
+    schema::is_db_connected,
+    select::{
+        select_http_requests_by_count, select_meshtastic_nodes, select_meshtastic_positions,
+        select_meshtastic_raw_by_count, select_meshtastic_texts_by_count,
+    },
 };
 use crate::http::errors::{QueryError, SerializeError};
 use crate::meshtastic::connection::global_connection;
+
 use axum::Json;
 use axum::http::StatusCode;
 use config::logging::get_log_filename;

@@ -1,8 +1,8 @@
-use crate::database::insert_http_request;
-use crate::database::schema::HTTPRequestEntry;
+use crate::database::{insert::insert_http_request, schema::HTTPRequestEntry};
+
 use axum::{body::Body, extract::ConnectInfo, http::Request, middleware::Next, response::Response};
 use chrono::Utc;
-use log::{debug, info};
+use log::debug;
 use std::net::SocketAddr;
 
 pub async fn log_request_middleware(

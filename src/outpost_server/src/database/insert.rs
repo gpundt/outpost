@@ -1,8 +1,8 @@
-use super::schema::get_db_pool;
-use super::schema::{
+use crate::database::schema::{
     HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry,
+    MeshtasticTextEntry, get_db_pool,
 };
+
 use chrono::Utc;
 use log::{debug, error, trace};
 

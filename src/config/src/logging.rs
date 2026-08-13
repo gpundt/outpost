@@ -1,3 +1,5 @@
+use crate::files::LOG_DIR;
+
 use chrono::Utc;
 use colored::Colorize;
 use log::LevelFilter;
@@ -5,8 +7,6 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
-
-use super::files::LOG_DIR;
 
 static LOG_FILENAME: OnceLock<Mutex<String>> = OnceLock::new();
 fn log_filename() -> &'static Mutex<String> {

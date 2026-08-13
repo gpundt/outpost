@@ -87,15 +87,7 @@ impl DeviceConnection {
     }
 }
 
-static RUNTIME: OnceLock<Runtime> = OnceLock::new();
 static CONNECTION: OnceLock<Mutex<DeviceConnection>> = OnceLock::new();
-
-/// The single Tokio runtime the whole app's async work runs on. Lives for
-/// the lifetime of the program (OnceLock is never dropped until process exit),
-/// so a spawned listener task keeps running no matter what UI screen is active.
-pub fn global_runtime() -> &'static Runtime {
-    RUNTIME.get_or_init(|| Runtime::new().expect("Failed to create Tokio runtime"))
-}
 
 /// The single device connection for the whole app.
 pub fn global_connection() -> &'static Mutex<DeviceConnection> {

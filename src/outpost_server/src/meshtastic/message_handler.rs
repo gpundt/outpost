@@ -5,12 +5,12 @@ use meshtastic::protobufs::{
 };
 use prost::Message;
 
-use crate::database::schema::{
-    MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
-};
-use crate::database::{
+use crate::database::insert::{
     insert_meshtastic_node, insert_meshtastic_position, insert_meshtastic_raw,
     insert_meshtastic_telemetry, insert_meshtastic_text,
+};
+use crate::database::schema::{
+    MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
 };
 
 /// `packet_receiver` yields `FromRadio` messages. These wrap several different

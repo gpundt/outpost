@@ -1,7 +1,8 @@
-use super::schema::{
+use crate::database::schema::{
     HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
     MeshtasticTextEntry, get_db_pool,
 };
+
 use log::{error, trace};
 
 pub async fn select_http_requests_by_count(
