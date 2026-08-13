@@ -1,6 +1,6 @@
 use chrono::{NaiveDateTime, Utc};
 use config::files::DATABASE_DIR;
-use log::{debug, error, info};
+use log::{debug, error, info, trace};
 use serde::Serialize;
 use sqlx::{
     FromRow, Pool, QueryBuilder, Sqlite,
@@ -230,6 +230,7 @@ pub async fn backup_database() -> Result<String, sqlx::Error> {
     match query.execute(get_db_pool()).await {
         Ok(_) => {
             info!("Database backup created: {}", path_str);
+            trace!("VACUUM INTO {}", path_str);
             return Ok(path_str.to_string());
         }
         Err(e) => {

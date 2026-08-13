@@ -80,7 +80,7 @@ pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std:
         .filter_module("axum", log::LevelFilter::Info)
         .filter_module("tower", log::LevelFilter::Info)
         .filter_module("mio", log::LevelFilter::Info)
-        .filter_module("meshtastic", log::LevelFilter::Debug)
+        .filter_module("meshtastic", log::LevelFilter::Info)
         .filter_module("sqlx", log::LevelFilter::Info)
         .init();
 

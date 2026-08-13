@@ -62,7 +62,6 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
             match portnum {
                 PortNum::TextMessageApp => match String::from_utf8(data.payload.clone()) {
                     Ok(text) => {
-                        error!("TEXT RECEIVED: {}", text);
                         let _ = insert_meshtastic_text(&MeshtasticTextEntry {
                             id: 0,
                             timestamp: Utc::now().naive_utc(),
@@ -121,7 +120,6 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                     Err(e) => error!("Failed to decode PortNum::NodeinfoApp: {}", e),
                 },
                 PortNum::TelemetryApp => {
-                    error!("TELEMETRY RECEIVED");
                     let _ = insert_meshtastic_telemetry().await;
                 }
                 _ => {
@@ -139,7 +137,6 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
             }
         }
         Some(mesh_packet::PayloadVariant::Encrypted(_)) => {
-            error!("ENCRYPTED RECEIVED");
             let _ = insert_meshtastic_raw(MeshtasticRawEntry {
                 id: 0,
                 src_node: mesh_packet.from,

@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 pub enum OutpostTask {
     Backup,
     Beacon,
-    RefreshNodes,
-    RefreshRaw,
-    RefreshHTTPRequests,
-    RefreshPositions,
+    Refresh_Nodes,
+    Refresh_Raw,
+    Refresh_HTTP_Requests,
+    Refresh_Positions,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

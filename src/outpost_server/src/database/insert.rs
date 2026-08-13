@@ -52,7 +52,7 @@ pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(
         .execute(get_db_pool())
         .await {
         Ok(_) => {
-            trace!("INSERT INTO meshtastic_nodes VALUES{:?}", entry_clone);
+            trace!("INSERT INTO meshtastic_nodes VALUES {:?}", entry_clone);
             return Ok(());
         }
             ,
