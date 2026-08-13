@@ -1,13 +1,13 @@
 mod arguments;
-
 pub mod http;
 
 use crate::http::connection::{initialize_http_connecion, test_server_connection};
-use arguments::{get_arguments, initialize_arguments};
 
+use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
 use log::error;
 
+/// Outpost server entrypoint
 #[tokio::main]
 async fn main() {
     start_time();
