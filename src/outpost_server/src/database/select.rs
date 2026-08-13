@@ -5,6 +5,7 @@ use crate::database::schema::{
 
 use log::{error, trace};
 
+/// Function to select X rows from the http_requests db table
 pub async fn select_http_requests_by_count(
     count: u32,
 ) -> Result<Vec<HTTPRequestEntry>, sqlx::Error> {
@@ -22,6 +23,7 @@ pub async fn select_http_requests_by_count(
     };
 }
 
+/// Function to select X rows from the meshtastic_texts db table
 pub async fn select_meshtastic_texts_by_count(
     count: u32,
 ) -> Result<Vec<MeshtasticTextEntry>, sqlx::Error> {
@@ -39,6 +41,7 @@ pub async fn select_meshtastic_texts_by_count(
     };
 }
 
+/// Function to select all rows from the meshtastic_nodes db table
 pub async fn select_meshtastic_nodes() -> Result<Vec<MeshtasticNodeEntry>, sqlx::Error> {
     match sqlx::query_as::<_, MeshtasticNodeEntry>(
         "SELECT id, node_num, node_id, node_long_name, node_short_name, hw_model, role, last_heard, uptime, channel, hops_away FROM meshtastic_nodes",
@@ -54,6 +57,7 @@ pub async fn select_meshtastic_nodes() -> Result<Vec<MeshtasticNodeEntry>, sqlx:
     };
 }
 
+/// Function to select all rows from the meshtastic_positions db table
 pub async fn select_meshtastic_positions() -> Result<Vec<MeshtasticPositionEntry>, sqlx::Error> {
     match sqlx::query_as::<_, MeshtasticPositionEntry>(
         "SELECT id, latitude, longitude, altitude, time, timestamp, next_update FROM meshtastic_positions",
@@ -69,6 +73,7 @@ pub async fn select_meshtastic_positions() -> Result<Vec<MeshtasticPositionEntry
     }
 }
 
+/// Function to select X rows from the meshtastic_raw db table
 pub async fn select_meshtastic_raw_by_count(
     count: u32,
 ) -> Result<Vec<MeshtasticRawEntry>, sqlx::Error> {

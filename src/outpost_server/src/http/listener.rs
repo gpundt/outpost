@@ -1,7 +1,10 @@
 use crate::arguments::get_arguments;
 use crate::http::{
     middleware::log_request_middleware,
-    query::{config_query_response, health_check_response, query_response, status_query_response},
+    query::{
+        generate_config_query_response, generate_health_check_response, generate_query_response,
+        generate_status_query_response,
+    },
     submit::task_submission_response,
 };
 use axum::routing::post;
@@ -16,21 +19,26 @@ use config::endpoints::{
 use log::{LevelFilter, debug, info};
 use std::net::SocketAddr;
 
+/// Master function to initialize all individual HTTP endpoints
 pub async fn initialize_http_listener() {
     let app = Router::new();
-    let app = initialize_query_endpoint(
+    let app = _initialize_endpoint(
         app,
         HEALTH_CHECK_ENDPOINT.to_string(),
-        get(health_check_response),
+        get(generate_health_check_response),
     );
-    let app = initialize_query_endpoint(
+    let app = _initialize_endpoint(
         app,
         STATUS_QUERY_ENDPOINT.to_string(),
-        get(status_query_response),
+        get(generate_status_query_response),
     );
-    let app = initialize_query_endpoint(app, QUERY_ENDPOINT.to_string(), get(query_response));
+    let app = _initialize_endpoint(
+        app,
+        QUERY_ENDPOINT.to_string(),
+        get(generate_query_response),
+    );
 
-    let app = initialize_submission_endpoint(
+    let app = _initialize_endpoint(
         app,
         SUBMIT_TASK_ENDPOINT.to_string(),
         post(task_submission_response),
@@ -38,10 +46,10 @@ pub async fn initialize_http_listener() {
 
     let app = match log::max_level() {
         LevelFilter::Trace => {
-            let app = initialize_query_endpoint(
+            let app = _initialize_endpoint(
                 app,
                 CONFIG_QUERY_ENDPOINT.to_string(),
-                get(config_query_response),
+                get(generate_config_query_response),
             );
             app
         }
@@ -63,20 +71,13 @@ pub async fn initialize_http_listener() {
     .unwrap();
 }
 
-pub fn initialize_query_endpoint(app: Router, path: String, response_func: MethodRouter) -> Router {
+/// Helper function to initialize an individual query endp
+fn _initialize_endpoint(app: Router, path: String, response_func: MethodRouter) -> Router {
     debug!("Initialized Endpoint: {}", path);
     app.route(&path, response_func)
 }
 
-pub fn initialize_submission_endpoint(
-    app: Router,
-    path: String,
-    response_func: MethodRouter,
-) -> Router {
-    debug!("Initialized Endpoint: {}", path);
-    app.route(&path, response_func)
-}
-
+/// Function to gracefully shutdown the HTTP endpoint handler
 async fn graceful_exit() {
     let ctrl_c = async {
         tokio::signal::ctrl_c()

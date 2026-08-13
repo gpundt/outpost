@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Enum to restrict the available query options
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryType {
@@ -10,12 +11,14 @@ pub enum QueryType {
     HttpRequests,
 }
 
+/// Struct to organize an individual query request
 #[derive(Deserialize, Serialize, Debug)]
 pub struct QueryRequest {
     pub query_type: QueryType,
     pub parameters: Option<serde_json::Value>,
 }
 
+/// Function to isolate the 'count' key and value from a QueryResonse's parameters field
 pub fn extract_count_parameter(parameters: &Option<serde_json::Value>, default: u32) -> u32 {
     parameters
         .as_ref()

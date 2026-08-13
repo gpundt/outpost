@@ -11,6 +11,7 @@ use std::{str::FromStr, sync::OnceLock};
 // Static container for the global db pool
 static DB_POOL: OnceLock<SqlitePool> = OnceLock::new();
 
+/// Function to initialize the backend storage database and its schema
 pub async fn initialize_database() -> Result<String, sqlx::Error> {
     let database_url = format!("sqlite://{}outpost_server.db", DATABASE_DIR);
 
@@ -131,6 +132,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
     Ok(database_url)
 }
 
+/// Struct to organize the contents of a row inside the http_requests db table
 #[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct HTTPRequestEntry {
     pub id: i32,
@@ -142,6 +144,7 @@ pub struct HTTPRequestEntry {
     pub timestamp: NaiveDateTime,
 }
 
+/// Struct to organize the contents of a row inside the tasks db table
 #[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct TaskRequestEntry {
     pub id: i32,
@@ -151,6 +154,7 @@ pub struct TaskRequestEntry {
     pub successful: bool,
 }
 
+/// Struct to organize the contents of a row inside the meshtastic_texts db table
 #[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticTextEntry {
     pub id: i32,
@@ -160,6 +164,7 @@ pub struct MeshtasticTextEntry {
     pub message: String,
 }
 
+/// Struct to organize the contents of a row inside the meshtastic_positions db table
 #[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticPositionEntry {
     pub id: i32,
@@ -171,6 +176,7 @@ pub struct MeshtasticPositionEntry {
     pub next_update: u32,
 }
 
+/// Struct to organize the contents of a row inside the meshtastic_nodes db table
 #[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticNodeEntry {
     pub id: i32,
@@ -186,6 +192,7 @@ pub struct MeshtasticNodeEntry {
     pub hops_away: u32,
 }
 
+/// Struct to organize the contents of a row inside the meshtastic_raw db table
 #[derive(Debug, Default, FromRow, Serialize, Clone)]
 pub struct MeshtasticRawEntry {
     pub id: i32,
@@ -198,10 +205,12 @@ pub struct MeshtasticRawEntry {
     pub encrypted: bool,
 }
 
+/// Function to safely get the globally-accessible database connection pool
 pub fn get_db_pool() -> &'static SqlitePool {
     DB_POOL.get().expect("Database pool is not initialized")
 }
 
+/// Function to check if the database connection is alive
 pub async fn is_db_connected() -> bool {
     let pool: &Pool<Sqlite> = get_db_pool();
 
@@ -215,6 +224,7 @@ pub async fn is_db_connected() -> bool {
     }
 }
 
+/// Function to create a database backup using a 'VACUUM INTO ???' query
 pub async fn backup_database() -> Result<String, sqlx::Error> {
     let path_str = format!(
         "{}outpost_server_{}.db",

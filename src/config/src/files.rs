@@ -39,6 +39,8 @@ mod platform {
 }
 
 pub use platform::*;
+
+/// Function to ensure the important directories always exist
 pub fn create_output_directories(mode: &str) -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir_all(ETC_DIR)?;
     fs::create_dir_all(LOG_DIR)?;

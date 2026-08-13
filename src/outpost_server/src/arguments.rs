@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 
 use clap::Parser;
 
+/// All available CLI arguments
 #[derive(Parser, Debug)]
 #[command(name = "Outpost Server")]
 #[command(version = "0.1.0")]
@@ -27,12 +28,14 @@ pub struct Args {
 // static global storage
 static ARGS: OnceLock<Args> = OnceLock::new();
 
+/// Populates globally-accessible ARGS static
 pub fn initialize_arguments() {
     let args = Args::parse();
     ARGS.set(args)
         .expect("Failed to set global arguments storage")
 }
 
+/// Used to access the globally-accessible ARGS struct
 pub fn get_arguments() -> &'static Args {
     ARGS.get().expect("Arguments not initialized yet")
 }

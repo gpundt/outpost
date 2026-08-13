@@ -9,20 +9,26 @@ use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
 
 static LOG_FILENAME: OnceLock<Mutex<String>> = OnceLock::new();
+
+/// Function to safely get the filename of the current log file
 fn log_filename() -> &'static Mutex<String> {
     LOG_FILENAME.get_or_init(|| Mutex::new(String::new()))
 }
 
+/// Function to safely set the filename of the current log file
 fn set_log_filename(name: &str) {
     let mut file = log_filename().lock().unwrap();
     *file = name.to_string();
 }
 
+/// Function to safely get a copy of the current log file's filename
 pub fn get_log_filename() -> String {
     let file = log_filename().lock().unwrap();
     file.clone()
 }
 
+/// Function to initialize the terminal and file logging controller
+/// Sets current log filter level
 pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let filepath: PathBuf =

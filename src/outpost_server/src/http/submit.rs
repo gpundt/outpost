@@ -8,6 +8,7 @@ use axum::{Json, http::StatusCode};
 use config::tasks::{OutpostTask, TaskRequest, TaskResponse};
 use log::info;
 
+/// Master functon to handle and direct task submission options
 pub async fn task_submission_response(
     Json(request): Json<TaskRequest>,
 ) -> (StatusCode, Json<TaskResponse>) {
@@ -22,6 +23,8 @@ pub async fn task_submission_response(
     }
 }
 
+/// Function to handle a backup task request
+/// Returns an HTTP status code and a JSON response
 async fn handle_backup() -> (StatusCode, Json<TaskResponse>) {
     let row_id = match insert_task_request_start("backup").await {
         Ok(i) => i,
@@ -77,6 +80,8 @@ async fn handle_backup() -> (StatusCode, Json<TaskResponse>) {
     };
 }
 
+/// Function to handle a beacon task request
+/// Returns an HTTP status code and a JSON response
 async fn handle_beacon() -> (StatusCode, Json<TaskResponse>) {
     (
         StatusCode::NOT_IMPLEMENTED,
@@ -88,6 +93,8 @@ async fn handle_beacon() -> (StatusCode, Json<TaskResponse>) {
     )
 }
 
+/// Function to handle a refresh_nodes task request
+/// Returns an HTTP status code and a JSON response
 async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
     let row_id = match insert_task_request_start("refresh_nodes").await {
         Ok(i) => i,
@@ -143,6 +150,8 @@ async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
     };
 }
 
+/// Function to handle a refresh_http_requests task request
+/// Returns an HTTP status code and a JSON response
 async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
     let row_id = match insert_task_request_start("refresh_http_requests").await {
         Ok(i) => i,
@@ -198,6 +207,8 @@ async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
     };
 }
 
+/// Function to handle a refresh_raw task request
+/// Returns an HTTP status code and a JSON response
 async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
     let row_id = match insert_task_request_start("refresh_raw").await {
         Ok(i) => i,
@@ -253,6 +264,8 @@ async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
     };
 }
 
+/// Function to handle a refresh_positions task request
+/// Returns an HTTP status code and a JSON response
 async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
     let row_id = match insert_task_request_start("refresh_positions").await {
         Ok(i) => i,

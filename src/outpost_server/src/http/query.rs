@@ -16,16 +16,19 @@ use config::query::{QueryRequest, QueryType, extract_count_parameter};
 use config::time::get_uptime_str;
 use serde::Serialize;
 
-pub async fn query_response(Json(request): Json<QueryRequest>) -> (StatusCode, String) {
+/// Master function to handle and direct all http query endpoint requests
+/// Returns an HTTP status code and a JSON response from an individual generation function
+pub async fn generate_query_response(Json(request): Json<QueryRequest>) -> (StatusCode, String) {
     match request.query_type {
-        QueryType::HttpRequests => http_requests_query_response(request.parameters).await,
-        QueryType::Nodes => nodes_query_response(request.parameters).await,
-        QueryType::Positions => positions_query_response(request.parameters).await,
-        QueryType::RawPackets => raw_packets_query_response(request.parameters).await,
-        QueryType::Texts => texts_query_response(request.parameters).await,
+        QueryType::HttpRequests => generate_http_requests_query_response(request.parameters).await,
+        QueryType::Nodes => generate_nodes_query_response(request.parameters).await,
+        QueryType::Positions => generate_positions_query_response(request.parameters).await,
+        QueryType::RawPackets => generate_raw_packets_query_response(request.parameters).await,
+        QueryType::Texts => generate_texts_query_response(request.parameters).await,
     }
 }
 
+/// Struct to organize the JSON response for the health_check query endpoint
 #[derive(Serialize)]
 pub struct HealthCheckResponse {
     status: String,
@@ -33,7 +36,8 @@ pub struct HealthCheckResponse {
     version: String,
 }
 
-pub async fn health_check_response() -> Json<HealthCheckResponse> {
+/// Function to generate and return the health_check endpoint JSON response
+pub async fn generate_health_check_response() -> Json<HealthCheckResponse> {
     let payload = HealthCheckResponse {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),
@@ -42,6 +46,7 @@ pub async fn health_check_response() -> Json<HealthCheckResponse> {
     Json(payload)
 }
 
+/// Struct to organize the JSON response for the config query endpoint
 #[derive(Serialize)]
 pub struct ConfigResponse {
     debug: bool,
@@ -51,7 +56,8 @@ pub struct ConfigResponse {
     log_file: String,
 }
 
-pub async fn config_query_response() -> Json<ConfigResponse> {
+/// Function to generate and return the config endpoint JSON response
+pub async fn generate_config_query_response() -> Json<ConfigResponse> {
     let payload = ConfigResponse {
         debug: get_arguments().debug,
         http_port: get_arguments().http_port,
@@ -62,6 +68,7 @@ pub async fn config_query_response() -> Json<ConfigResponse> {
     Json(payload)
 }
 
+/// Struct to organize the JSON response for the status query endpoint
 #[derive(Serialize)]
 pub struct StatusResponse {
     status: String,
@@ -75,7 +82,8 @@ pub struct StatusResponse {
     connected_peers: u16,
 }
 
-pub async fn status_query_response() -> Json<StatusResponse> {
+/// Function to generate and return the status endpoint JSON response
+pub async fn generate_status_query_response() -> Json<StatusResponse> {
     let db_connection = is_db_connected().await;
 
     let payload = StatusResponse {
@@ -92,7 +100,9 @@ pub async fn status_query_response() -> Json<StatusResponse> {
     return Json(payload);
 }
 
-pub async fn http_requests_query_response(
+/// Function to generate and return the http_request query endpoint JSON response
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_http_requests_query_response(
     parameters: Option<serde_json::Value>,
 ) -> (StatusCode, String) {
     let requests = match select_http_requests_by_count(100).await {
@@ -122,7 +132,11 @@ pub async fn http_requests_query_response(
     }
 }
 
-pub async fn nodes_query_response(parameters: Option<serde_json::Value>) -> (StatusCode, String) {
+/// Function to generate and return the HTTP response for the meshtastic_nodes query
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_nodes_query_response(
+    parameters: Option<serde_json::Value>,
+) -> (StatusCode, String) {
     let nodes = match select_meshtastic_nodes().await {
         Ok(n) => n,
         Err(e) => {
@@ -149,7 +163,9 @@ pub async fn nodes_query_response(parameters: Option<serde_json::Value>) -> (Sta
     }
 }
 
-pub async fn positions_query_response(
+/// Function to generate and return the HTTP response for the meshtastic_positions query
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_positions_query_response(
     parameters: Option<serde_json::Value>,
 ) -> (StatusCode, String) {
     let positions = match select_meshtastic_positions().await {
@@ -179,7 +195,9 @@ pub async fn positions_query_response(
     }
 }
 
-pub async fn raw_packets_query_response(
+/// Function to generate and return the HTTP response for the raw_packets query
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_raw_packets_query_response(
     parameters: Option<serde_json::Value>,
 ) -> (StatusCode, String) {
     let row_count = extract_count_parameter(&parameters, 100);
@@ -210,7 +228,11 @@ pub async fn raw_packets_query_response(
     }
 }
 
-pub async fn texts_query_response(parameters: Option<serde_json::Value>) -> (StatusCode, String) {
+/// Function to generate and return the HTTP response for the texts query option
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_texts_query_response(
+    parameters: Option<serde_json::Value>,
+) -> (StatusCode, String) {
     let row_count = extract_count_parameter(&parameters, 100);
     let texts = match select_meshtastic_texts_by_count(row_count).await {
         Ok(t) => t,

@@ -6,6 +6,7 @@ use crate::database::schema::{
 use chrono::Utc;
 use log::{debug, error, trace};
 
+/// Function to insert a row into the meshtastic_texts db table
 pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
@@ -31,6 +32,7 @@ pub async fn insert_meshtastic_text(text_entry: &MeshtasticTextEntry) -> Result<
     }
 }
 
+/// Function to insert a row into the meshtastic_nodes db table
 pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(), sqlx::Error> {
     let entry_clone = node_entry.clone();
     match sqlx::query(
@@ -63,6 +65,7 @@ pub async fn insert_meshtastic_node(node_entry: MeshtasticNodeEntry) -> Result<(
     };
 }
 
+/// Function to insert a row into the meshtastic_positions db table
 pub async fn insert_meshtastic_position(
     position_entry: MeshtasticPositionEntry,
 ) -> Result<(), sqlx::Error> {
@@ -92,11 +95,13 @@ pub async fn insert_meshtastic_position(
     };
 }
 
+/// Function to insert a row into the meshtastic_telemetry db table
 pub async fn insert_meshtastic_telemetry() -> Result<(), sqlx::Error> {
     debug!("Telemetry packet intercepted... Not adding to database");
     Ok(())
 }
 
+/// Function to insert a row into the meshtastic_raw db table
 pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), sqlx::Error> {
     match sqlx::query(
         r#"
@@ -125,6 +130,7 @@ pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), 
     }
 }
 
+/// Function to insert a row into the http_requests db table
 pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), sqlx::Error> {
     let entry_clone = request_entry.clone();
     match sqlx::query(
@@ -153,6 +159,7 @@ pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), 
     };
 }
 
+/// Function to insert the kickoff of a task into the tasks db table
 pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Error> {
     let requested_at: chrono::DateTime<Utc> = Utc::now();
 
@@ -179,6 +186,7 @@ pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Err
     Ok(generated_id)
 }
 
+/// Function to insert the conclusion of a task into the tasks db table
 pub async fn insert_task_request_finish(row_id: i64, successful: bool) -> Result<(), sqlx::Error> {
     let finished_at: chrono::DateTime<Utc> = Utc::now();
 

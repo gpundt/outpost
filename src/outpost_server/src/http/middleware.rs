@@ -5,6 +5,7 @@ use chrono::Utc;
 use log::debug;
 use std::net::SocketAddr;
 
+/// Function to log incoming HTTP requests
 pub async fn log_request_middleware(
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     req: Request<Body>,

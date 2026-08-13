@@ -3,6 +3,7 @@ use crate::database::schema::get_db_pool;
 use log::{error, trace, warn};
 use sqlx::{QueryBuilder, Sqlite};
 
+/// Function to wipe all entries from a specific database table
 pub async fn delete_from_table(table_name: &str) -> Result<(), sqlx::Error> {
     let mut delete_query: QueryBuilder<Sqlite> = QueryBuilder::new("DELETE FROM ");
     delete_query.push(format!("{}", table_name));

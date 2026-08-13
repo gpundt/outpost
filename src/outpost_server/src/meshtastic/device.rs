@@ -1,5 +1,8 @@
 use serialport::{SerialPortType, available_ports};
 
+/// Helper function to enumerate all connected serial devices
+/// Returns them in a Vector
+/// Used when user provides '-e' '--enumerate' CLI flag
 pub fn enumerate_serial_devices() -> Vec<String> {
     let mut serial_devices: Vec<String> = Vec::new();
 
@@ -25,9 +28,19 @@ pub fn enumerate_serial_devices() -> Vec<String> {
     return serial_devices;
 }
 
+/// Function to neatly print connected serial devices
+/// Used when user provides '-e' '--enumerate' CLI flag
 pub fn list_serial_devices(serial_devices: Vec<String>) {
-    println!("Available Serial Devices:");
-    for device in serial_devices {
-        println!(">  {}", device)
+    match serial_devices.len() {
+        0 => {
+            println!("No available serial devices...");
+            return;
+        }
+        _ => {
+            println!("Available Serial Devices:");
+            for device in serial_devices {
+                println!(">  {}", device)
+            }
+        }
     }
 }

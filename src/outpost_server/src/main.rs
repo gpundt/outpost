@@ -11,6 +11,7 @@ use config::{files::create_output_directories, logging::initialize_logger, time:
 use log::{error, info};
 use meshtastic::device::{enumerate_serial_devices, list_serial_devices};
 
+/// Outpost server entrypoint
 #[tokio::main]
 async fn main() {
     start_time();

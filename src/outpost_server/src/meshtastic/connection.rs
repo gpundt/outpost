@@ -20,6 +20,7 @@ impl DeviceConnection {
         }
     }
 
+    /// Function to initialize a connection with a specified serial port
     pub async fn connect(
         &mut self,
         port: Option<String>,
@@ -64,6 +65,7 @@ impl DeviceConnection {
         Ok(())
     }
 
+    /// Function to disconnect the established serial connection
     pub fn disconnect(&mut self) -> Result<(), ConnectionError> {
         match self.handler.take() {
             Some(handle) => {
@@ -74,15 +76,12 @@ impl DeviceConnection {
         }
     }
 
+    /// Function to check if the serial connection is up
     pub fn is_connected(&self) -> bool {
         self.handler
             .as_ref()
             .map(|h| !h.is_finished())
             .unwrap_or(false)
-    }
-
-    pub fn connected_flag(&self) -> Arc<AtomicBool> {
-        self.connected.clone()
     }
 }
 
