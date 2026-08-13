@@ -1,14 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum OutpostTask {
     Backup,
     Beacon,
-    Refresh_Nodes,
-    Refresh_Raw,
-    Refresh_HTTP_Requests,
-    Refresh_Positions,
+    RefreshNodes,
+    RefreshRaw,
+    RefreshHttpRequests,
+    RefreshPositions,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

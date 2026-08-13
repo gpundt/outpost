@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum QueryType {
     Texts,
     Nodes,
-    Raw_Packets,
+    RawPackets,
     Positions,
-    HTTP_Requests,
+    HttpRequests,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

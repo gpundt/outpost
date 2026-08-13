@@ -15,10 +15,10 @@ pub async fn task_submission_response(
     match request.task {
         OutpostTask::Backup => handle_backup().await,
         OutpostTask::Beacon => handle_beacon().await,
-        OutpostTask::Refresh_Nodes => handle_refresh_nodes().await,
-        OutpostTask::Refresh_HTTP_Requests => handle_refresh_http_requests().await,
-        OutpostTask::Refresh_Positions => handle_refresh_positions().await,
-        OutpostTask::Refresh_Raw => handle_refresh_raw().await,
+        OutpostTask::RefreshNodes => handle_refresh_nodes().await,
+        OutpostTask::RefreshHttpRequests => handle_refresh_http_requests().await,
+        OutpostTask::RefreshPositions => handle_refresh_positions().await,
+        OutpostTask::RefreshRaw => handle_refresh_raw().await,
     }
 }
 
@@ -95,7 +95,7 @@ async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Nodes,
+                    task: OutpostTask::RefreshNodes,
                     success: false,
                     message: e.to_string(),
                 }),
@@ -108,7 +108,7 @@ async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
             true,
             StatusCode::OK,
             TaskResponse {
-                task: OutpostTask::Refresh_Nodes,
+                task: OutpostTask::RefreshNodes,
                 success: true,
                 message: format!("Meshtastic nodes list successfully refreshed"),
             },
@@ -117,7 +117,7 @@ async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Nodes,
+                    task: OutpostTask::RefreshNodes,
                     success: false,
                     message: format!("Meshtastic nodes list refresh failed: {}", e),
                 }),
@@ -150,7 +150,7 @@ async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_HTTP_Requests,
+                    task: OutpostTask::RefreshHttpRequests,
                     success: false,
                     message: e.to_string(),
                 }),
@@ -163,7 +163,7 @@ async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
             true,
             StatusCode::OK,
             TaskResponse {
-                task: OutpostTask::Refresh_HTTP_Requests,
+                task: OutpostTask::RefreshHttpRequests,
                 success: true,
                 message: format!("HTTP Requests list successfully refreshed"),
             },
@@ -172,7 +172,7 @@ async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_HTTP_Requests,
+                    task: OutpostTask::RefreshHttpRequests,
                     success: false,
                     message: format!("HTTP Requests list refresh failed: {}", e),
                 }),
@@ -186,7 +186,7 @@ async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_HTTP_Requests,
+                    task: OutpostTask::RefreshHttpRequests,
                     success: false,
                     message: format!(
                         "HTTP Requests list refresh successful, tasks table update failed: {}",
@@ -205,7 +205,7 @@ async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Raw,
+                    task: OutpostTask::RefreshRaw,
                     success: false,
                     message: e.to_string(),
                 }),
@@ -218,7 +218,7 @@ async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
             true,
             StatusCode::OK,
             TaskResponse {
-                task: OutpostTask::Refresh_Raw,
+                task: OutpostTask::RefreshRaw,
                 success: true,
                 message: format!("Meshtastic raw packets list successfully refreshed"),
             },
@@ -227,7 +227,7 @@ async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Raw,
+                    task: OutpostTask::RefreshRaw,
                     success: false,
                     message: format!("Meshtastic raw packets list refresh failed: {}", e),
                 }),
@@ -241,7 +241,7 @@ async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Raw,
+                    task: OutpostTask::RefreshRaw,
                     success: false,
                     message: format!(
                         "Meshtastic raw packets list refresh successful, tasks table update failed: {}",
@@ -260,7 +260,7 @@ async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Positions,
+                    task: OutpostTask::RefreshPositions,
                     success: false,
                     message: e.to_string(),
                 }),
@@ -274,7 +274,7 @@ async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
             true,
             StatusCode::OK,
             TaskResponse {
-                task: OutpostTask::Refresh_Positions,
+                task: OutpostTask::RefreshPositions,
                 success: true,
                 message: format!("Meshtastic positions list successfully refreshed"),
             },
@@ -283,7 +283,7 @@ async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Positions,
+                    task: OutpostTask::RefreshPositions,
                     success: false,
                     message: format!("Meshtastic positions list refresh failed: {}", e),
                 }),
@@ -297,7 +297,7 @@ async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(TaskResponse {
-                    task: OutpostTask::Refresh_Positions,
+                    task: OutpostTask::RefreshPositions,
                     success: false,
                     message: format!(
                         "Meshtastic positions list refresh successful, tasks table update failed: {}",
