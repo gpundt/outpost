@@ -1,28 +1,17 @@
 mod arguments;
 
 pub mod http;
-use std::time::Duration;
 
+use crate::http::connection::{initialize_http_connecion, test_server_connection};
 use arguments::{get_arguments, initialize_arguments};
 
-use config::{
-    endpoints::HEALTH_CHECK_ENDPOINT, files::create_output_directories, logging::initialize_logger,
-    time::start_time,
-};
+use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
+use log::error;
 
 #[tokio::main]
 async fn main() {
     start_time();
     initialize_arguments();
-
-    if get_arguments().test {
-        test_server_connection(
-            get_arguments().clone().server_ip,
-            get_arguments().server_port,
-        )
-        .await;
-        return;
-    }
 
     match create_output_directories("client") {
         Ok(_) => {}
@@ -38,33 +27,35 @@ async fn main() {
             return;
         }
     };
-}
 
-async fn test_server_connection(server_ip: String, server_port: u16) {
-    // Generate URL
-    let url = format!(
-        "http://{}:{}{}",
-        server_ip,
-        server_port,
-        HEALTH_CHECK_ENDPOINT.to_string()
-    );
+    if get_arguments().test {
+        let _ = test_server_connection(
+            get_arguments().clone().server_ip,
+            get_arguments().server_port,
+            false,
+        )
+        .await;
+        return;
+    }
 
-    let client = reqwest::Client::new();
-
-    // Send HTTP GET
-    let response = match client.get(url).timeout(Duration::from_secs(2)).send().await {
-        Ok(r) => r,
+    match initialize_http_connecion() {
+        Ok(_) => {}
         Err(e) => {
-            println!("Server Connection Status: Failed ({})", e);
+            error!("{}", e);
             return;
         }
     };
 
-    match response.status() {
-        reqwest::StatusCode::OK => println!(
-            "Server Connection Status: Successful ({})",
-            response.status()
-        ),
-        _ => println!("Server Connection Status: Failed ({})", response.status()),
-    }
+    match test_server_connection(
+        get_arguments().clone().server_ip,
+        get_arguments().server_port,
+        true,
+    )
+    .await
+    {
+        Ok(_) => {}
+        Err(_) => {
+            return;
+        }
+    };
 }

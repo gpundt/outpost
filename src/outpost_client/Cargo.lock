@@ -1012,6 +1012,8 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "config",
+ "env_logger",
+ "log",
  "reqwest",
  "tokio",
 ]
