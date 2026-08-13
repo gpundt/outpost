@@ -3,7 +3,6 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use meshtastic::api::StreamApi;
 use meshtastic::utils;
-use tokio::runtime::Runtime;
 use tokio::task::JoinHandle;
 
 use crate::meshtastic::errors::ConnectionError;
