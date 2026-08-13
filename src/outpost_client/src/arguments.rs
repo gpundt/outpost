@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use clap::Parser;
 
 /// All available CLI arguments
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(name = "Outpost Client")]
 #[command(version = "0.1.0")]
 #[command(about = "Meshtastic Node Query Client")]
@@ -14,9 +14,9 @@ pub struct Args {
 
     /// Port to bind HTTP listener to
     #[arg(long, default_value_t = 8080)]
-    pub http_port: u16,
+    pub server_port: u16,
 
-    #[arg(short, long, default_value_t = "192.168.99.1".to_string())]
+    #[arg(long, default_value_t = "192.168.99.1".to_string())]
     pub server_ip: String,
 
     #[arg(short, long, default_value_t = false)]
