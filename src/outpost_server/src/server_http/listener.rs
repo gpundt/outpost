@@ -1,5 +1,5 @@
 use crate::arguments::get_arguments;
-use crate::http::{
+use crate::server_http::{
     middleware::log_request_middleware,
     query::{
         generate_config_query_response, generate_health_check_response, generate_query_response,
@@ -12,7 +12,7 @@ use axum::{
     Router, middleware,
     routing::{MethodRouter, get},
 };
-use config::endpoints::{
+use http::endpoints::{
     CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, QUERY_ENDPOINT, STATUS_QUERY_ENDPOINT,
     SUBMIT_TASK_ENDPOINT,
 };

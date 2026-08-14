@@ -6,15 +6,16 @@ use crate::database::{
         select_meshtastic_raw_by_count, select_meshtastic_texts_by_count,
     },
 };
-use crate::http::errors::{QueryError, SerializeError};
 use crate::meshtastic::connection::global_connection;
+use crate::server_http::errors::{QueryError, SerializeError};
 
 use axum::Json;
 use axum::http::StatusCode;
-use config::logging::get_log_filename;
-use config::query::{QueryRequest, QueryType, extract_count_parameter};
-use config::time::get_uptime_str;
-use serde::Serialize;
+use config::{logging::get_log_filename, time::get_uptime_str};
+use http::query::{
+    ConfigResponse, HealthCheckResponse, QueryRequest, QueryType, StatusResponse,
+    extract_count_parameter,
+};
 
 /// Master function to handle and direct all http query endpoint requests
 /// Returns an HTTP status code and a JSON response from an individual generation function
@@ -28,14 +29,6 @@ pub async fn generate_query_response(Json(request): Json<QueryRequest>) -> (Stat
     }
 }
 
-/// Struct to organize the JSON response for the health_check query endpoint
-#[derive(Serialize)]
-pub struct HealthCheckResponse {
-    status: String,
-    uptime: String,
-    version: String,
-}
-
 /// Function to generate and return the health_check endpoint JSON response
 pub async fn generate_health_check_response() -> Json<HealthCheckResponse> {
     let payload = HealthCheckResponse {
@@ -44,16 +37,6 @@ pub async fn generate_health_check_response() -> Json<HealthCheckResponse> {
         version: env!("CARGO_PKG_VERSION").to_string(),
     };
     Json(payload)
-}
-
-/// Struct to organize the JSON response for the config query endpoint
-#[derive(Serialize)]
-pub struct ConfigResponse {
-    debug: bool,
-    http_port: u16,
-    serial_port: Option<String>,
-    log_level: String,
-    log_file: String,
 }
 
 /// Function to generate and return the config endpoint JSON response
@@ -66,20 +49,6 @@ pub async fn generate_config_query_response() -> Json<ConfigResponse> {
         log_file: get_log_filename(),
     };
     Json(payload)
-}
-
-/// Struct to organize the JSON response for the status query endpoint
-#[derive(Serialize)]
-pub struct StatusResponse {
-    status: String,
-    uptime: String,
-    version: String,
-    serial_connected: bool,
-    serial_port: Option<String>,
-    database_reachable: bool,
-    packets_received: u32,
-    last_packet_received: String,
-    connected_peers: u16,
 }
 
 /// Function to generate and return the status endpoint JSON response

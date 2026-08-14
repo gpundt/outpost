@@ -156,7 +156,7 @@ dependencies = [
  "bytes",
  "form_urlencoded",
  "futures-util",
- "http",
+ "http 1.5.0",
  "http-body",
  "http-body-util",
  "hyper",
@@ -187,7 +187,7 @@ checksum = "08c78f31d7b1291f7ee735c1c6780ccde7785daae9a9206026862dab7d8792d1"
 dependencies = [
  "bytes",
  "futures-core",
- "http",
+ "http 1.5.0",
  "http-body",
  "http-body-util",
  "mime",
@@ -965,6 +965,15 @@ dependencies = [
 
 [[package]]
 name = "http"
+version = "0.1.0"
+dependencies = [
+ "const_format",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "http"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
@@ -980,7 +989,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca2a8f2913ee65f60facd6a5905613afaa448497a0230cc41ce022d93290bc2c"
 dependencies = [
  "bytes",
- "http",
+ "http 1.5.0",
 ]
 
 [[package]]
@@ -991,7 +1000,7 @@ checksum = "e9f41fd6a08e4d4ec69df65976da761afd5ad5e58a9d4acb46bd1c953a9e3ff2"
 dependencies = [
  "bytes",
  "futures-core",
- "http",
+ "http 1.5.0",
  "http-body",
  "pin-project-lite",
 ]
@@ -1027,7 +1036,7 @@ dependencies = [
  "bytes",
  "futures-channel",
  "futures-core",
- "http",
+ "http 1.5.0",
  "http-body",
  "httparse",
  "httpdate",
@@ -1044,7 +1053,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96547c2556ec9d12fb1578c4eaf448b04993e7fb79cbaad930a656880a6bdfa0"
 dependencies = [
  "bytes",
- "http",
+ "http 1.5.0",
  "http-body",
  "hyper",
  "pin-project-lite",
@@ -1517,6 +1526,7 @@ dependencies = [
  "clap",
  "config",
  "env_logger",
+ "http 0.1.0",
  "log",
  "meshtastic",
  "prost",

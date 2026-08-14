@@ -1,11 +1,11 @@
 mod arguments;
 
 pub mod database;
-pub mod http;
 pub mod meshtastic;
+pub mod server_http;
 use crate::database::schema::initialize_database;
-use crate::http::listener::initialize_http_listener;
 use crate::meshtastic::connection::global_connection;
+use crate::server_http::listener::initialize_http_listener;
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
 use log::{error, info};
@@ -28,7 +28,7 @@ async fn main() {
     }
 }
 
-/// Function to handle initialization and execution of server startup functions
+/// Function to handle execution of server startup
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     create_output_directories("server")?;
     initialize_logger("server", get_arguments().debug)?;

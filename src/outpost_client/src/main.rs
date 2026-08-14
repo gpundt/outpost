@@ -1,7 +1,10 @@
 mod arguments;
-pub mod http;
+pub mod client_http;
 
-use crate::http::connection::{initialize_http_connecion, test_server_connection};
+use crate::client_http::{
+    connection::set_server_config,
+    query::{query_health_check, query_server_config, query_server_status},
+};
 
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
@@ -17,6 +20,10 @@ async fn main() {
         error!("{}", e);
         std::process::exit(1);
     }
+
+    query_health_check(false).await;
+    query_server_config().await;
+    query_server_status().await;
 }
 
 /// Function to handle execution of client startup
@@ -24,24 +31,17 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     create_output_directories("client")?;
     initialize_logger("client", get_arguments().debug)?;
 
+    set_server_config(
+        get_arguments().server_ip.clone(),
+        get_arguments().server_port,
+    );
+
     if get_arguments().test {
-        let _ = test_server_connection(
-            get_arguments().clone().server_ip,
-            get_arguments().server_port,
-            false,
-        )
-        .await?;
-        return Ok(());
+        let _ = query_health_check(false).await?;
+        return std::process::exit(0);
     }
 
-    initialize_http_connecion()?;
-
-    test_server_connection(
-        get_arguments().clone().server_ip,
-        get_arguments().server_port,
-        true,
-    )
-    .await?;
+    query_health_check(true).await?;
 
     Ok(())
 }
