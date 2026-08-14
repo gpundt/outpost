@@ -38,9 +38,9 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         };
     }
 
-    query_server(HEALTH_CHECK_ENDPOINT.to_string(), None).await?;
-    query_server(CONFIG_QUERY_ENDPOINT.to_string(), None).await?;
-    query_server(STATUS_QUERY_ENDPOINT.to_string(), None).await?;
+    query_server(HEALTH_CHECK_ENDPOINT.to_string(), None).await;
+    query_server(CONFIG_QUERY_ENDPOINT.to_string(), None).await;
+    query_server(STATUS_QUERY_ENDPOINT.to_string(), None).await;
 
     Ok(())
 }

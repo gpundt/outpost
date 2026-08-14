@@ -26,32 +26,47 @@ pub enum QueryError {
 impl std::fmt::Display for QueryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            QueryError::Http(e) => write!(f, "HTTP/Network Error: {e}"),
-            QueryError::Serialization(e) => write!(f, "JSON Serialization Error: {e}"),
+            QueryError::Http(e) => write!(f, "HTTP/Network Failure: {e}"),
+            QueryError::Serialization(e) => write!(f, "JSON Serialization Failure: {e}"),
         }
     }
 }
 
 impl std::error::Error for QueryError {}
 
-pub async fn query_server(
-    endpoint: String,
-    body: Option<QueryRequest>,
-) -> Result<QueryResponse, QueryError> {
-    let response = get_server_connection()
+pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Option<QueryResponse> {
+    let response = match get_server_connection()
         .get(get_server_config().url(endpoint.clone()))
         .send()
         .await
-        .map_err(|e| QueryError::Http(e))?;
+        .map_err(|e| QueryError::Http(e))
+    {
+        Ok(b) => b,
+        Err(e) => {
+            error!("{}", e);
+            return None;
+        }
+    };
 
-    let successful_response = response
-        .error_for_status()
-        .map_err(|e| QueryError::Http(e))?;
+    let successful_response = match response.error_for_status().map_err(|e| QueryError::Http(e)) {
+        Ok(b) => b,
+        Err(e) => {
+            error!("{}", e);
+            return None;
+        }
+    };
 
-    let body_text = successful_response
+    let body_text = match successful_response
         .text()
         .await
-        .map_err(|e| QueryError::Http(e))?;
+        .map_err(|e| QueryError::Http(e))
+    {
+        Ok(b) => b,
+        Err(e) => {
+            error!("{}", e);
+            return None;
+        }
+    };
 
     let packaged_struct: QueryResponse = match endpoint.as_str() {
         HEALTH_CHECK_ENDPOINT => {
@@ -72,5 +87,5 @@ pub async fn query_server(
     if get_arguments().debug {
         debug!("{:?}", packaged_struct);
     }
-    Ok(packaged_struct)
+    Some(packaged_struct)
 }
