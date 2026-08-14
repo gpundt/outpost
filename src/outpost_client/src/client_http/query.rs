@@ -79,8 +79,8 @@ pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Optio
             QueryResponse::Status(StatusResponse::from_json(body_text).unwrap())
         }
         _ => {
-            error!("Invalid endpoint: {}", endpoint);
-            std::process::exit(1);
+            error!("Unsupported query_server Endpoint: {}", endpoint);
+            return None;
         }
     };
 
