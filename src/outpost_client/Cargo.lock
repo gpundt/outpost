@@ -552,6 +552,8 @@ name = "http"
 version = "0.1.0"
 dependencies = [
  "const_format",
+ "env_logger",
+ "log",
  "serde",
  "serde_json",
 ]
@@ -1265,6 +1267,8 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "rustls-platform-verifier",
+ "serde",
+ "serde_json",
  "sync_wrapper",
  "tokio",
  "tokio-rustls",

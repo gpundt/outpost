@@ -1,13 +1,11 @@
 mod arguments;
 pub mod client_http;
 
-use crate::client_http::{
-    connection::set_server_config,
-    query::{query_health_check, query_server_config, query_server_status},
-};
+use crate::client_http::{connection::set_server_config, query::query_server};
 
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
+use http::endpoints::{CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, STATUS_QUERY_ENDPOINT};
 use log::error;
 
 /// Outpost server entrypoint
@@ -33,16 +31,16 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     if get_arguments().test {
-        match query_health_check(false).await {
+        match query_server(HEALTH_CHECK_ENDPOINT.to_string(), None).await {
             _ => {
                 std::process::exit(0);
             }
         };
     }
 
-    query_health_check(true).await?;
-    query_server_config().await?;
-    query_server_status().await?;
+    query_server(HEALTH_CHECK_ENDPOINT.to_string(), None).await?;
+    query_server(CONFIG_QUERY_ENDPOINT.to_string(), None).await?;
+    query_server(STATUS_QUERY_ENDPOINT.to_string(), None).await?;
 
     Ok(())
 }

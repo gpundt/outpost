@@ -1,3 +1,4 @@
+use log::error;
 use serde::{Deserialize, Serialize};
 
 /// Enum to restrict the available query options
@@ -35,6 +36,22 @@ pub struct HealthCheckResponse {
     pub uptime: String,
     pub version: String,
 }
+impl HealthCheckResponse {
+    pub fn from_json(json: String) -> Result<Self, serde_json::Error> {
+        match serde_json::from_str::<HealthCheckResponse>(&json) {
+            Ok(r) => {
+                return Ok(r);
+            }
+            Err(e) => {
+                error!(
+                    "Failed to deserialize with HealthCheckResponse::from_json: {}",
+                    json
+                );
+                return Err(e);
+            }
+        }
+    }
+}
 
 /// Struct to organize the JSON response for the config query endpoint
 #[derive(Debug, Serialize, Deserialize)]
@@ -44,6 +61,22 @@ pub struct ConfigResponse {
     pub serial_port: Option<String>,
     pub log_level: String,
     pub log_file: String,
+}
+impl ConfigResponse {
+    pub fn from_json(json: String) -> Result<Self, serde_json::Error> {
+        match serde_json::from_str::<ConfigResponse>(&json) {
+            Ok(r) => {
+                return Ok(r);
+            }
+            Err(e) => {
+                error!(
+                    "Failed to deserialize with ConfigResponse::from_json: {}",
+                    json
+                );
+                return Err(e);
+            }
+        }
+    }
 }
 
 /// Struct to organize the JSON response for the status query endpoint
@@ -58,4 +91,20 @@ pub struct StatusResponse {
     pub packets_received: u32,
     pub last_packet_received: String,
     pub connected_peers: u16,
+}
+impl StatusResponse {
+    pub fn from_json(json: String) -> Result<Self, serde_json::Error> {
+        match serde_json::from_str::<StatusResponse>(&json) {
+            Ok(r) => {
+                return Ok(r);
+            }
+            Err(e) => {
+                error!(
+                    "Failed to deserialize with StatusResponse::from_json: {}",
+                    json
+                );
+                return Err(e);
+            }
+        }
+    }
 }
