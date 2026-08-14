@@ -22,33 +22,25 @@ async fn main() {
         return;
     }
 
-    match create_output_directories("server") {
-        Ok(_) => {}
-        Err(e) => {
-            println!("{}", e.to_string());
-            return;
-        }
+    if let Err(e) = run().await {
+        error!("{}", e);
+        std::process::exit(1);
     }
-    match initialize_logger("server", get_arguments().debug) {
-        Ok(_) => {}
-        Err(e) => {
-            println!("{}", e.to_string());
-            return;
-        }
-    };
+}
 
-    if let None = get_arguments().serial_port {
-        error!("You must specify a serial port: --serial-port PORT");
-        return;
-    }
+/// Function to handle initialization and execution of server startup functions
+async fn run() -> Result<(), Box<dyn std::error::Error>> {
+    create_output_directories("server")?;
+    initialize_logger("server", get_arguments().debug)?;
 
-    match initialize_database().await {
-        Ok(database_url) => info!("Database initialized: {}", database_url),
-        Err(e) => {
-            error!("Database Initialization Failure: {}", e.to_string());
-            return;
-        }
-    }
+    let serial_port = get_arguments()
+        .serial_port
+        .clone()
+        .ok_or("You must specify a serial port: --serial-port PORT");
+
+    initialize_database()
+        .await
+        .map(|url| info!("Database Initialized: {}", url))?;
 
     {
         let mut connection = global_connection().lock().unwrap();
@@ -57,10 +49,7 @@ async fn main() {
             let _ = connection.disconnect();
         }
 
-        info!(
-            "Connecting to serial device: {}",
-            get_arguments().serial_port.clone().unwrap()
-        );
+        info!("Connecting to serial device: {:?}", serial_port);
         match connection
             .connect(get_arguments().serial_port.clone(), 115200)
             .await
@@ -73,4 +62,6 @@ async fn main() {
     }
 
     initialize_http_listener().await;
+
+    Ok(())
 }

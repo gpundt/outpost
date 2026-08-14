@@ -13,20 +13,16 @@ async fn main() {
     start_time();
     initialize_arguments();
 
-    match create_output_directories("client") {
-        Ok(_) => {}
-        Err(e) => {
-            println!("{}", e.to_string());
-            return;
-        }
+    if let Err(e) = run().await {
+        error!("{}", e);
+        std::process::exit(1);
     }
-    match initialize_logger("client", get_arguments().debug) {
-        Ok(_) => {}
-        Err(e) => {
-            println!("{}", e.to_string());
-            return;
-        }
-    };
+}
+
+/// Function to handle execution of client startup
+async fn run() -> Result<(), Box<dyn std::error::Error>> {
+    create_output_directories("client")?;
+    initialize_logger("client", get_arguments().debug)?;
 
     if get_arguments().test {
         let _ = test_server_connection(
@@ -34,28 +30,18 @@ async fn main() {
             get_arguments().server_port,
             false,
         )
-        .await;
-        return;
+        .await?;
+        return Ok(());
     }
 
-    match initialize_http_connecion() {
-        Ok(_) => {}
-        Err(e) => {
-            error!("{}", e);
-            return;
-        }
-    };
+    initialize_http_connecion()?;
 
-    match test_server_connection(
+    test_server_connection(
         get_arguments().clone().server_ip,
         get_arguments().server_port,
         true,
     )
-    .await
-    {
-        Ok(_) => {}
-        Err(_) => {
-            return;
-        }
-    };
+    .await?;
+
+    Ok(())
 }
