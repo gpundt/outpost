@@ -11,6 +11,7 @@ use log::{debug, error};
 use reqwest::{self};
 use serde_json;
 
+/// Enum to organize the available query response options
 #[derive(Debug)]
 pub enum QueryResponse {
     HealthCheck(HealthCheckResponse),
@@ -18,6 +19,7 @@ pub enum QueryResponse {
     Status(StatusResponse),
 }
 
+/// Enum to organize the available query error options
 #[derive(Debug)]
 pub enum QueryError {
     Http(reqwest::Error),
@@ -31,9 +33,9 @@ impl std::fmt::Display for QueryError {
         }
     }
 }
-
 impl std::error::Error for QueryError {}
 
+/// Generic function to query and endpoint and return an organized response struct
 pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Option<QueryResponse> {
     let response = match get_server_connection()
         .get(get_server_config().url(endpoint.clone()))

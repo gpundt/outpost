@@ -24,13 +24,15 @@ impl ServerConfig {
 /// Globally accessible server config struct
 static SERVER_CONFIG: OnceLock<ServerConfig> = OnceLock::new();
 
-pub fn set_server_config(ip: String, port: u16) {
+/// Function to safely initialize the server config struct
+pub fn initialize_server_config(ip: String, port: u16) {
     if let Err(e) = SERVER_CONFIG.set(ServerConfig::new(ip, port)) {
         error!("Failed to get or init SERVER_CONNECTION: {:?}", e);
         std::process::exit(1);
     }
 }
 
+/// Function to safely get the global server config struct
 pub fn get_server_config() -> &'static ServerConfig {
     match SERVER_CONFIG.get() {
         Some(s) => s,

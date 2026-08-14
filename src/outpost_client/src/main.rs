@@ -1,7 +1,7 @@
 mod arguments;
 pub mod client_http;
 
-use crate::client_http::{connection::set_server_config, query::query_server};
+use crate::client_http::{connection::initialize_server_config, query::query_server};
 
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
@@ -25,7 +25,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     create_output_directories("client")?;
     initialize_logger("client", get_arguments().debug)?;
 
-    set_server_config(
+    initialize_server_config(
         get_arguments().server_ip.clone(),
         get_arguments().server_port,
     );
