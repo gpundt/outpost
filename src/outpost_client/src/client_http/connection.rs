@@ -1,8 +1,7 @@
 use reqwest::Client;
 use std::{sync::OnceLock, time::Duration};
 
-use http::endpoints::HEALTH_CHECK_ENDPOINT;
-use log::{error, info};
+use log::error;
 
 /// Struct to store server ip, port, and other info
 #[derive(Debug)]
@@ -26,15 +25,20 @@ impl ServerConfig {
 static SERVER_CONFIG: OnceLock<ServerConfig> = OnceLock::new();
 
 pub fn set_server_config(ip: String, port: u16) {
-    SERVER_CONFIG
-        .set(ServerConfig::new(ip, port))
-        .expect("Failed to set server configuration")
+    if let Err(e) = SERVER_CONFIG.set(ServerConfig::new(ip, port)) {
+        error!("Failed to get or init SERVER_CONNECTION: {:?}", e);
+        std::process::exit(1);
+    }
 }
 
 pub fn get_server_config() -> &'static ServerConfig {
-    SERVER_CONFIG
-        .get()
-        .expect("SERVER_CONFIG not initialized yet")
+    match SERVER_CONFIG.get() {
+        Some(s) => s,
+        None => {
+            error!("Failed to get SERVER_CONFIG");
+            std::process::exit(1);
+        }
+    }
 }
 
 /// Globally accessible HTTP client connection object
@@ -43,11 +47,17 @@ static SERVER_CONNECTION: OnceLock<Client> = OnceLock::new();
 /// Function to safely access the globally accessible HTTP client connection object
 pub fn get_server_connection() -> &'static Client {
     SERVER_CONNECTION.get_or_init(|| {
-        Client::builder()
+        match Client::builder()
             .user_agent("outpost-client")
             .timeout(Duration::from_secs(5))
             .build()
-            .expect("failed to build global reqwest client")
+        {
+            Ok(s) => s,
+            Err(e) => {
+                error!("Failed to get or init SERVER_CONNECTION: {}", e);
+                std::process::exit(1);
+            }
+        }
     })
 }
 

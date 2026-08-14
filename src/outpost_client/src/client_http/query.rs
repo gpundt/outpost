@@ -8,7 +8,7 @@ use http::{
     query::{ConfigResponse, HealthCheckResponse, StatusResponse},
 };
 use log::info;
-use reqwest::{self, Response};
+use reqwest::{self};
 use serde_json;
 
 #[derive(Debug)]

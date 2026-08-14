@@ -20,10 +20,6 @@ async fn main() {
         error!("{}", e);
         std::process::exit(1);
     }
-
-    query_health_check(false).await;
-    query_server_config().await;
-    query_server_status().await;
 }
 
 /// Function to handle execution of client startup
@@ -37,11 +33,16 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     if get_arguments().test {
-        let _ = query_health_check(false).await?;
-        return std::process::exit(0);
+        match query_health_check(false).await {
+            _ => {
+                std::process::exit(0);
+            }
+        };
     }
 
     query_health_check(true).await?;
+    query_server_config().await?;
+    query_server_status().await?;
 
     Ok(())
 }
