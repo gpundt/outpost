@@ -5,7 +5,7 @@ use http::{
     endpoints::{
         CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, QUERY_ENDPOINT, STATUS_QUERY_ENDPOINT,
     },
-    query::{ConfigResponse, HealthCheckResponse, QueryRequest, StatusResponse},
+    query::{ConfigResponse, HealthCheckResponse, QueryRequest, QueryType, StatusResponse},
 };
 use log::{debug, error};
 use reqwest::{self};
@@ -17,6 +17,7 @@ pub enum QueryResponse {
     HealthCheck(HealthCheckResponse),
     Config(ConfigResponse),
     Status(StatusResponse),
+    Database(Option<Vec<serde_json::Value>>),
 }
 
 /// Enum to organize the available query error options
@@ -37,12 +38,13 @@ impl std::error::Error for QueryError {}
 
 /// Generic function to query and endpoint and return an organized response struct
 pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Option<QueryResponse> {
-    let response = match get_server_connection()
-        .get(get_server_config().url(endpoint.clone()))
-        .send()
-        .await
-        .map_err(|e| QueryError::Http(e))
-    {
+    let mut response = get_server_connection().get(get_server_config().url(endpoint.clone()));
+
+    if let Some(request_body) = body {
+        response = response.json(&request_body);
+    }
+
+    let response = match response.send().await.map_err(|e| QueryError::Http(e)) {
         Ok(b) => b,
         Err(e) => {
             error!("{}", e);
@@ -80,6 +82,9 @@ pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Optio
         STATUS_QUERY_ENDPOINT => {
             QueryResponse::Status(StatusResponse::from_json(body_text).unwrap())
         }
+        QUERY_ENDPOINT => {
+            QueryResponse::Database(serde_json::from_str(&body_text.to_string()).unwrap())
+        }
         _ => {
             error!("Unsupported query_server Endpoint: {}", endpoint);
             return None;
@@ -90,4 +95,44 @@ pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Optio
         debug!("{:?}", packaged_struct);
     }
     Some(packaged_struct)
+}
+
+pub async fn query_server_texts(count: Option<u32>) -> Option<QueryResponse> {
+    let body = QueryRequest {
+        query_type: QueryType::Texts,
+        parameters: Some(serde_json::json!({ "count": count.unwrap_or(100) })),
+    };
+    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+}
+
+pub async fn query_server_nodes() -> Option<QueryResponse> {
+    let body = QueryRequest {
+        query_type: QueryType::Nodes,
+        parameters: None,
+    };
+    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+}
+
+pub async fn query_server_raw_packets() -> Option<QueryResponse> {
+    let body = QueryRequest {
+        query_type: QueryType::RawPackets,
+        parameters: None,
+    };
+    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+}
+
+pub async fn query_server_positions() -> Option<QueryResponse> {
+    let body = QueryRequest {
+        query_type: QueryType::Positions,
+        parameters: None,
+    };
+    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+}
+
+pub async fn query_server_http_requests(count: Option<u32>) -> Option<QueryResponse> {
+    let body = QueryRequest {
+        query_type: QueryType::HttpRequests,
+        parameters: Some(serde_json::json!({ "count": count.unwrap_or(100) })),
+    };
+    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
 }

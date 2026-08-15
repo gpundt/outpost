@@ -1,7 +1,13 @@
 mod arguments;
 pub mod client_http;
 
-use crate::client_http::{connection::initialize_server_config, query::query_server};
+use crate::client_http::{
+    connection::initialize_server_config,
+    query::{
+        query_server, query_server_http_requests, query_server_nodes, query_server_positions,
+        query_server_raw_packets, query_server_texts,
+    },
+};
 
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
@@ -41,6 +47,11 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     query_server(HEALTH_CHECK_ENDPOINT.to_string(), None).await;
     query_server(CONFIG_QUERY_ENDPOINT.to_string(), None).await;
     query_server(STATUS_QUERY_ENDPOINT.to_string(), None).await;
+    query_server_texts(None).await;
+    query_server_http_requests(Some(20)).await;
+    query_server_nodes().await;
+    query_server_positions().await;
+    query_server_raw_packets().await;
 
     Ok(())
 }

@@ -25,8 +25,8 @@ pub async fn handle_from_radio_packet(from_radio: meshtastic::protobufs::FromRad
                 id: 0,
                 node_num: node_info.num,
                 node_id: node_info.clone().user.unwrap_or(User::default()).id,
-                long_name: node_info.clone().user.unwrap_or(User::default()).long_name,
-                short_name: node_info.clone().user.unwrap_or(User::default()).short_name,
+                node_long_name: node_info.clone().user.unwrap_or(User::default()).long_name,
+                node_short_name: node_info.clone().user.unwrap_or(User::default()).short_name,
                 hw_model: node_info.clone().user.unwrap_or(User::default()).hw_model,
                 role: node_info.clone().user.unwrap_or(User::default()).role,
                 last_heard: node_info.last_heard,
@@ -77,7 +77,6 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                 },
                 PortNum::PositionApp => match Position::decode(data.payload.as_slice()) {
                     Ok(position_info) => {
-                        error!("POSITON RECEIVED: {:?}", position_info);
                         let _ = insert_meshtastic_position(MeshtasticPositionEntry {
                             id: 0,
                             latitude: position_info.latitude_i(),
@@ -93,13 +92,16 @@ async fn handle_mesh_packet(mesh_packet: meshtastic::protobufs::MeshPacket) {
                 },
                 PortNum::NodeinfoApp => match NodeInfo::decode(data.payload.as_slice()) {
                     Ok(node_info) => {
-                        error!("NODE RECEIVED: {:?}", node_info);
                         let _ = insert_meshtastic_node(MeshtasticNodeEntry {
                             id: 0,
                             node_num: node_info.num,
                             node_id: node_info.clone().user.unwrap_or(User::default()).id,
-                            long_name: node_info.clone().user.unwrap_or(User::default()).long_name,
-                            short_name: node_info
+                            node_long_name: node_info
+                                .clone()
+                                .user
+                                .unwrap_or(User::default())
+                                .long_name,
+                            node_short_name: node_info
                                 .clone()
                                 .user
                                 .unwrap_or(User::default())

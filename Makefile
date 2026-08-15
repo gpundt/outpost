@@ -20,7 +20,7 @@ endef
 
 all: prep_provisioning_files
 
-PIZERO_HOST      ?= mesh@192.168.1.190
+PIZERO_HOST      ?= mesh@192.168.1.191
 PIZERO_TARGET    := arm-unknown-linux-gnueabihf
 PIZERO_TOOLCHAIN ?= $(HOME)/opt/x-tools/armv6-rpi-linux-gnueabihf/bin
 PIZERO_SYSROOT   := $(CURDIR)/outpost_server/sysroots/pizero
