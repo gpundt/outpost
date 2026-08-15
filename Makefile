@@ -68,14 +68,14 @@ build_outpost_server_native:								## Builds outpost_server for whatever machin
 	cp outpost_server/target/release/outpost_server ./build/outpost_server_native
 	$(call successful)
 
-build_outpost_client:
+build_outpost_client:										## Builds outpost_client
 	$(call start_step_message,"Building outpost_client")
 	cd outpost_client && cargo build --release -p outpost_client
 	cp outpost_client/target/release/outpost_client ./build/outpost_client
 	$(call successful)
 
-build_outpost:
-	$(MAKE) prepare_build_output_dir												## Builds outpost binaries. Set PLATFORM=pizero to cross-compile for the Pi Zero W
+build_outpost: build_outpost_client							## Builds outpost binaries. Set PLATFORM=pizero to cross-compile for the Pi Zero W
+	$(MAKE) prepare_build_output_dir							
 ifeq ($(PLATFORM),pizero)
 	$(MAKE) build_outpost_server_pizero
 else
