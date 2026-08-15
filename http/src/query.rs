@@ -1,3 +1,5 @@
+use core::fmt;
+
 use log::error;
 use serde::{Deserialize, Serialize};
 
@@ -11,12 +13,32 @@ pub enum QueryType {
     Positions,
     HttpRequests,
 }
+impl fmt::Display for QueryType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            QueryType::HttpRequests => write!(f, "http_requests"),
+            QueryType::Nodes => write!(f, "nodes"),
+            QueryType::Positions => write!(f, "positions"),
+            QueryType::RawPackets => write!(f, "raw_packets"),
+            QueryType::Texts => write!(f, "texts"),
+        }
+    }
+}
 
 /// Struct to organize an individual query request
 #[derive(Deserialize, Serialize, Debug)]
 pub struct QueryRequest {
     pub query_type: QueryType,
     pub parameters: Option<serde_json::Value>,
+}
+impl fmt::Display for QueryRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "query_type: {}, parameters: {:?}",
+            self.query_type, self.parameters
+        )
+    }
 }
 
 /// Function to isolate the 'count' key and value from a QueryResonse's parameters field
@@ -35,6 +57,15 @@ pub struct HealthCheckResponse {
     pub status: String,
     pub uptime: String,
     pub version: String,
+}
+impl fmt::Display for HealthCheckResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "\n\tStatus: {}\n\tUptime: {}\n\tVersion: {}",
+            self.status, self.uptime, self.version
+        )
+    }
 }
 impl HealthCheckResponse {
     pub fn from_json(json: String) -> Result<Self, serde_json::Error> {
@@ -61,6 +92,19 @@ pub struct ConfigResponse {
     pub serial_port: Option<String>,
     pub log_level: String,
     pub log_file: String,
+}
+impl fmt::Display for ConfigResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "\n\tDebug: {}\n\tHTTP Port: {}\n\tSerial Port: {}\n\tLog Level: {}\n\tLog File: {}",
+            self.debug,
+            self.http_port,
+            self.serial_port.clone().unwrap_or("None".to_string()),
+            self.log_level,
+            self.log_file
+        )
+    }
 }
 impl ConfigResponse {
     pub fn from_json(json: String) -> Result<Self, serde_json::Error> {
@@ -91,6 +135,23 @@ pub struct StatusResponse {
     pub packets_received: u32,
     pub last_packet_received: String,
     pub connected_peers: u16,
+}
+impl fmt::Display for StatusResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "\n\tStatus: {}\n\tUptime: {}\n\tVersion: {}\n\tSerial Connected: {}\n\tSerial Port: {}\n\tDatabase Reachable: {}\n\tPackets Received: {}\n\tLast Packet Received: {}\n\tConnected Peers: {}",
+            self.status,
+            self.uptime,
+            self.version,
+            self.serial_connected,
+            self.serial_port.clone().unwrap_or("None".to_string()),
+            self.database_reachable,
+            self.packets_received,
+            self.last_packet_received,
+            self.connected_peers
+        )
+    }
 }
 impl StatusResponse {
     pub fn from_json(json: String) -> Result<Self, serde_json::Error> {

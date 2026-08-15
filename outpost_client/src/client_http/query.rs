@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::{arguments::get_arguments, client_http::connection::get_server_config};
 
 use super::connection::get_server_connection;
@@ -18,6 +20,16 @@ pub enum QueryResponse {
     Config(ConfigResponse),
     Status(StatusResponse),
     Database(Option<Vec<serde_json::Value>>),
+}
+impl fmt::Display for QueryResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            QueryResponse::Database(r) => write!(f, "[Database Query]: {:?}", r),
+            QueryResponse::HealthCheck(r) => write!(f, "[Health Check]: {}", r),
+            QueryResponse::Config(r) => write!(f, "[Config Query]: {}", r),
+            QueryResponse::Status(r) => write!(f, "[Status Query]: {}", r),
+        }
+    }
 }
 
 /// Enum to organize the available query error options
@@ -92,7 +104,7 @@ pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Optio
     };
 
     if get_arguments().debug {
-        debug!("{:?}", packaged_struct);
+        debug!("{}", packaged_struct);
     }
     Some(packaged_struct)
 }
