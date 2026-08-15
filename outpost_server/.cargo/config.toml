@@ -1,0 +1,7 @@
+[target.arm-unknown-linux-gnueabihf]
+linker = "armv6-rpi-linux-gnueabihf-gcc"
+
+[env]
+CC_arm_unknown_linux_gnueabihf = "armv6-rpi-linux-gnueabihf-gcc"
+CXX_arm_unknown_linux_gnueabihf = "armv6-rpi-linux-gnueabihf-g++"
+AR_arm_unknown_linux_gnueabihf = "armv6-rpi-linux-gnueabihf-ar"

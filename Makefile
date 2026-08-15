@@ -20,9 +20,68 @@ endef
 
 all: prep_provisioning_files
 
-build_outpost:												## Builds individual rust binaries
-	$(call start_step_message,"Building Outpost Binaries")
-	$(MAKE) -f ./src/build.mk build
+PIZERO_HOST      ?= mesh@192.168.1.190
+PIZERO_TARGET    := arm-unknown-linux-gnueabihf
+PIZERO_TOOLCHAIN ?= $(HOME)/opt/x-tools/armv6-rpi-linux-gnueabihf/bin
+PIZERO_SYSROOT   := $(CURDIR)/outpost_server/sysroots/pizero
+
+PLATFORM ?= native
+
+prepare_build_output_dir:
+	@mkdir -p ./build
+
+sysroot-pizero:												## Pulls libudev/libc/etc from a real Pi Zero W (override with PIZERO_HOST=user@ip)
+	$(call start_step_message,"Syncing Pi Zero W sysroot from $(PIZERO_HOST)")
+	@test -f ./scripts/sync_pizero_sysroot.sh || { echo "missing scripts/sync_pizero_sysroot.sh"; exit 1; }
+	@cd scripts && ./sync_pizero_sysroot.sh $(PIZERO_HOST) $(PIZERO_SYSROOT)
+	$(call successful)
+
+sysroot-pizero-refresh:										## Forces a clean re-sync of the Pi Zero W sysroot
+	@rm -rf $(PIZERO_SYSROOT)
+	$(MAKE) sysroot-pizero
+
+build_outpost_server_pizero: sysroot-pizero					## Cross-compiles outpost_server for the Pi Zero W (ARMv6)
+	$(call start_step_message,"Cross-compiling outpost_server for Pi Zero W")
+	rustup target add arm-unknown-linux-gnueabihf && \
+	cd outpost_server && \
+	PATH="$(PIZERO_TOOLCHAIN):$$PATH" \
+	PKG_CONFIG_ALLOW_CROSS=1 \
+	PKG_CONFIG_LIBDIR="$(PIZERO_SYSROOT)/usr/lib/arm-linux-gnueabihf/pkgconfig" \
+	PKG_CONFIG_SYSROOT_DIR="$(PIZERO_SYSROOT)" \
+	CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=armv6-rpi-linux-gnueabihf-gcc \
+	CC_arm_unknown_linux_gnueabihf=armv6-rpi-linux-gnueabihf-gcc \
+	CXX_arm_unknown_linux_gnueabihf=armv6-rpi-linux-gnueabihf-g++ \
+	AR_arm_unknown_linux_gnueabihf=armv6-rpi-linux-gnueabihf-ar \
+	RUSTFLAGS="-C link-arg=--sysroot=$(PIZERO_SYSROOT)" \
+	cargo build --release --target $(PIZERO_TARGET) -p outpost_server
+	cp outpost_server/target/$(PIZERO_TARGET)/release/outpost_server ./build/outpost_server_pizero
+	$(call successful)
+
+build_outpost_server_native:								## Builds outpost_server for whatever machine you're running make on (e.g. Windows)
+	$(call start_step_message,"Building outpost_server for host platform")
+	cd outpost_server && \
+	unset PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_ALLOW_CROSS \
+	      CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER \
+	      CC_arm_unknown_linux_gnueabihf CXX_arm_unknown_linux_gnueabihf AR_arm_unknown_linux_gnueabihf \
+	      RUSTFLAGS && \
+	cargo build --release -p outpost_server
+	cp outpost_server/target/release/outpost_server ./build/outpost_server_native
+	$(call successful)
+
+build_outpost_client:
+	$(call start_step_message,"Building outpost_client")
+	cd outpost_client && cargo build --release -p outpost_client
+	cp outpost_client/target/release/outpost_client ./build/outpost_client
+	$(call successful)
+
+build_outpost:
+	$(MAKE) prepare_build_output_dir												## Builds outpost binaries. Set PLATFORM=pizero to cross-compile for the Pi Zero W
+ifeq ($(PLATFORM),pizero)
+	$(MAKE) build_outpost_server_pizero
+else
+	$(MAKE) build_outpost_server_native
+endif
+	$(MAKE) build_outpost_client
 	$(call successful)
 
 generate_certs:												## Generates server and client-side certificates
