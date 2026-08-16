@@ -36,10 +36,13 @@ pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std:
 
     set_log_filename(filepath.to_str().unwrap_or("invalid utf-8"));
     // CHANGED: keep file handle separately for the format closure
-    let log_file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&filepath)?;
+    let log_file = match OpenOptions::new().create(true).append(true).open(&filepath) {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("Failed to open log file at '{}': {}", filepath.display(), e);
+            return Err(Box::new(e));
+        }
+    };
 
     colored::control::set_override(true);
 

@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
+use log::debug;
 use meshtastic::api::StreamApi;
 use meshtastic::utils;
 use tokio::task::JoinHandle;
@@ -33,21 +34,28 @@ impl DeviceConnection {
             return Err(ConnectionError::PortNotFound("None".to_string()));
         }
 
-        let serial_stream = utils::stream::build_serial_stream(
+        let serial_stream = match utils::stream::build_serial_stream(
             port.unwrap().clone(),
             Some(baud),
             Some(false),
             Some(false),
-        )?;
+        ) {
+            Ok(s) => s,
+            Err(e) => return Err(ConnectionError::ConnectionFailed(e.to_string())),
+        };
 
         let stream_api = StreamApi::new();
         let (mut packet_receiver, stream_api) = stream_api.connect(serial_stream).await;
 
         let config_id = utils::generate_rand_id();
-        let stream_api = stream_api
+        let stream_api = match stream_api
             .configure(config_id)
             .await
-            .map_err(|e| ConnectionError::ConnectionFailed(e.to_string()))?;
+            .map_err(|e| ConnectionError::ConnectionFailed(e.to_string()))
+        {
+            Ok(s) => s,
+            Err(e) => return Err(ConnectionError::ConnectionFailed(e.to_string())),
+        };
 
         self.connected.store(true, Ordering::SeqCst);
         let connected = self.connected.clone();
