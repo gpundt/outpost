@@ -4,23 +4,35 @@ use log::error;
 use serde::{Deserialize, Serialize};
 
 /// Enum to restrict the available query options
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryType {
+    HealthCheck,
+    ServerStatus,
+    ServerConfig,
     Texts,
     Nodes,
     RawPackets,
     Positions,
     HttpRequests,
+    CpuMetrics,
+    StorageMetrics,
+    RamMetrics,
 }
 impl fmt::Display for QueryType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            QueryType::HealthCheck => write!(f, "health_check"),
+            QueryType::ServerConfig => write!(f, "server_config"),
+            QueryType::ServerStatus => write!(f, "server_status"),
             QueryType::HttpRequests => write!(f, "http_requests"),
             QueryType::Nodes => write!(f, "nodes"),
             QueryType::Positions => write!(f, "positions"),
             QueryType::RawPackets => write!(f, "raw_packets"),
             QueryType::Texts => write!(f, "texts"),
+            QueryType::CpuMetrics => write!(f, "cpu_metrics"),
+            QueryType::RamMetrics => write!(f, "ram_metrics"),
+            QueryType::StorageMetrics => write!(f, "storage_metrics"),
         }
     }
 }
@@ -30,6 +42,14 @@ impl fmt::Display for QueryType {
 pub struct QueryRequest {
     pub query_type: QueryType,
     pub parameters: Option<serde_json::Value>,
+}
+impl QueryRequest {
+    pub fn new(query_type: QueryType, parameters: Option<serde_json::Value>) -> Self {
+        Self {
+            query_type,
+            parameters,
+        }
+    }
 }
 impl fmt::Display for QueryRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

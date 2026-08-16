@@ -1,7 +1,6 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
-use log::debug;
 use meshtastic::api::StreamApi;
 use meshtastic::utils;
 use tokio::task::JoinHandle;

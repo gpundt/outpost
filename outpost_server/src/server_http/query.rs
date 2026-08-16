@@ -21,26 +21,44 @@ use http::query::{
 /// Returns an HTTP status code and a JSON response from an individual generation function
 pub async fn generate_query_response(Json(request): Json<QueryRequest>) -> (StatusCode, String) {
     match request.query_type {
+        QueryType::HealthCheck => generate_health_check_response().await,
+        QueryType::ServerConfig => generate_config_query_response().await,
+        QueryType::ServerStatus => generate_status_query_response().await,
         QueryType::HttpRequests => generate_http_requests_query_response(request.parameters).await,
         QueryType::Nodes => generate_nodes_query_response(request.parameters).await,
         QueryType::Positions => generate_positions_query_response(request.parameters).await,
         QueryType::RawPackets => generate_raw_packets_query_response(request.parameters).await,
         QueryType::Texts => generate_texts_query_response(request.parameters).await,
+        QueryType::CpuMetrics => (StatusCode::NOT_IMPLEMENTED, "".to_string()),
+        QueryType::RamMetrics => (StatusCode::NOT_IMPLEMENTED, "".to_string()),
+        QueryType::StorageMetrics => (StatusCode::NOT_IMPLEMENTED, "".to_string()),
     }
 }
 
 /// Function to generate and return the health_check endpoint JSON response
-pub async fn generate_health_check_response() -> Json<HealthCheckResponse> {
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_health_check_response() -> (StatusCode, String) {
     let payload = HealthCheckResponse {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),
         version: env!("CARGO_PKG_VERSION").to_string(),
     };
-    Json(payload)
+
+    match serde_json::to_string(&payload) {
+        Ok(s) => (StatusCode::OK, s),
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("http_requests_query_response".to_string(), e.to_string())
+                    .jsonify(),
+            );
+        }
+    }
 }
 
 /// Function to generate and return the config endpoint JSON response
-pub async fn generate_config_query_response() -> Json<ConfigResponse> {
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_config_query_response() -> (StatusCode, String) {
     let payload = ConfigResponse {
         debug: get_arguments().debug,
         http_port: get_arguments().http_port,
@@ -48,11 +66,22 @@ pub async fn generate_config_query_response() -> Json<ConfigResponse> {
         log_level: log::max_level().to_string(),
         log_file: get_log_filename(),
     };
-    Json(payload)
+
+    match serde_json::to_string(&payload) {
+        Ok(s) => (StatusCode::OK, s),
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("http_requests_query_response".to_string(), e.to_string())
+                    .jsonify(),
+            );
+        }
+    }
 }
 
 /// Function to generate and return the status endpoint JSON response
-pub async fn generate_status_query_response() -> Json<StatusResponse> {
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_status_query_response() -> (StatusCode, String) {
     let db_connection = is_db_connected().await;
 
     let payload = StatusResponse {
@@ -66,7 +95,17 @@ pub async fn generate_status_query_response() -> Json<StatusResponse> {
         last_packet_received: "".to_string(),
         connected_peers: 0,
     };
-    return Json(payload);
+
+    match serde_json::to_string(&payload) {
+        Ok(s) => (StatusCode::OK, s),
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("http_requests_query_response".to_string(), e.to_string())
+                    .jsonify(),
+            );
+        }
+    }
 }
 
 /// Function to generate and return the http_request query endpoint JSON response

@@ -4,9 +4,7 @@ use crate::{arguments::get_arguments, client_http::connection::get_server_config
 
 use super::connection::get_server_connection;
 use http::{
-    endpoints::{
-        CONFIG_QUERY_ENDPOINT, HEALTH_CHECK_ENDPOINT, QUERY_ENDPOINT, STATUS_QUERY_ENDPOINT,
-    },
+    endpoints::QUERY_ENDPOINT,
     query::{ConfigResponse, HealthCheckResponse, QueryRequest, QueryType, StatusResponse},
 };
 use log::{debug, error};
@@ -49,14 +47,20 @@ impl std::fmt::Display for QueryError {
 impl std::error::Error for QueryError {}
 
 /// Generic function to query and endpoint and return an organized response struct
-pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Option<QueryResponse> {
-    let mut response = get_server_connection().get(get_server_config().url(endpoint.clone()));
+pub async fn query_server(
+    query_type: QueryType,
+    parameters: Option<serde_json::Value>,
+) -> Option<QueryResponse> {
+    let response = get_server_connection().get(get_server_config().url(QUERY_ENDPOINT.to_string()));
 
-    if let Some(request_body) = body {
-        response = response.json(&request_body);
-    }
+    let request_body = QueryRequest::new(query_type.clone(), parameters);
 
-    let response = match response.send().await.map_err(|e| QueryError::Http(e)) {
+    let response = match response
+        .json(&request_body)
+        .send()
+        .await
+        .map_err(|e| QueryError::Http(e))
+    {
         Ok(b) => b,
         Err(e) => {
             error!("{}", e);
@@ -84,23 +88,17 @@ pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Optio
         }
     };
 
-    let packaged_struct: QueryResponse = match endpoint.as_str() {
-        HEALTH_CHECK_ENDPOINT => {
+    let packaged_struct: QueryResponse = match query_type.clone() {
+        QueryType::HealthCheck => {
             QueryResponse::HealthCheck(HealthCheckResponse::from_json(body_text).unwrap())
         }
-        CONFIG_QUERY_ENDPOINT => {
+        QueryType::ServerConfig => {
             QueryResponse::Config(ConfigResponse::from_json(body_text).unwrap())
         }
-        STATUS_QUERY_ENDPOINT => {
+        QueryType::ServerStatus => {
             QueryResponse::Status(StatusResponse::from_json(body_text).unwrap())
         }
-        QUERY_ENDPOINT => {
-            QueryResponse::Database(serde_json::from_str(&body_text.to_string()).unwrap())
-        }
-        _ => {
-            error!("Unsupported query_server Endpoint: {}", endpoint);
-            return None;
-        }
+        _ => QueryResponse::Database(serde_json::from_str(&body_text.to_string()).unwrap()),
     };
 
     if get_arguments().debug {
@@ -109,42 +107,36 @@ pub async fn query_server(endpoint: String, body: Option<QueryRequest>) -> Optio
     Some(packaged_struct)
 }
 
+pub async fn query_server_health_check() -> Option<QueryResponse> {
+    query_server(QueryType::HealthCheck, None).await
+}
+
+pub async fn query_server_config() -> Option<QueryResponse> {
+    query_server(QueryType::ServerConfig, None).await
+}
+
+pub async fn query_server_status() -> Option<QueryResponse> {
+    query_server(QueryType::ServerStatus, None).await
+}
+
 pub async fn query_server_texts(count: Option<u32>) -> Option<QueryResponse> {
-    let body = QueryRequest {
-        query_type: QueryType::Texts,
-        parameters: Some(serde_json::json!({ "count": count.unwrap_or(100) })),
-    };
-    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+    let parameters = Some(serde_json::json!({ "count": count.unwrap_or(100) }));
+    query_server(QueryType::Texts, parameters).await
 }
 
 pub async fn query_server_nodes() -> Option<QueryResponse> {
-    let body = QueryRequest {
-        query_type: QueryType::Nodes,
-        parameters: None,
-    };
-    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+    query_server(QueryType::Nodes, None).await
 }
 
 pub async fn query_server_raw_packets() -> Option<QueryResponse> {
-    let body = QueryRequest {
-        query_type: QueryType::RawPackets,
-        parameters: None,
-    };
-    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+    query_server(QueryType::RawPackets, None).await
 }
 
 pub async fn query_server_positions() -> Option<QueryResponse> {
-    let body = QueryRequest {
-        query_type: QueryType::Positions,
-        parameters: None,
-    };
-    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+    query_server(QueryType::Positions, None).await
 }
 
 pub async fn query_server_http_requests(count: Option<u32>) -> Option<QueryResponse> {
-    let body = QueryRequest {
-        query_type: QueryType::HttpRequests,
-        parameters: Some(serde_json::json!({ "count": count.unwrap_or(100) })),
-    };
-    query_server(QUERY_ENDPOINT.to_string(), Some(body)).await
+    let parameters = Some(serde_json::json!({ "count": count.unwrap_or(100) }));
+    query_server(QueryType::HttpRequests, parameters).await
 }
