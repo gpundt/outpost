@@ -1,7 +1,7 @@
 use super::connection::get_server_connection;
 use config::tasks::OutpostTask;
 use http::{
-    endpoints::{QUERY_ENDPOINT, SUBMISSION_ENDPOINT},
+    endpoints::SUBMISSION_ENDPOINT,
     errors::RequestError,
     submit::{TaskRequest, TaskResponse},
 };
@@ -9,7 +9,6 @@ use http::{
 use crate::{arguments::get_arguments, client_http::connection::get_server_config};
 
 use log::{debug, error};
-use reqwest::{self};
 use serde_json;
 
 /// Generic function to submit a task to the server and return an organized response struct

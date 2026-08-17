@@ -13,7 +13,6 @@ use http::{
     query::{ConfigResponse, HealthCheckResponse, QueryRequest, QueryType, StatusResponse},
 };
 use log::{debug, error};
-use reqwest::{self};
 use serde_json;
 
 /// Enum to organize the available query response options
