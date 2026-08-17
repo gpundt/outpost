@@ -6,10 +6,12 @@ use serde::{Deserialize, Serialize};
 pub enum OutpostTask {
     Backup,
     Beacon,
-    RefreshNodes,
-    RefreshRaw,
-    RefreshHttpRequests,
-    RefreshPositions,
+    PurgeNodes,
+    PurgeRaw,
+    PurgeHttpRequests,
+    PurgePositions,
+    ReconnectSerial,
+    Restart,
 }
 
 /// Struct to organize an individual task request

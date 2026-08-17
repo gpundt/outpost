@@ -22,14 +22,16 @@ async fn main() {
         return;
     }
 
-    if let Err(e) = run().await {
+    if let Err(e) = setup_server().await {
         eprintln!("Fatal error: {}", e);
         std::process::exit(1);
     }
+
+    initialize_http_listener().await;
 }
 
 /// Function to handle execution of server startup
-async fn run() -> Result<(), Box<dyn std::error::Error>> {
+async fn setup_server() -> Result<(), Box<dyn std::error::Error>> {
     create_output_directories("server")?;
     initialize_logger("server", get_arguments().debug)?;
 
@@ -60,8 +62,6 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-
-    initialize_http_listener().await;
 
     Ok(())
 }
