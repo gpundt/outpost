@@ -14,7 +14,7 @@ static DB_POOL: OnceLock<SqlitePool> = OnceLock::new();
 pub async fn initialize_database() -> Result<String, sqlx::Error> {
     let database_url = format!("sqlite://{}outpost_server.db", DATABASE_DIR);
 
-    debug!("URL: {}", database_url);
+    debug!("Database URL: {}", database_url);
     let options = SqliteConnectOptions::from_str(database_url.as_str())?.create_if_missing(true);
     let pool = SqlitePool::connect_with(options).await?;
 
