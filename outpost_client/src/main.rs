@@ -20,14 +20,14 @@ async fn main() {
     start_time();
     initialize_arguments();
 
-    if let Err(e) = run().await {
+    if let Err(e) = setup_client().await {
         error!("{}", e);
         std::process::exit(1);
     }
 }
 
 /// Function to handle execution of client startup
-async fn run() -> Result<(), Box<dyn std::error::Error>> {
+async fn setup_client() -> Result<(), Box<dyn std::error::Error>> {
     create_output_directories("client")?;
     initialize_logger("client", get_arguments().debug)?;
 
@@ -37,21 +37,16 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     if get_arguments().test {
-        // match query_server(HEALTH_CHECK_ENDPOINT.to_string(), None).await {
-        //     _ => {
-        //         std::process::exit(0);
-        //     }
-        // };
+        query_server_health_check().await;
+        query_server_config().await;
+        query_server_status().await;
+        query_server_texts(None).await;
+        query_server_http_requests(Some(20)).await;
+        query_server_nodes().await;
+        query_server_positions().await;
+        query_server_raw_packets().await;
+        std::process::exit(0)
     }
-
-    query_server_health_check().await;
-    query_server_config().await;
-    query_server_status().await;
-    query_server_texts(None).await;
-    query_server_http_requests(Some(20)).await;
-    query_server_nodes().await;
-    query_server_positions().await;
-    query_server_raw_packets().await;
 
     Ok(())
 }

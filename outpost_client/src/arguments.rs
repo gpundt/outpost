@@ -16,9 +16,11 @@ pub struct Args {
     #[arg(long, default_value_t = 8080)]
     pub server_port: u16,
 
+    /// Specifies the IP of the Outpost Server
     #[arg(long, default_value_t = "192.168.99.1".to_string())]
     pub server_ip: String,
 
+    /// Tests every Outpost Server query endpoint
     #[arg(short, long, default_value_t = false)]
     pub test: bool,
 }

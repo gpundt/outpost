@@ -167,36 +167,84 @@ async fn query_server(
     Some(packaged_struct)
 }
 
-pub async fn query_server_health_check() -> Option<QueryResponse> {
-    query_server(QueryType::HealthCheck, None).await
+pub async fn query_server_health_check() -> Option<HealthCheckResponse> {
+    match query_server(QueryType::HealthCheck, None).await? {
+        QueryResponse::HealthCheck(r) => Some(r),
+        other => {
+            error!("Unexpected response type for HealthCheck: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_config() -> Option<QueryResponse> {
-    query_server(QueryType::ServerConfig, None).await
+pub async fn query_server_config() -> Option<ConfigResponse> {
+    match query_server(QueryType::ServerConfig, None).await? {
+        QueryResponse::Config(r) => Some(r),
+        other => {
+            error!("Unexpected response type for ServerConfig: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_status() -> Option<QueryResponse> {
-    query_server(QueryType::ServerStatus, None).await
+pub async fn query_server_status() -> Option<StatusResponse> {
+    match query_server(QueryType::ServerStatus, None).await? {
+        QueryResponse::Status(r) => Some(r),
+        other => {
+            error!("Unexpected response type for ServerStatus: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_texts(count: Option<u32>) -> Option<QueryResponse> {
+pub async fn query_server_texts(count: Option<u32>) -> Option<Vec<MeshtasticTextEntry>> {
     let parameters = Some(serde_json::json!({ "count": count.unwrap_or(100) }));
-    query_server(QueryType::Texts, parameters).await
+    match query_server(QueryType::Texts, parameters).await? {
+        QueryResponse::Texts(r) => Some(r),
+        other => {
+            error!("Unexpected response type for Texts: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_nodes() -> Option<QueryResponse> {
-    query_server(QueryType::Nodes, None).await
+pub async fn query_server_nodes() -> Option<Vec<MeshtasticNodeEntry>> {
+    match query_server(QueryType::Nodes, None).await? {
+        QueryResponse::Nodes(r) => Some(r),
+        other => {
+            error!("Unexpected response type for Nodes: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_raw_packets() -> Option<QueryResponse> {
-    query_server(QueryType::RawPackets, None).await
+pub async fn query_server_raw_packets() -> Option<Vec<MeshtasticRawEntry>> {
+    match query_server(QueryType::RawPackets, None).await? {
+        QueryResponse::RawPackets(r) => Some(r),
+        other => {
+            error!("Unexpected response type for RawPackets: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_positions() -> Option<QueryResponse> {
-    query_server(QueryType::Positions, None).await
+pub async fn query_server_positions() -> Option<Vec<MeshtasticPositionEntry>> {
+    match query_server(QueryType::Positions, None).await? {
+        QueryResponse::Positions(r) => Some(r),
+        other => {
+            error!("Unexpected response type for Positions: {}", other);
+            None
+        }
+    }
 }
 
-pub async fn query_server_http_requests(count: Option<u32>) -> Option<QueryResponse> {
+pub async fn query_server_http_requests(count: Option<u32>) -> Option<Vec<HTTPRequestEntry>> {
     let parameters = Some(serde_json::json!({ "count": count.unwrap_or(100) }));
-    query_server(QueryType::HttpRequests, parameters).await
+    match query_server(QueryType::HttpRequests, parameters).await? {
+        QueryResponse::HttpRequests(r) => Some(r),
+        other => {
+            error!("Unexpected response type for HttpRequests: {}", other);
+            None
+        }
+    }
 }
