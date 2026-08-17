@@ -9,6 +9,7 @@ use crate::{arguments::get_arguments, client_http::connection::get_server_config
 use super::connection::get_server_connection;
 use http::{
     endpoints::QUERY_ENDPOINT,
+    errors::RequestError,
     query::{ConfigResponse, HealthCheckResponse, QueryRequest, QueryType, StatusResponse},
 };
 use log::{debug, error};
@@ -72,22 +73,6 @@ impl fmt::Display for QueryResponse {
     }
 }
 
-/// Enum to organize the available query error options
-#[derive(Debug)]
-pub enum QueryError {
-    Http(reqwest::Error),
-    Serialization(serde_json::Error),
-}
-impl std::fmt::Display for QueryError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            QueryError::Http(e) => write!(f, "HTTP/Network Failure: {e}"),
-            QueryError::Serialization(e) => write!(f, "JSON Serialization Failure: {e}"),
-        }
-    }
-}
-impl std::error::Error for QueryError {}
-
 /// Generic function to query and endpoint and return an organized response struct
 async fn query_server(
     query_type: QueryType,
@@ -101,7 +86,7 @@ async fn query_server(
         .json(&request_body)
         .send()
         .await
-        .map_err(|e| QueryError::Http(e))
+        .map_err(|e| RequestError::Http(e))
     {
         Ok(b) => b,
         Err(e) => {
@@ -110,7 +95,10 @@ async fn query_server(
         }
     };
 
-    let successful_response = match response.error_for_status().map_err(|e| QueryError::Http(e)) {
+    let successful_response = match response
+        .error_for_status()
+        .map_err(|e| RequestError::Http(e))
+    {
         Ok(b) => b,
         Err(e) => {
             error!("{}", e);
@@ -121,7 +109,7 @@ async fn query_server(
     let body_text = match successful_response
         .text()
         .await
-        .map_err(|e| QueryError::Http(e))
+        .map_err(|e| RequestError::Http(e))
     {
         Ok(b) => b,
         Err(e) => {

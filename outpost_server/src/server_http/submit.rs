@@ -6,7 +6,8 @@ use crate::server_database::{
     schema::backup_database,
 };
 use axum::{Json, http::StatusCode};
-use config::tasks::{OutpostTask, TaskRequest, TaskResponse};
+use config::tasks::OutpostTask;
+use http::submit::{TaskRequest, TaskResponse};
 use log::{error, info, warn};
 
 /// Master functon to handle and direct task submission options

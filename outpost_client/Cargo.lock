@@ -838,9 +838,11 @@ dependencies = [
 name = "http"
 version = "0.1.0"
 dependencies = [
+ "config",
  "const_format",
  "env_logger",
  "log",
+ "reqwest",
  "serde",
  "serde_json",
 ]

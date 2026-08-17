@@ -1,3 +1,5 @@
+use core::fmt;
+
 use serde::{Deserialize, Serialize};
 
 /// Enum to restrict the available task options
@@ -14,17 +16,17 @@ pub enum OutpostTask {
     Restart,
 }
 
-/// Struct to organize an individual task request
-#[derive(Deserialize, Serialize, Debug)]
-pub struct TaskRequest {
-    pub task: OutpostTask,
-    pub parameters: Option<serde_json::Value>,
-}
-
-/// Struct to organize an individual task response
-#[derive(Serialize, Debug)]
-pub struct TaskResponse {
-    pub task: OutpostTask,
-    pub success: bool,
-    pub message: String,
+impl fmt::Display for OutpostTask {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OutpostTask::Backup => write!(f, "backup"),
+            OutpostTask::Beacon => write!(f, "beacon"),
+            OutpostTask::PurgeHttpRequests => write!(f, "purge_http_requests"),
+            OutpostTask::PurgeNodes => write!(f, "purge_nodes"),
+            OutpostTask::PurgePositions => write!(f, "purge_positions"),
+            OutpostTask::PurgeRaw => write!(f, "purge_raw"),
+            OutpostTask::ReconnectSerial => write!(f, "reconnect_serial"),
+            OutpostTask::Restart => write!(f, "restart"),
+        }
+    }
 }

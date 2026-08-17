@@ -8,6 +8,7 @@ use crate::client_http::{
         query_server_nodes, query_server_positions, query_server_raw_packets, query_server_status,
         query_server_texts,
     },
+    submit::submit_restart_task,
 };
 
 use arguments::{get_arguments, initialize_arguments};
@@ -24,6 +25,8 @@ async fn main() {
         error!("{}", e);
         std::process::exit(1);
     }
+
+    submit_restart_task().await;
 }
 
 /// Function to handle execution of client startup

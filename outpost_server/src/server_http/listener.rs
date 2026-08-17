@@ -8,7 +8,7 @@ use axum::{
     Router, middleware,
     routing::{MethodRouter, get},
 };
-use http::endpoints::{QUERY_ENDPOINT, SUBMIT_TASK_ENDPOINT};
+use http::endpoints::{QUERY_ENDPOINT, SUBMISSION_ENDPOINT};
 use log::{debug, info};
 use std::net::SocketAddr;
 
@@ -23,7 +23,7 @@ pub async fn initialize_http_listener() {
 
     let app = _initialize_endpoint(
         app,
-        SUBMIT_TASK_ENDPOINT.to_string(),
+        SUBMISSION_ENDPOINT.to_string(),
         post(task_submission_response),
     );
 
