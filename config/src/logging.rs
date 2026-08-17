@@ -66,7 +66,7 @@ pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std:
             };
 
             // write colored output directly to stdout, bypassing buf
-            println!("[{}] {:<15} {}", ts, level, record.args());
+            println!("[{}] {:<5}  {}", ts, level, record.args());
 
             // write clean output to file via Mutex guard
             if let Ok(mut file) = log_file.lock() {
