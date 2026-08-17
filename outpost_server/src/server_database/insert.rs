@@ -1,6 +1,7 @@
-use crate::database::schema::{
+use crate::server_database::schema::get_db_pool;
+use database::schema::{
     HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry, get_db_pool,
+    MeshtasticTextEntry,
 };
 
 use chrono::Utc;

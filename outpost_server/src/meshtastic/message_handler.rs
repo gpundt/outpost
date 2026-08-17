@@ -5,11 +5,11 @@ use meshtastic::protobufs::{
 };
 use prost::Message;
 
-use crate::database::insert::{
+use crate::server_database::insert::{
     insert_meshtastic_node, insert_meshtastic_position, insert_meshtastic_raw,
     insert_meshtastic_telemetry, insert_meshtastic_text,
 };
-use crate::database::schema::{
+use database::schema::{
     MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
 };
 

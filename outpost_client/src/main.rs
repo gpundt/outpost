@@ -4,7 +4,7 @@ pub mod client_http;
 use crate::client_http::{
     connection::initialize_server_config,
     query::{
-        query_server, query_server_config, query_server_health_check, query_server_http_requests,
+        query_server_config, query_server_health_check, query_server_http_requests,
         query_server_nodes, query_server_positions, query_server_raw_packets, query_server_status,
         query_server_texts,
     },

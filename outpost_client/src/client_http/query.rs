@@ -1,4 +1,8 @@
 use core::fmt;
+use database::schema::{
+    HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
+    MeshtasticTextEntry,
+};
 
 use crate::{arguments::get_arguments, client_http::connection::get_server_config};
 
@@ -17,15 +21,53 @@ pub enum QueryResponse {
     HealthCheck(HealthCheckResponse),
     Config(ConfigResponse),
     Status(StatusResponse),
-    Database(Option<Vec<serde_json::Value>>),
+    Texts(Vec<MeshtasticTextEntry>),
+    Nodes(Vec<MeshtasticNodeEntry>),
+    Positions(Vec<MeshtasticPositionEntry>),
+    RawPackets(Vec<MeshtasticRawEntry>),
+    HttpRequests(Vec<HTTPRequestEntry>),
 }
 impl fmt::Display for QueryResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            QueryResponse::Database(r) => write!(f, "[Database Query]: {:?}", r),
-            QueryResponse::HealthCheck(r) => write!(f, "[Health Check]: {}", r),
-            QueryResponse::Config(r) => write!(f, "[Config Query]: {}", r),
-            QueryResponse::Status(r) => write!(f, "[Status Query]: {}", r),
+            QueryResponse::HealthCheck(r) => write!(f, "[Server Health Check]: {}", r),
+            QueryResponse::Config(r) => write!(f, "[Server Config Query]: {}", r),
+            QueryResponse::Status(r) => write!(f, "[Server Status Query]: {}", r),
+            QueryResponse::Texts(r) => {
+                let _ = write!(f, "[Meshtastic Texts Query]:");
+                for entry in r {
+                    let _ = write!(f, "{}", entry);
+                }
+                Ok(())
+            }
+            QueryResponse::HttpRequests(r) => {
+                let _ = write!(f, "[HTTP Requests Query]:");
+                for entry in r {
+                    let _ = write!(f, "{}", entry);
+                }
+                Ok(())
+            }
+            QueryResponse::Nodes(r) => {
+                let _ = write!(f, "[Meshtastic Nodes Query]:");
+                for entry in r {
+                    let _ = write!(f, "{}", entry);
+                }
+                Ok(())
+            }
+            QueryResponse::Positions(r) => {
+                let _ = write!(f, "[Meshtastic Positions Query]:");
+                for entry in r {
+                    let _ = write!(f, "{}", entry);
+                }
+                Ok(())
+            }
+            QueryResponse::RawPackets(r) => {
+                let _ = write!(f, "[Raw Packets Query]:");
+                for entry in r {
+                    let _ = write!(f, "{}", entry);
+                }
+                Ok(())
+            }
         }
     }
 }
@@ -47,7 +89,7 @@ impl std::fmt::Display for QueryError {
 impl std::error::Error for QueryError {}
 
 /// Generic function to query and endpoint and return an organized response struct
-pub async fn query_server(
+async fn query_server(
     query_type: QueryType,
     parameters: Option<serde_json::Value>,
 ) -> Option<QueryResponse> {
@@ -98,7 +140,25 @@ pub async fn query_server(
         QueryType::ServerStatus => {
             QueryResponse::Status(StatusResponse::from_json(body_text).unwrap())
         }
-        _ => QueryResponse::Database(serde_json::from_str(&body_text.to_string()).unwrap()),
+        QueryType::Texts => {
+            QueryResponse::Texts(MeshtasticTextEntry::from_json(body_text).unwrap())
+        }
+        QueryType::Nodes => {
+            QueryResponse::Nodes(MeshtasticNodeEntry::from_json(body_text).unwrap())
+        }
+        QueryType::HttpRequests => {
+            QueryResponse::HttpRequests(HTTPRequestEntry::from_json(body_text).unwrap())
+        }
+        QueryType::RawPackets => {
+            QueryResponse::RawPackets(MeshtasticRawEntry::from_json(body_text).unwrap())
+        }
+        QueryType::Positions => {
+            QueryResponse::Positions(MeshtasticPositionEntry::from_json(body_text).unwrap())
+        }
+        _ => {
+            error!("Unsupported type");
+            return None;
+        }
     };
 
     if get_arguments().debug {

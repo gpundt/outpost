@@ -1,4 +1,6 @@
-use crate::database::{insert::insert_http_request, schema::HTTPRequestEntry};
+use crate::server_database::insert::insert_http_request;
+
+use database::schema::HTTPRequestEntry;
 
 use axum::{body::Body, extract::ConnectInfo, http::Request, middleware::Next, response::Response};
 use chrono::Utc;

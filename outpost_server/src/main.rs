@@ -1,10 +1,10 @@
 mod arguments;
 
-pub mod database;
 pub mod meshtastic;
+pub mod server_database;
 pub mod server_http;
-use crate::database::schema::initialize_database;
 use crate::meshtastic::connection::global_connection;
+use crate::server_database::schema::initialize_database;
 use crate::server_http::listener::initialize_http_listener;
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};

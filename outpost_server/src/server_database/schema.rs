@@ -1,9 +1,8 @@
-use chrono::{NaiveDateTime, Utc};
+use chrono::Utc;
 use config::files::DATABASE_DIR;
 use log::{debug, error, info, trace};
-use serde::Serialize;
 use sqlx::{
-    FromRow, Pool, QueryBuilder, Sqlite,
+    Pool, QueryBuilder, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
 };
 use std::{str::FromStr, sync::OnceLock};
@@ -130,79 +129,6 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
     .await?;
 
     Ok(database_url)
-}
-
-/// Struct to organize the contents of a row inside the http_requests db table
-#[derive(Debug, Default, FromRow, Serialize, Clone)]
-pub struct HTTPRequestEntry {
-    pub id: i32,
-    pub method: String,
-    pub source: String,
-    pub endpoint: String,
-    pub user_agent: String,
-    pub status_code: u16,
-    pub timestamp: NaiveDateTime,
-}
-
-/// Struct to organize the contents of a row inside the tasks db table
-#[derive(Debug, Default, FromRow, Serialize, Clone)]
-pub struct TaskRequestEntry {
-    pub id: i32,
-    pub task_type: String,
-    pub requested_at: NaiveDateTime,
-    pub finished_at: NaiveDateTime,
-    pub successful: bool,
-}
-
-/// Struct to organize the contents of a row inside the meshtastic_texts db table
-#[derive(Debug, Default, FromRow, Serialize, Clone)]
-pub struct MeshtasticTextEntry {
-    pub id: i32,
-    pub timestamp: NaiveDateTime,
-    pub src_id: u32,
-    pub dst_id: u32,
-    pub message: String,
-}
-
-/// Struct to organize the contents of a row inside the meshtastic_positions db table
-#[derive(Debug, Default, FromRow, Serialize, Clone)]
-pub struct MeshtasticPositionEntry {
-    pub id: i32,
-    pub latitude: i32,
-    pub longitude: i32,
-    pub altitude: i32,
-    pub time: u32,
-    pub timestamp: u32,
-    pub next_update: u32,
-}
-
-/// Struct to organize the contents of a row inside the meshtastic_nodes db table
-#[derive(Debug, Default, FromRow, Serialize, Clone)]
-pub struct MeshtasticNodeEntry {
-    pub id: i32,
-    pub node_num: u32,
-    pub node_id: String,
-    pub node_long_name: String,
-    pub node_short_name: String,
-    pub hw_model: i32,
-    pub role: i32,
-    pub last_heard: u32,
-    pub uptime: u32,
-    pub channel: u32,
-    pub hops_away: u32,
-}
-
-/// Struct to organize the contents of a row inside the meshtastic_raw db table
-#[derive(Debug, Default, FromRow, Serialize, Clone)]
-pub struct MeshtasticRawEntry {
-    pub id: i32,
-    pub src_node: u32,
-    pub dst_node: u32,
-    pub channel: u32,
-    pub hop_limit: u32,
-    pub hop_start: u32,
-    pub next_hop: u32,
-    pub encrypted: bool,
 }
 
 /// Function to safely get the globally-accessible database connection pool

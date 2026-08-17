@@ -96,7 +96,7 @@ impl HealthCheckResponse {
             Err(e) => {
                 error!(
                     "Failed to deserialize with HealthCheckResponse::from_json: {}",
-                    json
+                    e,
                 );
                 return Err(e);
             }
@@ -135,7 +135,7 @@ impl ConfigResponse {
             Err(e) => {
                 error!(
                     "Failed to deserialize with ConfigResponse::from_json: {}",
-                    json
+                    e
                 );
                 return Err(e);
             }
@@ -182,7 +182,7 @@ impl StatusResponse {
             Err(e) => {
                 error!(
                     "Failed to deserialize with StatusResponse::from_json: {}",
-                    json
+                    e
                 );
                 return Err(e);
             }

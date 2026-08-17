@@ -1,4 +1,4 @@
-use crate::database::schema::get_db_pool;
+use crate::server_database::schema::get_db_pool;
 
 use log::{error, trace, warn};
 use sqlx::{QueryBuilder, Sqlite};

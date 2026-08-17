@@ -3,7 +3,8 @@
         "./outpost_server/Cargo.toml",
         "./outpost_client/Cargo.toml",
         "./config/Cargo.toml",
-        "./http/Cargo.toml"
+        "./http/Cargo.toml",
+        "./database/Cargo.toml"
     ],
     "terminal.integrated.env.windows": {
         "COLORTERM": "truecolor"
