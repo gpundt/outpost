@@ -50,7 +50,10 @@ static SERVER_CONNECTION: OnceLock<Client> = OnceLock::new();
 pub fn get_server_connection() -> &'static Client {
     SERVER_CONNECTION.get_or_init(|| {
         match Client::builder()
-            .user_agent("outpost-client")
+            .user_agent(format!(
+                "outpost-client_{}",
+                env!("CARGO_PKG_VERSION").to_string()
+            ))
             .timeout(Duration::from_secs(5))
             .build()
         {
