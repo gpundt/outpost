@@ -22,7 +22,7 @@ pub struct Args {
 
     /// Specifies which serial device port to connect to
     #[arg(short, long)]
-    pub serial_port: Option<String>,
+    pub serial_port: String,
 }
 
 // static global storage

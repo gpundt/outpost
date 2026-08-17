@@ -22,20 +22,13 @@ impl DeviceConnection {
     }
 
     /// Function to initialize a connection with a specified serial port
-    pub async fn connect(
-        &mut self,
-        port: Option<String>,
-        baud: u32,
-    ) -> Result<(), ConnectionError> {
+    pub async fn connect(&mut self, port: String, baud: u32) -> Result<(), ConnectionError> {
         if self.is_connected() {
             return Err(ConnectionError::AlreadyConnected);
         }
-        if let None = port {
-            return Err(ConnectionError::PortNotFound("None".to_string()));
-        }
 
         let serial_stream = match utils::stream::build_serial_stream(
-            port.unwrap().clone(),
+            port.clone(),
             Some(baud),
             Some(false),
             Some(false),

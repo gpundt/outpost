@@ -32,13 +32,12 @@ async fn main() {
 
 /// Function to handle execution of server startup
 async fn setup_server() -> Result<(), Box<dyn std::error::Error>> {
-    create_output_directories("server")?;
-    initialize_logger("server", get_arguments().debug)?;
+    {
+        create_output_directories("server")?;
+        initialize_logger("server", get_arguments().debug)?;
+    }
 
-    let serial_port = get_arguments()
-        .serial_port
-        .clone()
-        .ok_or("You must specify a serial port: --serial-port PORT");
+    let serial_port = get_arguments().serial_port.clone();
 
     initialize_database()
         .await
@@ -51,11 +50,8 @@ async fn setup_server() -> Result<(), Box<dyn std::error::Error>> {
             let _ = connection.disconnect();
         }
 
-        info!("Connecting to serial device: {:?}", serial_port);
-        match connection
-            .connect(get_arguments().serial_port.clone(), 115200)
-            .await
-        {
+        info!("Connecting to serial device: {}", serial_port);
+        match connection.connect(serial_port.clone(), 115200).await {
             Ok(()) => {}
             Err(e) => {
                 error!("{}", e.to_string())

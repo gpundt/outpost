@@ -113,7 +113,9 @@ pub async fn generate_status_query_response() -> (StatusCode, String) {
 pub async fn generate_http_requests_query_response(
     parameters: Option<serde_json::Value>,
 ) -> (StatusCode, String) {
-    let requests = match select_http_requests_by_count(100).await {
+    let row_count = extract_count_parameter(&parameters, 100);
+
+    let requests = match select_http_requests_by_count(row_count).await {
         Ok(r) => r,
         Err(e) => {
             return (

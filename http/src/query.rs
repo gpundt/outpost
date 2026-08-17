@@ -109,7 +109,7 @@ impl HealthCheckResponse {
 pub struct ConfigResponse {
     pub debug: bool,
     pub http_port: u16,
-    pub serial_port: Option<String>,
+    pub serial_port: String,
     pub log_level: String,
     pub log_file: String,
 }
@@ -120,7 +120,7 @@ impl fmt::Display for ConfigResponse {
             "\n\tDebug: {}\n\tHTTP Port: {}\n\tSerial Port: {}\n\tLog Level: {}\n\tLog File: {}",
             self.debug,
             self.http_port,
-            self.serial_port.clone().unwrap_or("None".to_string()),
+            self.serial_port.clone().to_string(),
             self.log_level,
             self.log_file
         )
@@ -150,7 +150,7 @@ pub struct StatusResponse {
     pub uptime: String,
     pub version: String,
     pub serial_connected: bool,
-    pub serial_port: Option<String>,
+    pub serial_port: String,
     pub database_reachable: bool,
     pub packets_received: u32,
     pub last_packet_received: String,
@@ -165,7 +165,7 @@ impl fmt::Display for StatusResponse {
             self.uptime,
             self.version,
             self.serial_connected,
-            self.serial_port.clone().unwrap_or("None".to_string()),
+            self.serial_port.clone().to_string(),
             self.database_reachable,
             self.packets_received,
             self.last_packet_received,

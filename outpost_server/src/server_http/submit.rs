@@ -344,7 +344,7 @@ async fn handle_reconnect_serial() -> (StatusCode, Json<TaskResponse>) {
         );
     }
 
-    info!("Connecting to serial device: {:?}", serial_port);
+    info!("Connecting to serial device: {}", serial_port);
 
     match connection.connect(serial_port.clone(), 115200).await {
         Ok(()) => (
@@ -352,10 +352,7 @@ async fn handle_reconnect_serial() -> (StatusCode, Json<TaskResponse>) {
             Json(TaskResponse {
                 task: OutpostTask::ReconnectSerial,
                 success: true,
-                message: format!(
-                    "Successfully connected to {}",
-                    serial_port.unwrap_or_default()
-                ),
+                message: format!("Successfully connected to {}", serial_port),
             }),
         ),
         Err(e) => {
