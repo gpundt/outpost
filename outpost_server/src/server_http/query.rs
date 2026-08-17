@@ -88,7 +88,7 @@ pub async fn generate_status_query_response() -> (StatusCode, String) {
         status: "Healthy".to_string(),
         uptime: get_uptime_str(),
         version: env!("CARGO_PKG_VERSION").to_string(),
-        serial_connected: global_connection().lock().unwrap().is_connected(),
+        serial_connected: global_connection().lock().await.is_connected(),
         serial_port: get_arguments().serial_port.clone(),
         database_reachable: db_connection,
         packets_received: 0,

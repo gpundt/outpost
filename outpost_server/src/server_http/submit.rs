@@ -1,12 +1,13 @@
+use crate::arguments::get_arguments;
+use crate::meshtastic::connection::global_connection;
 use crate::server_database::{
     delete::delete_from_table,
     insert::{insert_task_request_finish, insert_task_request_start},
     schema::backup_database,
 };
-
 use axum::{Json, http::StatusCode};
 use config::tasks::{OutpostTask, TaskRequest, TaskResponse};
-use log::{info, warn};
+use log::{error, info, warn};
 
 /// Master functon to handle and direct task submission options
 pub async fn task_submission_response(
@@ -327,14 +328,48 @@ async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
 /// Function to initiate a reconnect with the server's serial device
 /// Returns an HTTP status code and a JSON response
 async fn handle_reconnect_serial() -> (StatusCode, Json<TaskResponse>) {
-    (
-        StatusCode::NOT_IMPLEMENTED,
-        Json(TaskResponse {
-            task: OutpostTask::ReconnectSerial,
-            success: false,
-            message: format!("RefreshSerial task not implemented yet"),
-        }),
-    )
+    let serial_port = get_arguments().serial_port.clone();
+
+    // CHANGED: .lock().await - safe to hold across .await with tokio Mutex
+    let mut connection = global_connection().lock().await;
+
+    if connection.is_connected() {
+        return (
+            StatusCode::ALREADY_REPORTED,
+            Json(TaskResponse {
+                task: OutpostTask::ReconnectSerial,
+                success: true,
+                message: "Serial device already connected".to_string(),
+            }),
+        );
+    }
+
+    info!("Connecting to serial device: {:?}", serial_port);
+
+    match connection.connect(serial_port.clone(), 115200).await {
+        Ok(()) => (
+            StatusCode::OK,
+            Json(TaskResponse {
+                task: OutpostTask::ReconnectSerial,
+                success: true,
+                message: format!(
+                    "Successfully connected to {}",
+                    serial_port.unwrap_or_default()
+                ),
+            }),
+        ),
+        Err(e) => {
+            error!("{}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(TaskResponse {
+                    task: OutpostTask::ReconnectSerial,
+                    success: false,
+                    message: e.to_string(),
+                }),
+            )
+        }
+    }
 }
 
 /// Function to gracefully exit and allow the systemd daemon to reload the server

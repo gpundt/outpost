@@ -45,7 +45,7 @@ async fn setup_server() -> Result<(), Box<dyn std::error::Error>> {
         .map(|url| info!("Database Initialized: {}", url))?;
 
     {
-        let mut connection = global_connection().lock().unwrap();
+        let mut connection = global_connection().lock().await;
 
         if connection.is_connected() {
             let _ = connection.disconnect();

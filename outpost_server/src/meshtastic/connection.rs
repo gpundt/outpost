@@ -1,8 +1,9 @@
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, OnceLock};
 
 use meshtastic::api::StreamApi;
 use meshtastic::utils;
+use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
 use crate::meshtastic::errors::ConnectionError;
