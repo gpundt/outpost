@@ -3,13 +3,15 @@ use std::{
     sync::{Arc, OnceLock, RwLock},
 };
 
+use crate::client_http::query::query_server_tasks;
+
 use super::query::{
     query_server_config, query_server_health_check, query_server_http_requests, query_server_nodes,
     query_server_positions, query_server_raw_packets, query_server_status, query_server_texts,
 };
 use database::schema::{
     HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry,
+    MeshtasticTextEntry, TaskRequestEntry,
 };
 use http::query::{ConfigResponse, HealthCheckResponse, StatusResponse};
 
@@ -19,6 +21,7 @@ pub struct ResponseStorage {
     pub server_config: Option<ConfigResponse>,
     pub server_status: Option<StatusResponse>,
     pub server_texts: Option<Vec<MeshtasticTextEntry>>,
+    pub server_tasks: Option<Vec<TaskRequestEntry>>,
     pub server_nodes: Option<Vec<MeshtasticNodeEntry>>,
     pub server_positions: Option<Vec<MeshtasticPositionEntry>>,
     pub server_raw_packets: Option<Vec<MeshtasticRawEntry>>,
@@ -55,6 +58,13 @@ pub async fn update_server_texts() -> Result<(), Box<dyn Error>> {
     let server_texts = query_server_texts(None).await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_texts = server_texts;
+
+    Ok(())
+}
+pub async fn update_server_tasks() -> Result<(), Box<dyn Error>> {
+    let server_tasks = query_server_tasks(None).await;
+    let mut storage = global_response_storage().write().unwrap();
+    storage.server_tasks = server_tasks;
 
     Ok(())
 }
@@ -102,6 +112,10 @@ pub fn get_server_status() -> Option<StatusResponse> {
 pub fn get_server_texts() -> Option<Vec<MeshtasticTextEntry>> {
     let storage = global_response_storage().read().unwrap();
     return storage.clone().server_texts;
+}
+pub fn get_server_tasks() -> Option<Vec<TaskRequestEntry>> {
+    let storage = global_response_storage().read().unwrap();
+    return storage.clone().server_tasks;
 }
 pub fn get_server_nodes() -> Option<Vec<MeshtasticNodeEntry>> {
     let storage = global_response_storage().read().unwrap();

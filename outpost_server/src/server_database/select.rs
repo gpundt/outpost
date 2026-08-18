@@ -1,7 +1,7 @@
 use crate::server_database::schema::get_db_pool;
 use database::schema::{
     HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry,
+    MeshtasticTextEntry, TaskRequestEntry,
 };
 
 use log::{error, trace};
@@ -53,6 +53,31 @@ pub async fn select_meshtastic_nodes() -> Result<Vec<MeshtasticNodeEntry>, sqlx:
         },
         Err(e) => {
             error!("Failed to query nodes from 'meshtastic_nodes' table: {}", e);
+            return Err(e);
+        }
+    };
+}
+
+/// Function to select all rows from tasks db table
+pub async fn select_outpost_tasks_by_count(
+    count: u32,
+) -> Result<Vec<TaskRequestEntry>, sqlx::Error> {
+    match sqlx::query_as::<_, TaskRequestEntry>(
+        "SELECT id, type, requested_at, finished_at, successful FROM tasks ORDER BY id DESC LIMIT ?",
+    )
+    .bind(count)
+    .fetch_all(get_db_pool())
+    .await
+    {
+        Ok(tasks) => {
+            trace!(
+                "SELECT FROM tasks ORDER BY id DESC LIMIT {}",
+                count
+            );
+            return Ok(tasks);
+        }
+        Err(e) => {
+            error!("Failed to query {} tasks from 'tasks' table: {}", count, e);
             return Err(e);
         }
     };

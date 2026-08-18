@@ -1,5 +1,6 @@
 use crate::arguments::get_arguments;
 use crate::meshtastic::connection::global_connection;
+use crate::server_database::select::select_outpost_tasks_by_count;
 use crate::server_database::{
     schema::is_db_connected,
     select::{
@@ -29,6 +30,7 @@ pub async fn generate_query_response(Json(request): Json<QueryRequest>) -> (Stat
         QueryType::Positions => generate_positions_query_response(request.parameters).await,
         QueryType::RawPackets => generate_raw_packets_query_response(request.parameters).await,
         QueryType::Texts => generate_texts_query_response(request.parameters).await,
+        QueryType::Tasks => generate_tasks_query_response(request.parameters).await,
         QueryType::CpuMetrics => (StatusCode::NOT_IMPLEMENTED, "".to_string()),
         QueryType::RamMetrics => (StatusCode::NOT_IMPLEMENTED, "".to_string()),
         QueryType::StorageMetrics => (StatusCode::NOT_IMPLEMENTED, "".to_string()),
@@ -265,6 +267,39 @@ pub async fn generate_texts_query_response(
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 SerializeError::new("texts_query_response".to_string(), e.to_string()).jsonify(),
+            );
+        }
+    }
+}
+
+/// Function to generate and return the HTTP response for the tasks query option
+/// Returns an HTTP status code and a JSON response
+pub async fn generate_tasks_query_response(
+    parameters: Option<serde_json::Value>,
+) -> (StatusCode, String) {
+    let row_count = extract_count_parameter(&parameters, 100);
+    let tasks = match select_outpost_tasks_by_count(row_count).await {
+        Ok(t) => t,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                QueryError::new(
+                    "tasks".to_string(),
+                    "generate_tasks_query_response".to_string(),
+                    e.to_string(),
+                )
+                .jsonify(),
+            );
+        }
+    };
+
+    match serde_json::to_string(&tasks) {
+        Ok(s) => (StatusCode::OK, s),
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                SerializeError::new("generate_tasks_query_response".to_string(), e.to_string())
+                    .jsonify(),
             );
         }
     }

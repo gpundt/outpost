@@ -1,7 +1,7 @@
 use core::fmt;
 use database::schema::{
     HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry,
+    MeshtasticTextEntry, TaskRequestEntry,
 };
 
 use crate::{arguments::get_arguments, client_http::connection::get_server_config};
@@ -22,6 +22,7 @@ pub enum QueryResponse {
     Config(ConfigResponse),
     Status(StatusResponse),
     Texts(Vec<MeshtasticTextEntry>),
+    Tasks(Vec<TaskRequestEntry>),
     Nodes(Vec<MeshtasticNodeEntry>),
     Positions(Vec<MeshtasticPositionEntry>),
     RawPackets(Vec<MeshtasticRawEntry>),
@@ -35,6 +36,13 @@ impl fmt::Display for QueryResponse {
             QueryResponse::Status(r) => write!(f, "[Server Status Query]: {}", r),
             QueryResponse::Texts(r) => {
                 let _ = write!(f, "[Meshtastic Texts Query]:");
+                for entry in r {
+                    let _ = write!(f, "{}", entry);
+                }
+                Ok(())
+            }
+            QueryResponse::Tasks(r) => {
+                let _ = write!(f, "[Outpost Tasks Query]:");
                 for entry in r {
                     let _ = write!(f, "{}", entry);
                 }
@@ -130,6 +138,7 @@ async fn query_server(
         QueryType::Texts => {
             QueryResponse::Texts(MeshtasticTextEntry::from_json(body_text).unwrap())
         }
+        QueryType::Tasks => QueryResponse::Tasks(TaskRequestEntry::from_json(body_text).unwrap()),
         QueryType::Nodes => {
             QueryResponse::Nodes(MeshtasticNodeEntry::from_json(body_text).unwrap())
         }
@@ -190,6 +199,17 @@ pub async fn query_server_texts(count: Option<u32>) -> Option<Vec<MeshtasticText
         QueryResponse::Texts(r) => Some(r),
         other => {
             error!("Unexpected response type for Texts: {}", other);
+            None
+        }
+    }
+}
+
+pub async fn query_server_tasks(count: Option<u32>) -> Option<Vec<TaskRequestEntry>> {
+    let parameters = Some(serde_json::json!({ "count": count.unwrap_or(100) }));
+    match query_server(QueryType::Tasks, parameters).await? {
+        QueryResponse::Tasks(r) => Some(r),
+        other => {
+            error!("Unexpected response type for Tasks: {}", other);
             None
         }
     }

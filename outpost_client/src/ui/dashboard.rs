@@ -100,7 +100,10 @@ impl Dashboard {
         frame.render_widget(serial_connection_paragraph, header_row[3]);
 
         // Main content
-        // TODO
+        let dashboard_content = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .split(chunks[1]);
 
         // Footer
         let footer_content = Layout::default()
