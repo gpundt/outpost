@@ -72,7 +72,7 @@ pub fn extract_count_parameter(parameters: &Option<serde_json::Value>, default: 
 }
 
 /// Struct to organize the JSON response for the health_check query endpoint
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct HealthCheckResponse {
     pub status: String,
     pub uptime: String,
@@ -105,7 +105,7 @@ impl HealthCheckResponse {
 }
 
 /// Struct to organize the JSON response for the config query endpoint
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConfigResponse {
     pub debug: bool,
     pub http_port: u16,
@@ -144,7 +144,7 @@ impl ConfigResponse {
 }
 
 /// Struct to organize the JSON response for the status query endpoint
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StatusResponse {
     pub status: String,
     pub uptime: String,
