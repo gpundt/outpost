@@ -61,13 +61,9 @@ pub struct ClientStatus {
     pub severity: Severity,
     pub message: String,
 }
-
 impl ClientStatus {
-    pub fn new() -> Self {
-        Self {
-            severity: Severity::Info,
-            message: "".to_string(),
-        }
+    pub fn new(severity: Severity, message: String) -> Self {
+        Self { severity, message }
     }
 }
 
@@ -124,73 +120,4 @@ pub fn generate_client_status<'a>(status: &ClientStatus) -> Paragraph<'a> {
     );
 
     return status_widget;
-}
-
-#[derive(Clone, Default)]
-pub struct ServerStatusCache {
-    pub server_connection: bool,
-    pub database_connection: bool,
-    pub serial_connection: bool,
-}
-
-pub async fn fetch_server_status() -> ServerStatusCache {
-    match query_server_status().await {
-        Some(s) => ServerStatusCache {
-            server_connection: true,
-            database_connection: s.database_reachable,
-            serial_connection: s.serial_connected,
-        },
-        None => ServerStatusCache::default(),
-    }
-}
-
-pub fn generate_server_status<'a>(status: &ServerStatusCache) -> Paragraph<'a> {
-    let mut spans = Vec::new();
-    spans.push(Span::styled(
-        format!(
-            "Server: {}",
-            if status.server_connection {
-                "\x1b[32m\u{2713}\x1b[0m"
-            } else {
-                "\x1b[31m\u{2717}\x1b[0m"
-            }
-        ),
-        Style::default().fg(Color::White),
-    ));
-    spans.push(Span::styled("  |  ", Style::default().fg(Color::DarkGray)));
-
-    spans.push(Span::styled(
-        format!(
-            "Database: {}",
-            if status.database_connection {
-                "\x1b[32m\u{2713}\x1b[0m"
-            } else {
-                "\x1b[31m\u{2717}\x1b[0m"
-            }
-        ),
-        Style::default().fg(Color::White),
-    ));
-    spans.push(Span::styled("  |  ", Style::default().fg(Color::DarkGray)));
-
-    spans.push(Span::styled(
-        format!(
-            "Meshtastic: {}",
-            if status.serial_connection {
-                "\x1b[32m\u{2713}\x1b[0m"
-            } else {
-                "\x1b[31m\u{2717}\x1b[0m"
-            }
-        ),
-        Style::default().fg(Color::White),
-    ));
-
-    let status_line = Line::from(spans).left_aligned();
-    Paragraph::new(status_line).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Blue))
-            .border_type(BorderType::Rounded)
-            .title("Status")
-            .padding(Padding::new(5, 0, 0, 0)),
-    )
 }

@@ -2,7 +2,7 @@ use std::io;
 
 use tokio::sync::watch;
 
-use crate::ui::{dashboard::Dashboard, footer::ServerStatusCache};
+use crate::ui::{dashboard::Dashboard, header::ServerStatusCache};
 
 use super::frame::NextFrame;
 
@@ -20,14 +20,12 @@ pub enum ActiveFrame {
 
 pub struct App {
     active_frame: ActiveFrame,
-    server_status_rx: watch::Receiver<ServerStatusCache>,
 }
 
 impl App {
-    pub fn new(server_status_rx: watch::Receiver<ServerStatusCache>) -> Self {
+    pub fn new() -> Self {
         Self {
             active_frame: ActiveFrame::default(),
-            server_status_rx,
         }
     }
 
@@ -43,7 +41,7 @@ impl App {
                     | ActiveFrame::HttpRequests
                     | ActiveFrame::Tasks
                     | ActiveFrame::Postions => {
-                        let next = Dashboard::new(self.server_status_rx.clone()).run(terminal)?;
+                        let next = Dashboard::new().run(terminal)?;
                         self.active_frame = match next {
                             NextFrame::Exit => ActiveFrame::Exit,
                             NextFrame::Dashboard => ActiveFrame::Dashboard,

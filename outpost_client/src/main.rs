@@ -2,6 +2,8 @@ mod arguments;
 pub mod client_http;
 pub mod ui;
 
+use std::{thread, time::Duration};
+
 use crate::{
     client_http::{
         connection::initialize_server_config,
@@ -11,16 +13,13 @@ use crate::{
             query_server_status, query_server_texts,
         },
     },
-    ui::{
-        app::App,
-        footer::{ServerStatusCache, fetch_server_status},
-    },
+    ui::{app::App, header::update_server_status},
 };
 
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
 use log::error;
-use tokio::sync::watch;
+use tokio::runtime::Runtime;
 
 /// Outpost server entrypoint
 #[tokio::main]
@@ -34,18 +33,15 @@ async fn main() {
     }
 
     // Background task: polls the server every second and publishes the result.
-    let (tx, rx) = watch::channel(ServerStatusCache::default());
-    tokio::spawn(async move {
+    thread::spawn(|| {
+        let rt = Runtime::new().unwrap();
         loop {
-            let status = fetch_server_status().await;
-            if tx.send(status).is_err() {
-                break; // receiver dropped (app exited)
-            }
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            rt.block_on(update_server_status());
+            thread::sleep(Duration::from_secs(5))
         }
     });
 
-    let _ = App::new(rx).run();
+    let _ = App::new().run();
 }
 
 /// Function to handle execution of client startup

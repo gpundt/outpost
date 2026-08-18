@@ -1,14 +1,11 @@
 use std::{io, time::Duration};
 
-use crate::ui::footer::ServerStatusCache;
+use crate::ui::header::global_server_status;
 
 use super::{
-    footer::{
-        ClientStatus, Keybind, Severity, generate_client_status, generate_keybinds,
-        generate_server_status,
-    },
+    footer::{ClientStatus, Keybind, Severity, generate_client_status, generate_keybinds},
     frame::NextFrame,
-    header::{Title, generate_title},
+    header::{ServerStatusCache, Title, generate_server_status, generate_title},
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
@@ -34,23 +31,18 @@ pub struct Dashboard {
     pub mode: DashboardMode,
     /// Current status
     status: ClientStatus,
-    server_status_rx: watch::Receiver<ServerStatusCache>,
-    server_status: ServerStatusCache,
 }
 
 /// Functions that can be imlemented by DeviceDashboard
 impl Dashboard {
     /// Function to create a new dashboard object
-    pub fn new(server_status_rx: watch::Receiver<ServerStatusCache>) -> Self {
-        let server_status = server_status_rx.borrow().clone();
+    pub fn new() -> Self {
         Self {
             mode: DashboardMode::default(),
             status: ClientStatus {
                 severity: Severity::Info,
                 message: "".to_string(),
             },
-            server_status_rx,
-            server_status,
         }
     }
 
@@ -58,10 +50,6 @@ impl Dashboard {
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<NextFrame> {
         loop {
             // Pull the latest value out of the channel — non-blocking, no .await needed.
-            if self.server_status_rx.has_changed().unwrap_or(false) {
-                self.server_status = self.server_status_rx.borrow_and_update().clone();
-            }
-
             terminal.draw(|frame| self.draw(frame))?;
             if event::poll(Duration::from_millis(500))? {
                 self.handle_events()?;
@@ -76,42 +64,52 @@ impl Dashboard {
     }
 
     /// Function to draw all Dashboard widgets to the terminal
-    fn draw(&self, frame: &mut Frame) {
+    fn draw(&mut self, frame: &mut Frame) {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
                 Constraint::Length(3),
                 Constraint::Fill(1),
                 Constraint::Length(3),
-                Constraint::Length(3),
             ])
             .split(frame.area());
 
         // Header
+        let header_row = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(75),
+                Constraint::Fill(1),
+                Constraint::Fill(1),
+                Constraint::Fill(1),
+            ])
+            .split(chunks[0]);
         frame.render_widget(
             generate_title(&Title {
                 name: "Outpost-Client Dashboard",
                 description: "Interact with Outpost-Server",
             }),
-            chunks[0],
+            header_row[0],
         );
+
+        let (
+            server_connection_paragraph,
+            database_connection_paragraph,
+            serial_connection_paragraph,
+        ) = generate_server_status();
+
+        frame.render_widget(server_connection_paragraph, header_row[1]);
+        frame.render_widget(database_connection_paragraph, header_row[2]);
+        frame.render_widget(serial_connection_paragraph, header_row[3]);
 
         // Main content
+        // TODO
 
         // Footer
-        let server_status_content = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints([Constraint::Percentage(100)])
-            .split(chunks[2]);
-        frame.render_widget(
-            generate_server_status(&self.server_status),
-            server_status_content[0],
-        );
-
         let footer_content = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([Constraint::Min(50), Constraint::Min(50)])
-            .split(chunks[3]);
+            .split(chunks[2]);
         // Keybinds
         let mut keybinds = Vec::new();
         keybinds.push(Keybind {
@@ -143,5 +141,10 @@ impl Dashboard {
             }
             _ => {}
         }
+    }
+
+    /// Function to safely update self.status
+    fn update_status(&mut self, client_status: ClientStatus) {
+        self.status = client_status;
     }
 }
