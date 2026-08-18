@@ -34,7 +34,7 @@ async fn main() {
 async fn setup_server() -> Result<(), Box<dyn std::error::Error>> {
     {
         create_output_directories("server")?;
-        initialize_logger("server", get_arguments().debug)?;
+        initialize_logger("server", get_arguments().debug, true)?;
     }
 
     let serial_port = get_arguments().serial_port.clone();

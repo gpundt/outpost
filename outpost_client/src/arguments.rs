@@ -22,7 +22,7 @@ pub struct Args {
 
     /// Tests every Outpost Server query endpoint
     #[arg(short, long, default_value_t = false)]
-    pub test: bool,
+    pub connection_test: bool,
 }
 
 // static global storage

@@ -29,7 +29,11 @@ pub fn get_log_filename() -> String {
 
 /// Function to initialize the terminal and file logging controller
 /// Sets current log filter level
-pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std::error::Error>> {
+pub fn initialize_logger(
+    log_type: &str,
+    debug: bool,
+    print_to_terminal: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let filepath: PathBuf =
         PathBuf::from(LOG_DIR).join(format!("outpost_{}_{}.log", log_type, timestamp));
@@ -65,8 +69,10 @@ pub fn initialize_logger(log_type: &str, debug: bool) -> Result<(), Box<dyn std:
                 log::Level::Trace => record.level().to_string().dimmed(),
             };
 
-            // write colored output directly to stdout, bypassing buf
-            println!("[{}] {:<5}  {}", ts, level, record.args());
+            if print_to_terminal {
+                // write colored output directly to stdout, bypassing buf
+                println!("[{}] {:<5}  {}", ts, level, record.args());
+            }
 
             // write clean output to file via Mutex guard
             if let Ok(mut file) = log_file.lock() {

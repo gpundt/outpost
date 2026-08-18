@@ -47,14 +47,19 @@ async fn main() {
 /// Function to handle execution of client startup
 async fn setup_client() -> Result<(), Box<dyn std::error::Error>> {
     create_output_directories("client")?;
-    initialize_logger("client", get_arguments().debug)?;
+
+    initialize_logger(
+        "client",
+        get_arguments().debug,
+        get_arguments().connection_test,
+    )?;
 
     initialize_server_config(
         get_arguments().server_ip.clone(),
         get_arguments().server_port,
     );
 
-    if get_arguments().test {
+    if get_arguments().connection_test {
         query_server_health_check().await;
         query_server_config().await;
         query_server_status().await;
