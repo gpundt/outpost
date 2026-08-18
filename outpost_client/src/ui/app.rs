@@ -1,8 +1,6 @@
 use std::io;
 
-use tokio::sync::watch;
-
-use crate::ui::{dashboard::Dashboard, header::ServerStatusCache};
+use crate::ui::dashboard::Dashboard;
 
 use super::frame::NextFrame;
 

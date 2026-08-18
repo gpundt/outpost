@@ -1,11 +1,9 @@
 use std::{io, time::Duration};
 
-use crate::ui::header::global_server_status;
-
 use super::{
     footer::{ClientStatus, Keybind, Severity, generate_client_status, generate_keybinds},
     frame::NextFrame,
-    header::{ServerStatusCache, Title, generate_server_status, generate_title},
+    header::{Title, generate_server_status, generate_title},
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
@@ -16,7 +14,6 @@ use ratatui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Paragraph},
 };
-use tokio::sync::watch;
 
 #[derive(Debug, Default)]
 pub enum DashboardMode {

@@ -1,9 +1,6 @@
 use std::sync::{Arc, OnceLock, RwLock};
 
-use crate::{
-    client_http::query::{QueryResponse::Status, query_server_status},
-    ui::footer::{ClientStatus, Severity},
-};
+use crate::client_http::query::query_server_status;
 use ratatui::{
     style::{Color, Style},
     text::{Line, Span},

@@ -1,4 +1,3 @@
-use crate::client_http::query::query_server_status;
 use ratatui::{
     style::{Color, Style},
     text::{Line, Span},
