@@ -12,7 +12,7 @@ use http::{
     errors::RequestError,
     query::{ConfigResponse, HealthCheckResponse, QueryRequest, QueryType, StatusResponse},
 };
-use log::{debug, error};
+use log::{error, trace};
 use serde_json;
 
 /// Enum to organize the available query response options
@@ -149,7 +149,7 @@ async fn query_server(
     };
 
     if get_arguments().debug {
-        debug!("{}", packaged_struct);
+        trace!("{}", packaged_struct);
     }
     Some(packaged_struct)
 }

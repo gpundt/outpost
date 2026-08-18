@@ -1,19 +1,26 @@
 mod arguments;
 pub mod client_http;
+pub mod ui;
 
-use crate::client_http::{
-    connection::initialize_server_config,
-    query::{
-        query_server_config, query_server_health_check, query_server_http_requests,
-        query_server_nodes, query_server_positions, query_server_raw_packets, query_server_status,
-        query_server_texts,
+use crate::{
+    client_http::{
+        connection::initialize_server_config,
+        query::{
+            query_server_config, query_server_health_check, query_server_http_requests,
+            query_server_nodes, query_server_positions, query_server_raw_packets,
+            query_server_status, query_server_texts,
+        },
     },
-    submit::submit_restart_task,
+    ui::{
+        app::App,
+        footer::{ServerStatusCache, fetch_server_status},
+    },
 };
 
 use arguments::{get_arguments, initialize_arguments};
 use config::{files::create_output_directories, logging::initialize_logger, time::start_time};
 use log::error;
+use tokio::sync::watch;
 
 /// Outpost server entrypoint
 #[tokio::main]
@@ -26,7 +33,19 @@ async fn main() {
         std::process::exit(1);
     }
 
-    submit_restart_task().await;
+    // Background task: polls the server every second and publishes the result.
+    let (tx, rx) = watch::channel(ServerStatusCache::default());
+    tokio::spawn(async move {
+        loop {
+            let status = fetch_server_status().await;
+            if tx.send(status).is_err() {
+                break; // receiver dropped (app exited)
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        }
+    });
+
+    let _ = App::new(rx).run();
 }
 
 /// Function to handle execution of client startup

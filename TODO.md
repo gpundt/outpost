@@ -1,17 +1,13 @@
 # To Do
 
 -  Server (Rust)
-    - HTTP endpoint
     - API authentication (mTLS)
     - Webpage
     - Send Meshtastic packets
         - Scheduled messages?
 
 - Client (Rust)
-    - Arguments
-    - Env File
-    - Send HTTP requests
-    - Optional TUI
+    - TUI
 
 - Ansible
     - Configure node

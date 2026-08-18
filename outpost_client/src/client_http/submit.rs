@@ -8,7 +8,7 @@ use http::{
 
 use crate::{arguments::get_arguments, client_http::connection::get_server_config};
 
-use log::{debug, error};
+use log::{error, trace};
 use serde_json;
 
 /// Generic function to submit a task to the server and return an organized response struct
@@ -60,7 +60,7 @@ async fn submit_task(
     let packaged_struct = TaskResponse::from_json(body_text).unwrap();
 
     if get_arguments().debug {
-        debug!("{}", packaged_struct);
+        trace!("{}", packaged_struct);
     }
 
     Some(packaged_struct)
