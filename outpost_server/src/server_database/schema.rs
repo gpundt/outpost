@@ -44,7 +44,7 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
         r#"
         CREATE TABLE IF NOT EXISTS tasks (
             id            INTEGER  PRIMARY KEY AUTOINCREMENT,
-            type          TEXT     NOT NULL,
+            task_type          TEXT     NOT NULL,
             requested_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
             finished_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
             successful    BOOLEAN  DEFAULT false

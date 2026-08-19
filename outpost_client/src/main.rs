@@ -12,6 +12,7 @@ use crate::{
             query_server_nodes, query_server_positions, query_server_raw_packets,
             query_server_status, query_server_texts,
         },
+        storage::update_response_storage_master,
     },
     ui::{app::App, header::update_server_status},
 };
@@ -34,10 +35,18 @@ async fn main() {
 
     // Background task: polls the server every second and publishes the result.
     thread::spawn(|| {
-        let rt = Runtime::new().unwrap();
+        let server_status_runtime = Runtime::new().unwrap();
         loop {
-            rt.block_on(update_server_status());
+            server_status_runtime.block_on(update_server_status());
             thread::sleep(Duration::from_secs(5))
+        }
+    });
+
+    thread::spawn(|| {
+        let server_query_runtime = Runtime::new().unwrap();
+        loop {
+            server_query_runtime.block_on(update_response_storage_master());
+            thread::sleep(Duration::from_secs(10))
         }
     });
 

@@ -33,63 +33,75 @@ pub fn global_response_storage() -> &'static Arc<RwLock<ResponseStorage>> {
     STORAGE.get_or_init(|| Arc::new(RwLock::new(ResponseStorage::default())))
 }
 
-pub async fn update_health_check() -> Result<(), Box<dyn Error>> {
+pub async fn update_response_storage_master() {
+    let _ = update_health_check().await;
+    let _ = update_server_config().await;
+    let _ = update_server_status().await;
+    let _ = update_server_tasks().await;
+    let _ = update_server_texts().await;
+    let _ = update_server_nodes().await;
+    let _ = update_server_positions().await;
+    let _ = update_server_raw_packets().await;
+    let _ = update_server_http_requests().await;
+}
+
+async fn update_health_check() -> Result<(), Box<dyn Error>> {
     let health_check = query_server_health_check().await;
     let mut storage = global_response_storage().write().unwrap();
     storage.health_check = health_check;
 
     Ok(())
 }
-pub async fn update_server_config() -> Result<(), Box<dyn Error>> {
+async fn update_server_config() -> Result<(), Box<dyn Error>> {
     let server_config = query_server_config().await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_config = server_config;
 
     Ok(())
 }
-pub async fn update_server_status() -> Result<(), Box<dyn Error>> {
+async fn update_server_status() -> Result<(), Box<dyn Error>> {
     let server_status = query_server_status().await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_status = server_status;
 
     Ok(())
 }
-pub async fn update_server_texts() -> Result<(), Box<dyn Error>> {
+async fn update_server_texts() -> Result<(), Box<dyn Error>> {
     let server_texts = query_server_texts(None).await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_texts = server_texts;
 
     Ok(())
 }
-pub async fn update_server_tasks() -> Result<(), Box<dyn Error>> {
+async fn update_server_tasks() -> Result<(), Box<dyn Error>> {
     let server_tasks = query_server_tasks(None).await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_tasks = server_tasks;
 
     Ok(())
 }
-pub async fn update_server_nodes() -> Result<(), Box<dyn Error>> {
+async fn update_server_nodes() -> Result<(), Box<dyn Error>> {
     let server_nodes = query_server_nodes().await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_nodes = server_nodes;
 
     Ok(())
 }
-pub async fn update_server_positions() -> Result<(), Box<dyn Error>> {
+async fn update_server_positions() -> Result<(), Box<dyn Error>> {
     let server_positions = query_server_positions().await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_positions = server_positions;
 
     Ok(())
 }
-pub async fn update_server_raw_packets() -> Result<(), Box<dyn Error>> {
+async fn update_server_raw_packets() -> Result<(), Box<dyn Error>> {
     let server_raw_packets = query_server_raw_packets().await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_raw_packets = server_raw_packets;
 
     Ok(())
 }
-pub async fn update_server_http_requests() -> Result<(), Box<dyn Error>> {
+async fn update_server_http_requests() -> Result<(), Box<dyn Error>> {
     let server_http_requests = query_server_http_requests(None).await;
     let mut storage = global_response_storage().write().unwrap();
     storage.server_http_requests = server_http_requests;

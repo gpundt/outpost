@@ -63,7 +63,7 @@ pub async fn select_outpost_tasks_by_count(
     count: u32,
 ) -> Result<Vec<TaskRequestEntry>, sqlx::Error> {
     match sqlx::query_as::<_, TaskRequestEntry>(
-        "SELECT id, type, requested_at, finished_at, successful FROM tasks ORDER BY id DESC LIMIT ?",
+        "SELECT id, task_type, requested_at, finished_at, successful FROM tasks ORDER BY id DESC LIMIT ?",
     )
     .bind(count)
     .fetch_all(get_db_pool())

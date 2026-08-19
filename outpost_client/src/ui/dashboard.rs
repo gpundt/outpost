@@ -1,5 +1,7 @@
 use std::{io, time::Duration};
 
+use crate::ui::{tasks::generate_tasks_dashboard_widget, texts::generate_texts_dashboard_widget};
+
 use super::{
     footer::{ClientStatus, Keybind, Severity, generate_client_status, generate_keybinds},
     frame::NextFrame,
@@ -104,6 +106,28 @@ impl Dashboard {
             .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(chunks[1]);
+        let dashboard_content_left_half = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .split(dashboard_content[0]);
+        frame.render_widget(
+            generate_texts_dashboard_widget(),
+            dashboard_content_left_half[0],
+        );
+        frame.render_widget(
+            generate_tasks_dashboard_widget(),
+            dashboard_content_left_half[1],
+        );
+
+        let dashboard_content_right_half = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(25),
+                Constraint::Percentage(25),
+                Constraint::Percentage(25),
+                Constraint::Percentage(25),
+            ])
+            .split(dashboard_content[1]);
 
         // Footer
         let footer_content = Layout::default()
