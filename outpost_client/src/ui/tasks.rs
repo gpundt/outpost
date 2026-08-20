@@ -21,8 +21,14 @@ pub fn generate_tasks_dashboard_widget<'a>() -> Paragraph<'a> {
             for task in tasks_vec {
                 lines.push(Line::from(Span::styled(
                     format!(
-                        " [{}] {} - {}: {}\n\n\n",
-                        task.task_type, task.requested_at, task.finished_at, task.successful
+                        " [{}] {:<15} ->  {}",
+                        task.requested_at.format("%m/%d %H:%M:%S"),
+                        task.task_type,
+                        if task.successful {
+                            "Finished"
+                        } else {
+                            "Failed"
+                        }
                     ),
                     Style::default().fg(Color::White),
                 )));
