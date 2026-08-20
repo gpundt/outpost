@@ -6,24 +6,6 @@ use database::schema::{
 
 use log::{error, trace};
 
-/// Function to select X rows from the http_requests db table
-pub async fn select_http_requests_by_count(
-    count: u32,
-) -> Result<Vec<HTTPRequestEntry>, sqlx::Error> {
-    match sqlx::query_as::<_, HTTPRequestEntry>(
-        "SELECT id, method, source, endpoint, user_agent, status_code, timestamp FROM http_requests ORDER BY id DESC LIMIT ?",
-    ).bind(count).fetch_all(get_db_pool()).await {
-        Ok(requests) => {
-            trace!("SELECT FROM http_requests ORDER BY id DESC LIMIT {}", count);
-            return Ok(requests);
-        },
-        Err(e) => {
-            error!("Failed to query {} texts from 'http_requests' table: {}", count, e);
-            return Err(e);
-        }
-    };
-}
-
 /// Function to select X rows from the meshtastic_texts db table
 pub async fn select_meshtastic_texts_by_count(
     count: u32,

@@ -26,7 +26,6 @@ pub enum QueryResponse {
     Nodes(Vec<MeshtasticNodeEntry>),
     Positions(Vec<MeshtasticPositionEntry>),
     RawPackets(Vec<MeshtasticRawEntry>),
-    HttpRequests(Vec<HTTPRequestEntry>),
 }
 impl fmt::Display for QueryResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -43,13 +42,6 @@ impl fmt::Display for QueryResponse {
             }
             QueryResponse::Tasks(r) => {
                 let _ = write!(f, "[Outpost Tasks Query]:");
-                for entry in r {
-                    let _ = write!(f, "{}", entry);
-                }
-                Ok(())
-            }
-            QueryResponse::HttpRequests(r) => {
-                let _ = write!(f, "[HTTP Requests Query]:");
                 for entry in r {
                     let _ = write!(f, "{}", entry);
                 }
@@ -141,9 +133,6 @@ async fn query_server(
         QueryType::Tasks => QueryResponse::Tasks(TaskRequestEntry::from_json(body_text).unwrap()),
         QueryType::Nodes => {
             QueryResponse::Nodes(MeshtasticNodeEntry::from_json(body_text).unwrap())
-        }
-        QueryType::HttpRequests => {
-            QueryResponse::HttpRequests(HTTPRequestEntry::from_json(body_text).unwrap())
         }
         QueryType::RawPackets => {
             QueryResponse::RawPackets(MeshtasticRawEntry::from_json(body_text).unwrap())
@@ -240,17 +229,6 @@ pub async fn query_server_positions() -> Option<Vec<MeshtasticPositionEntry>> {
         QueryResponse::Positions(r) => Some(r),
         other => {
             error!("Unexpected response type for Positions: {}", other);
-            None
-        }
-    }
-}
-
-pub async fn query_server_http_requests(count: Option<u32>) -> Option<Vec<HTTPRequestEntry>> {
-    let parameters = Some(serde_json::json!({ "count": count.unwrap_or(100) }));
-    match query_server(QueryType::HttpRequests, parameters).await? {
-        QueryResponse::HttpRequests(r) => Some(r),
-        other => {
-            error!("Unexpected response type for HttpRequests: {}", other);
             None
         }
     }

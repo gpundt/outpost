@@ -1,9 +1,4 @@
-use crate::server_database::insert::insert_http_request;
-
-use database::schema::HTTPRequestEntry;
-
 use axum::{body::Body, extract::ConnectInfo, http::Request, middleware::Next, response::Response};
-use chrono::Utc;
 use log::debug;
 use std::net::SocketAddr;
 
@@ -32,22 +27,6 @@ pub async fn log_request_middleware(
         "HTTP {} {} from {} ({}) -> {}",
         method, endpoint, source, user_agent, status_code
     );
-
-    tokio::spawn(async move {
-        if let Err(e) = insert_http_request(HTTPRequestEntry {
-            id: 0,
-            method,
-            source,
-            endpoint,
-            user_agent,
-            status_code: status_code,
-            timestamp: Utc::now().naive_utc(),
-        })
-        .await
-        {
-            log::error!("Failed to log HTTP request to database: {}", e);
-        }
-    });
 
     response
 }

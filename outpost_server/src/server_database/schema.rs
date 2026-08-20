@@ -22,23 +22,6 @@ pub async fn initialize_database() -> Result<String, sqlx::Error> {
         .set(pool)
         .map_err(|_| sqlx::Error::Configuration("Pool already set".into()))?;
 
-    // ── http_requests Table ─────
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS http_requests (
-            id          INTEGER  PRIMARY KEY AUTOINCREMENT,
-            method      TEXT     NOT NULL,
-            source      TEXT     NOT NULL,
-            endpoint    TEXT     NOT NULL,
-            user_agent  TEXT     NOT NULL,
-            status_code INTEGER  NOT NULL,
-            timestamp   DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-        "#,
-    )
-    .execute(get_db_pool())
-    .await?;
-
     // ── tasks Table ────────────
     sqlx::query(
         r#"

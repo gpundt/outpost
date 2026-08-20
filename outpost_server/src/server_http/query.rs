@@ -4,8 +4,8 @@ use crate::server_database::select::select_outpost_tasks_by_count;
 use crate::server_database::{
     schema::is_db_connected,
     select::{
-        select_http_requests_by_count, select_meshtastic_nodes, select_meshtastic_positions,
-        select_meshtastic_raw_by_count, select_meshtastic_texts_by_count,
+        select_meshtastic_nodes, select_meshtastic_positions, select_meshtastic_raw_by_count,
+        select_meshtastic_texts_by_count,
     },
 };
 use crate::server_http::errors::{QueryError, SerializeError};
@@ -25,7 +25,6 @@ pub async fn generate_query_response(Json(request): Json<QueryRequest>) -> (Stat
         QueryType::HealthCheck => generate_health_check_response().await,
         QueryType::ServerConfig => generate_config_query_response().await,
         QueryType::ServerStatus => generate_status_query_response().await,
-        QueryType::HttpRequests => generate_http_requests_query_response(request.parameters).await,
         QueryType::Nodes => generate_nodes_query_response(request.parameters).await,
         QueryType::Positions => generate_positions_query_response(request.parameters).await,
         QueryType::RawPackets => generate_raw_packets_query_response(request.parameters).await,
@@ -99,40 +98,6 @@ pub async fn generate_status_query_response() -> (StatusCode, String) {
     };
 
     match serde_json::to_string(&payload) {
-        Ok(s) => (StatusCode::OK, s),
-        Err(e) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                SerializeError::new("http_requests_query_response".to_string(), e.to_string())
-                    .jsonify(),
-            );
-        }
-    }
-}
-
-/// Function to generate and return the http_request query endpoint JSON response
-/// Returns an HTTP status code and a JSON response
-pub async fn generate_http_requests_query_response(
-    parameters: Option<serde_json::Value>,
-) -> (StatusCode, String) {
-    let row_count = extract_count_parameter(&parameters, 100);
-
-    let requests = match select_http_requests_by_count(row_count).await {
-        Ok(r) => r,
-        Err(e) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                QueryError::new(
-                    "http_requests".to_string(),
-                    "http_requests_query_response".to_string(),
-                    e.to_string(),
-                )
-                .jsonify(),
-            );
-        }
-    };
-
-    match serde_json::to_string(&requests) {
         Ok(s) => (StatusCode::OK, s),
         Err(e) => {
             return (

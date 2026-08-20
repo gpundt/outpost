@@ -18,10 +18,9 @@ pub async fn task_submission_response(
     match request.task {
         OutpostTask::Backup => handle_backup().await,
         OutpostTask::Beacon => handle_beacon().await,
-        OutpostTask::PurgeNodes => handle_refresh_nodes().await,
-        OutpostTask::PurgeHttpRequests => handle_refresh_http_requests().await,
-        OutpostTask::PurgePositions => handle_refresh_positions().await,
-        OutpostTask::PurgeRaw => handle_refresh_raw().await,
+        OutpostTask::PurgeNodes => handle_purge_nodes().await,
+        OutpostTask::PurgePositions => handle_purge_positions().await,
+        OutpostTask::PurgeRaw => handle_purge_raw().await,
         OutpostTask::ReconnectSerial => handle_reconnect_serial().await,
         OutpostTask::Restart => handle_restart().await,
     }
@@ -97,10 +96,10 @@ async fn handle_beacon() -> (StatusCode, Json<TaskResponse>) {
     )
 }
 
-/// Function to handle a refresh_nodes task request
+/// Function to handle a purge_nodes task request
 /// Returns an HTTP status code and a JSON response
-async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
-    let row_id = match insert_task_request_start("refresh_nodes").await {
+async fn handle_purge_nodes() -> (StatusCode, Json<TaskResponse>) {
+    let row_id = match insert_task_request_start("purge_nodes").await {
         Ok(i) => i,
         Err(e) => {
             return (
@@ -154,67 +153,10 @@ async fn handle_refresh_nodes() -> (StatusCode, Json<TaskResponse>) {
     };
 }
 
-/// Function to handle a refresh_http_requests task request
+/// Function to handle a purge_raw task request
 /// Returns an HTTP status code and a JSON response
-async fn handle_refresh_http_requests() -> (StatusCode, Json<TaskResponse>) {
-    let row_id = match insert_task_request_start("refresh_http_requests").await {
-        Ok(i) => i,
-        Err(e) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(TaskResponse {
-                    task: OutpostTask::PurgeHttpRequests,
-                    success: false,
-                    message: e.to_string(),
-                }),
-            );
-        }
-    };
-
-    let (successful, status_code, response) = match delete_from_table("http_requests").await {
-        Ok(_) => (
-            true,
-            StatusCode::OK,
-            TaskResponse {
-                task: OutpostTask::PurgeHttpRequests,
-                success: true,
-                message: format!("HTTP Requests list successfully refreshed"),
-            },
-        ),
-        Err(e) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(TaskResponse {
-                    task: OutpostTask::PurgeHttpRequests,
-                    success: false,
-                    message: format!("HTTP Requests list refresh failed: {}", e),
-                }),
-            );
-        }
-    };
-
-    match insert_task_request_finish(row_id, successful).await {
-        Ok(_) => return (status_code, Json(response)),
-        Err(e) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(TaskResponse {
-                    task: OutpostTask::PurgeHttpRequests,
-                    success: false,
-                    message: format!(
-                        "HTTP Requests list refresh successful, tasks table update failed: {}",
-                        e.to_string(),
-                    ),
-                }),
-            );
-        }
-    };
-}
-
-/// Function to handle a refresh_raw task request
-/// Returns an HTTP status code and a JSON response
-async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
-    let row_id = match insert_task_request_start("refresh_raw").await {
+async fn handle_purge_raw() -> (StatusCode, Json<TaskResponse>) {
+    let row_id = match insert_task_request_start("purge_raw").await {
         Ok(i) => i,
         Err(e) => {
             return (
@@ -268,10 +210,10 @@ async fn handle_refresh_raw() -> (StatusCode, Json<TaskResponse>) {
     };
 }
 
-/// Function to handle a refresh_positions task request
+/// Function to handle a purge_positions task request
 /// Returns an HTTP status code and a JSON response
-async fn handle_refresh_positions() -> (StatusCode, Json<TaskResponse>) {
-    let row_id = match insert_task_request_start("refresh_positions").await {
+async fn handle_purge_positions() -> (StatusCode, Json<TaskResponse>) {
+    let row_id = match insert_task_request_start("purge_positions").await {
         Ok(i) => i,
         Err(e) => {
             return (

@@ -1,7 +1,6 @@
 use crate::server_database::schema::get_db_pool;
 use database::schema::{
-    HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry,
+    MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
 };
 
 use chrono::Utc;
@@ -131,42 +130,13 @@ pub async fn insert_meshtastic_raw(raw_entry: MeshtasticRawEntry) -> Result<(), 
     }
 }
 
-/// Function to insert a row into the http_requests db table
-pub async fn insert_http_request(request_entry: HTTPRequestEntry) -> Result<(), sqlx::Error> {
-    let entry_clone = request_entry.clone();
-    match sqlx::query(
-        r#"
-        INSERT INTO http_requests (method, source, endpoint, user_agent, status_code, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?)
-        "#,
-    )
-    .bind(request_entry.method)
-    .bind(request_entry.source)
-    .bind(request_entry.endpoint)
-    .bind(request_entry.user_agent)
-    .bind(request_entry.status_code)
-    .bind(request_entry.timestamp)
-    .execute(get_db_pool())
-    .await
-    {
-        Ok(_) => {
-            trace!("INSERT INTO http_requests VALUES {:?}", entry_clone);
-            return Ok(());
-        }
-        Err(e) => {
-            error!("Failed to insert into 'http_requests' table: {}", e);
-            return Err(e);
-        }
-    };
-}
-
 /// Function to insert the kickoff of a task into the tasks db table
 pub async fn insert_task_request_start(task_type: &str) -> Result<i64, sqlx::Error> {
     let requested_at: chrono::DateTime<Utc> = Utc::now();
 
     let result = match sqlx::query(
         r#"
-        INSERT INTO tasks (type, requested_at)
+        INSERT INTO tasks (task_type, requested_at)
         VALUES (?, ?)
         "#,
     )

@@ -6,12 +6,12 @@ use std::{
 use crate::client_http::query::query_server_tasks;
 
 use super::query::{
-    query_server_config, query_server_health_check, query_server_http_requests, query_server_nodes,
-    query_server_positions, query_server_raw_packets, query_server_status, query_server_texts,
+    query_server_config, query_server_health_check, query_server_nodes, query_server_positions,
+    query_server_raw_packets, query_server_status, query_server_texts,
 };
 use database::schema::{
-    HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry, TaskRequestEntry,
+    MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
+    TaskRequestEntry,
 };
 use http::query::{ConfigResponse, HealthCheckResponse, StatusResponse};
 
@@ -25,7 +25,6 @@ pub struct ResponseStorage {
     pub server_nodes: Option<Vec<MeshtasticNodeEntry>>,
     pub server_positions: Option<Vec<MeshtasticPositionEntry>>,
     pub server_raw_packets: Option<Vec<MeshtasticRawEntry>>,
-    pub server_http_requests: Option<Vec<HTTPRequestEntry>>,
 }
 
 pub fn global_response_storage() -> &'static Arc<RwLock<ResponseStorage>> {
@@ -42,7 +41,6 @@ pub async fn update_response_storage_master() {
     let _ = update_server_nodes().await;
     let _ = update_server_positions().await;
     let _ = update_server_raw_packets().await;
-    let _ = update_server_http_requests().await;
 }
 
 async fn update_health_check() -> Result<(), Box<dyn Error>> {
@@ -101,13 +99,6 @@ async fn update_server_raw_packets() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-async fn update_server_http_requests() -> Result<(), Box<dyn Error>> {
-    let server_http_requests = query_server_http_requests(None).await;
-    let mut storage = global_response_storage().write().unwrap();
-    storage.server_http_requests = server_http_requests;
-
-    Ok(())
-}
 
 pub fn get_health_check() -> Option<HealthCheckResponse> {
     let storage = global_response_storage().read().unwrap();
@@ -140,8 +131,4 @@ pub fn get_server_positions() -> Option<Vec<MeshtasticPositionEntry>> {
 pub fn get_server_raw_packets() -> Option<Vec<MeshtasticRawEntry>> {
     let storage = global_response_storage().read().unwrap();
     return storage.clone().server_raw_packets;
-}
-pub fn get_server_http_requests() -> Option<Vec<HTTPRequestEntry>> {
-    let storage = global_response_storage().read().unwrap();
-    return storage.clone().server_http_requests;
 }

@@ -10,7 +10,6 @@ pub enum OutpostTask {
     Beacon,
     PurgeNodes,
     PurgeRaw,
-    PurgeHttpRequests,
     PurgePositions,
     ReconnectSerial,
     Restart,
@@ -21,7 +20,6 @@ impl fmt::Display for OutpostTask {
         match self {
             OutpostTask::Backup => write!(f, "backup"),
             OutpostTask::Beacon => write!(f, "beacon"),
-            OutpostTask::PurgeHttpRequests => write!(f, "purge_http_requests"),
             OutpostTask::PurgeNodes => write!(f, "purge_nodes"),
             OutpostTask::PurgePositions => write!(f, "purge_positions"),
             OutpostTask::PurgeRaw => write!(f, "purge_raw"),

@@ -8,9 +8,9 @@ use crate::{
     client_http::{
         connection::initialize_server_config,
         query::{
-            query_server_config, query_server_health_check, query_server_http_requests,
-            query_server_nodes, query_server_positions, query_server_raw_packets,
-            query_server_status, query_server_texts,
+            query_server_config, query_server_health_check, query_server_nodes,
+            query_server_positions, query_server_raw_packets, query_server_status,
+            query_server_texts,
         },
         storage::update_response_storage_master,
     },
@@ -73,7 +73,6 @@ async fn setup_client() -> Result<(), Box<dyn std::error::Error>> {
         query_server_config().await;
         query_server_status().await;
         query_server_texts(None).await;
-        query_server_http_requests(Some(20)).await;
         query_server_nodes().await;
         query_server_positions().await;
         query_server_raw_packets().await;
