@@ -1,7 +1,7 @@
 use crate::server_database::schema::get_db_pool;
 use database::schema::{
-    HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry, TaskRequestEntry,
+    MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
+    TaskRequestEntry,
 };
 
 use log::{error, trace};

@@ -1,7 +1,7 @@
 use core::fmt;
 use database::schema::{
-    HTTPRequestEntry, MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry,
-    MeshtasticTextEntry, TaskRequestEntry,
+    MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
+    TaskRequestEntry,
 };
 
 use crate::{arguments::get_arguments, client_http::connection::get_server_config};
