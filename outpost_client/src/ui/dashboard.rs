@@ -285,7 +285,7 @@ impl Dashboard {
                 }
                 Some(DashboardWidgets::TEXTS) => {
                     if self.current_texts_offset > 0 {
-                        self.current_texts_offset += 1
+                        self.current_texts_offset -= 1
                     }
                 }
                 None => {}
