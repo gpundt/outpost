@@ -5,7 +5,10 @@ use ratatui::{
     widgets::{Block, BorderType, Borders, Padding, Paragraph},
 };
 
-pub fn generate_tasks_dashboard_widget<'a>() -> Paragraph<'a> {
+pub fn generate_tasks_dashboard_widget<'a>(
+    current_scroll_offset: u16,
+    selected_widget: bool,
+) -> Paragraph<'a> {
     let mut lines = Vec::new();
 
     let tasks = get_server_tasks();
@@ -42,12 +45,18 @@ pub fn generate_tasks_dashboard_widget<'a>() -> Paragraph<'a> {
         }
     }
 
-    Paragraph::new(lines).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Blue))
-            .border_type(BorderType::Rounded)
-            .title("Tasks")
-            .padding(Padding::new(5, 0, 0, 0)),
-    )
+    Paragraph::new(lines)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(if selected_widget {
+                    Color::Green
+                } else {
+                    Color::Blue
+                }))
+                .border_type(BorderType::Rounded)
+                .title("Tasks")
+                .padding(Padding::new(3, 0, 0, 0)),
+        )
+        .scroll((current_scroll_offset, 0))
 }

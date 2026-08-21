@@ -1,33 +1,32 @@
-use crate::client_http::storage::get_server_texts;
+use crate::client_http::storage::get_server_nodes;
 use ratatui::{
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, Padding, Paragraph},
 };
 
-pub fn generate_texts_dashboard_widget<'a>(
+pub fn generate_nodes_dashbaord_widget<'a>(
     current_scroll_offset: u16,
     selected_widget: bool,
 ) -> Paragraph<'a> {
     let mut lines = Vec::new();
 
-    let texts = get_server_texts();
+    let nodes = get_server_nodes();
 
-    match texts {
-        Some(texts_vec) => {
-            if texts_vec.is_empty() {
+    match nodes {
+        Some(nodes_vec) => {
+            if nodes_vec.is_empty() {
                 lines.push(Line::from(Span::styled(
-                    format!("No meshtastic texts received..."),
+                    "No meshtastic nodes discovered...",
                     Style::default().fg(Color::White),
                 )));
             }
-            for text in texts_vec {
+            for node in nodes_vec {
+                let trimmed_long_name = node.node_long_name.trim();
                 lines.push(Line::from(Span::styled(
                     format!(
-                        "[{}] {:<10}: {}\n\n\n",
-                        text.timestamp.format("%m/%d %H:%M:%S"),
-                        text.src_id,
-                        text.message
+                        "{:<25} : {:<10} ( {:<9} )",
+                        trimmed_long_name, node.node_short_name, node.node_id
                     ),
                     Style::default().fg(Color::White),
                 )));
@@ -51,7 +50,7 @@ pub fn generate_texts_dashboard_widget<'a>(
                     Color::Blue
                 }))
                 .border_type(BorderType::Rounded)
-                .title("Texts")
+                .title("Nodes")
                 .padding(Padding::new(3, 0, 0, 0)),
         )
         .scroll((current_scroll_offset, 0))
