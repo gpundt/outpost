@@ -1,7 +1,8 @@
 use std::{io, time::Duration};
 
 use crate::ui::{
-    nodes::{self, generate_nodes_dashbaord_widget},
+    config::generate_server_url_widget,
+    nodes::generate_nodes_dashbaord_widget,
     status::{
         generate_server_serial_port_widget, generate_server_uptime_widget,
         generate_server_version_widget,
@@ -187,6 +188,10 @@ impl Dashboard {
         frame.render_widget(
             generate_server_serial_port_widget(),
             dashboard_content_right_half_second_quarter[0],
+        );
+        frame.render_widget(
+            generate_server_url_widget(),
+            dashboard_content_right_half_second_quarter[1],
         );
 
         // Footer

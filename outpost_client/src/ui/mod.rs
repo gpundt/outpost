@@ -1,4 +1,5 @@
 pub mod app;
+pub mod config;
 pub mod dashboard;
 pub mod footer;
 pub mod frame;

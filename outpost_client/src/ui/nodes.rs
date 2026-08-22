@@ -23,6 +23,9 @@ pub fn generate_nodes_dashbaord_widget<'a>(
             }
             for node in nodes_vec {
                 let trimmed_long_name = node.node_long_name.trim();
+                if trimmed_long_name.is_empty() {
+                    continue;
+                }
                 lines.push(Line::from(Span::styled(
                     format!(
                         "{:<25} : {:<10} ( {:<9} )",

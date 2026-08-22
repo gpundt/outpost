@@ -27,7 +27,16 @@ pub async fn select_meshtastic_texts_by_count(
 /// Function to select all rows from the meshtastic_nodes db table
 pub async fn select_meshtastic_nodes() -> Result<Vec<MeshtasticNodeEntry>, sqlx::Error> {
     match sqlx::query_as::<_, MeshtasticNodeEntry>(
-        "SELECT id, node_num, node_id, node_long_name, node_short_name, hw_model, role, last_heard, uptime, channel, hops_away FROM meshtastic_nodes",
+        "SELECT DISTINCT id, node_num, node_id, node_long_name, node_short_name, hw_model, role, last_heard, uptime, channel, hops_away 
+        FROM (
+            SELECT *,
+            ROW_NUMBER() OVER (
+                PARTITION BY node_id, node_long_name, node_short_name
+                ORDER BY last_heard DESC, id DESC
+            ) as rn
+        FROM meshtastic_nodes
+    )
+    WHERE rn = 1",
     ).fetch_all(get_db_pool()).await {
         Ok(nodes) => {
             trace!("SELECT FROM meshtastic_nodes");
