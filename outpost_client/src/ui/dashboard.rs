@@ -200,23 +200,36 @@ impl Dashboard {
             .constraints([Constraint::Min(50), Constraint::Min(50)])
             .split(chunks[2]);
         // Keybinds
-        let mut keybinds = Vec::new();
-        keybinds.push(Keybind {
-            key: "q / Esc".to_string(),
-            description: "Exit".to_string(),
-        });
-        keybinds.push(Keybind {
-            key: "t".to_string(),
-            description: "Texts".to_string(),
-        });
-        keybinds.push(Keybind {
-            key: "a".to_string(),
-            description: "Tasks".to_string(),
-        });
-        keybinds.push(Keybind {
-            key: "n".to_string(),
-            description: "Nodes".to_string(),
-        });
+        let mut keybinds: Vec<Keybind> = Vec::new();
+        keybinds.push(Keybind::new("q / Esc".to_string(), "Exit".to_string()));
+        keybinds.push(Keybind::new("t".to_string(), "Tasks".to_string()));
+        keybinds.push(Keybind::new("a".to_string(), "Tasks".to_string()));
+        keybinds.push(Keybind::new("n".to_string(), "Nodes".to_string()));
+        keybinds.push(Keybind::new("c".to_string(), "Server Config".to_string()));
+        keybinds.push(Keybind::new("s".to_string(), "Server Status".to_string()));
+        if !matches!(self.current_widget, None) {
+            match self.current_widget {
+                Some(DashboardWidgets::NODES) => {
+                    keybinds.push(Keybind::new(
+                        "Enter".to_string(),
+                        "Inspect Nodes".to_string(),
+                    ));
+                }
+                Some(DashboardWidgets::TASKS) => {
+                    keybinds.push(Keybind::new(
+                        "Enter".to_string(),
+                        "Inspect Tasks".to_string(),
+                    ));
+                }
+                Some(DashboardWidgets::TEXTS) => {
+                    keybinds.push(Keybind::new(
+                        "Enter".to_string(),
+                        "Inspect Texts".to_string(),
+                    ));
+                }
+                _ => {}
+            }
+        }
         frame.render_widget(generate_keybinds(keybinds), footer_content[0]);
         // Status
         frame.render_widget(generate_client_status(&self.status), footer_content[1]);
