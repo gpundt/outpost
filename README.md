@@ -1,9 +1,9 @@
 # outpost
-Ansible deployment for offline, remote Linux hosts
+Ansible-deployed Meshtastic connector for offline, remote Linux hosts
 
 # How to Deploy
 
-To configure an outpost node, do the following:
+To configure an outpost server, do the following:
 
 1) Build the outpost Rust binaries:
     - `make`
