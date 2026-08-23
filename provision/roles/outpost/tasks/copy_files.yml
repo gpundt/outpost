@@ -1,4 +1,18 @@
 ---
+- name: Ensure Outpost Directory Exists
+  ansible.builtin.file:
+    path: /opt/outpost/bin
+    state: directory
+    mode: '0755'
+  become: true
+  
+- name: Copy Outpost Server Binary
+  ansible.builtin.copy:
+    src: outpost_server_pizero
+    dest: /opt/outpost/bin/outpost_server
+    mode: '0700'
+  become: true
+
 - name: Copy hostapd Config
   ansible.builtin.copy:
     src: hostapd.conf
@@ -25,6 +39,3 @@
     group: root
     mode: '0644'
   become: true
-
-- name: Clear shell path cache
-  ansible.builtin.shell: hash -r

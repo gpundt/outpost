@@ -5,46 +5,6 @@ use sqlx::FromRow;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
-/// Struct to organize the contents of a row inside the http_requests db table
-#[derive(Debug, Default, FromRow, Serialize, Clone, Deserialize)]
-pub struct HTTPRequestEntry {
-    pub id: i32,
-    pub method: String,
-    pub source: String,
-    pub endpoint: String,
-    pub user_agent: String,
-    pub status_code: u16,
-    pub timestamp: NaiveDateTime,
-}
-impl fmt::Display for HTTPRequestEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "\n  {:<33} {:<21} {:<6} {:<22} -> {:<23} ({})",
-            format!("[{}]:", self.timestamp),
-            self.source,
-            self.method,
-            self.user_agent,
-            self.endpoint,
-            self.status_code
-        )
-    }
-}
-impl HTTPRequestEntry {
-    pub fn from_json(json: String) -> Result<Vec<Self>, serde_json::Error> {
-        match serde_json::from_str::<Vec<HTTPRequestEntry>>(&json) {
-            Ok(e) => Ok(e),
-            Err(e) => {
-                error!(
-                    "Failed to deserialize with HTTPRequestEntry::from_json: {}",
-                    e
-                );
-                return Err(e);
-            }
-        }
-    }
-}
-
 /// Struct to organize the contents of a row inside the tasks db table
 #[derive(Debug, Default, FromRow, Serialize, Clone, Deserialize)]
 pub struct TaskRequestEntry {

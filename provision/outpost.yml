@@ -1,5 +1,5 @@
 ---
 - name: Configure Outpost Nodes
-  hosts: test
+  hosts: prod
   roles:
     - outpost

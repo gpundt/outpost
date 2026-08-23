@@ -5,4 +5,4 @@
       - hostapd
       - dnsmasq
     state: present
-  become: yes
+  become: true

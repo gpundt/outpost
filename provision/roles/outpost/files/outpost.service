@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/outpost
-ExecStart=/opt/outpost/bin/outpost_server --serial-port test -d
+ExecStart=/opt/outpost/bin/outpost_server --serial-port /dev/ttyACM0 -d
 Restart=on-failure
 RestartSec=10
 

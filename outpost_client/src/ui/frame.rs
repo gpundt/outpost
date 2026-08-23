@@ -5,7 +5,6 @@ pub enum NextFrame {
     Nodes,
     Texts,
     Positions,
-    HttpRequests,
     Tasks,
     Exit,
 }

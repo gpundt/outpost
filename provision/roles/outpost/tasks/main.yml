@@ -1,2 +1,9 @@
 ---
-# tasks file for outpost
+- name: Install necessary dependencies
+  ansible.builtin.import_tasks: install_deps.yml
+
+- name: Copy necessary files
+  ansible.builtin.import_tasks: copy_files.yml
+
+- name: Start systemd services
+  ansible.builtin.import_tasks: systemd.yml

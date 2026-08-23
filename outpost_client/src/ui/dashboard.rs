@@ -1,3 +1,4 @@
+use core::fmt;
 use std::{io, time::Duration};
 
 use crate::ui::{
@@ -8,7 +9,7 @@ use crate::ui::{
         generate_server_version_widget,
     },
     tasks::generate_tasks_dashboard_widget,
-    texts::generate_texts_dashboard_widget,
+    texts::generate_texts_widget,
 };
 
 use super::{
@@ -32,6 +33,15 @@ pub enum DashboardWidgets {
     TEXTS,
     TASKS,
     NODES,
+}
+impl fmt::Display for DashboardWidgets {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DashboardWidgets::NODES => write!(f, "Nodes Widget"),
+            DashboardWidgets::TASKS => write!(f, "Tasks Widget"),
+            DashboardWidgets::TEXTS => write!(f, "Texts Widget"),
+        }
+    }
 }
 
 #[derive(Debug, Default)]
@@ -138,7 +148,7 @@ impl Dashboard {
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(dashboard_content[0]);
         frame.render_widget(
-            generate_texts_dashboard_widget(
+            generate_texts_widget(
                 self.current_texts_offset,
                 matches!(self.current_widget, Some(DashboardWidgets::TEXTS)),
             ),
@@ -251,7 +261,11 @@ impl Dashboard {
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => {
-                if self.current_widget.is_some() {
+                if let Some(widget) = &self.current_widget {
+                    self.update_status(ClientStatus::new(
+                        Severity::Info,
+                        format!("{}: Unselected", widget),
+                    ));
                     self.current_widget = None
                 } else {
                     self.mode = DashboardMode::Exit;
@@ -259,12 +273,24 @@ impl Dashboard {
             }
             KeyCode::Char('t') => {
                 self.current_widget = Some(DashboardWidgets::TEXTS);
+                self.update_status(ClientStatus::new(
+                    Severity::Info,
+                    "Texts Widget: Selected".to_string(),
+                ));
             }
             KeyCode::Char('n') => {
                 self.current_widget = Some(DashboardWidgets::NODES);
+                self.update_status(ClientStatus::new(
+                    Severity::Info,
+                    "Nodes Widget: Selected".to_string(),
+                ));
             }
             KeyCode::Char('a') => {
                 self.current_widget = Some(DashboardWidgets::TASKS);
+                self.update_status(ClientStatus::new(
+                    Severity::Info,
+                    "Tasks Widget: Selected".to_string(),
+                ));
             }
             KeyCode::Down => match self.current_widget {
                 Some(DashboardWidgets::TASKS) => {

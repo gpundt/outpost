@@ -11,7 +11,6 @@ pub enum ActiveFrame {
     Nodes,
     Texts,
     Postions,
-    HttpRequests,
     Tasks,
     Exit,
 }
@@ -36,7 +35,6 @@ impl App {
                     ActiveFrame::Dashboard
                     | ActiveFrame::Nodes
                     | ActiveFrame::Texts
-                    | ActiveFrame::HttpRequests
                     | ActiveFrame::Tasks
                     | ActiveFrame::Postions => {
                         let next = Dashboard::new().run(terminal)?;
@@ -44,7 +42,6 @@ impl App {
                             NextFrame::Exit => ActiveFrame::Exit,
                             NextFrame::Dashboard => ActiveFrame::Dashboard,
                             NextFrame::Nodes => ActiveFrame::Nodes,
-                            NextFrame::HttpRequests => ActiveFrame::HttpRequests,
                             NextFrame::Positions => ActiveFrame::Postions,
                             NextFrame::Tasks => ActiveFrame::Tasks,
                             NextFrame::Texts => ActiveFrame::Tasks,

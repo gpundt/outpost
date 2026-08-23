@@ -1,11 +1,11 @@
-use crate::client_http::storage::get_server_texts;
+use crate::{client_http::storage::get_server_texts, ui::dashboard};
 use ratatui::{
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, Padding, Paragraph},
 };
 
-pub fn generate_texts_dashboard_widget<'a>(
+pub fn generate_texts_widget<'a>(
     current_scroll_offset: u16,
     selected_widget: bool,
 ) -> Paragraph<'a> {
@@ -21,6 +21,7 @@ pub fn generate_texts_dashboard_widget<'a>(
                     Style::default().fg(Color::White),
                 )));
             }
+
             for text in texts_vec {
                 lines.push(Line::from(Span::styled(
                     format!(

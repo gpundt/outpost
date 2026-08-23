@@ -12,7 +12,7 @@ To configure an outpost server, do the following:
     - `provision/inventory/hosts.yml`
 
 3) Run the playbook:
-    - `cd provision && ansible-playbook -i inventry/hosts.yml playbooks/outpost.yml`
+    - `cd provision && ansible-playbook -i inventry/hosts.yml outpost.yml -m <USERNAME> -k -K`
 
 4) Reboot each Outpost node, and you should see a new wireless network become available.
 
