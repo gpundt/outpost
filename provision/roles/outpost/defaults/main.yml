@@ -1,2 +1,5 @@
 ---
-# defaults file for outpost
+outpost_wlan_interface: wlan0
+outpost_static_ip: 192.168.99.1
+outpost_static_prefix: 24
+outpost_hostapd_conf_path: /etc/hostapd/hostapd.conf

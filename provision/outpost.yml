@@ -1,5 +1,6 @@
 ---
 - name: Configure Outpost Nodes
   hosts: prod
+  become: true
   roles:
     - outpost

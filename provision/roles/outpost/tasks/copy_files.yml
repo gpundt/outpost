@@ -4,14 +4,12 @@
     path: /opt/outpost/bin
     state: directory
     mode: '0755'
-  become: true
   
 - name: Copy Outpost Server Binary
   ansible.builtin.copy:
     src: outpost_server_pizero
     dest: /opt/outpost/bin/outpost_server
     mode: '0700'
-  become: true
 
 - name: Copy hostapd Config
   ansible.builtin.copy:
@@ -20,7 +18,6 @@
     owner: root
     group: root
     mode: '0644'
-  become: true
 
 - name: Copy dnsmasq Config
   ansible.builtin.copy:
@@ -29,7 +26,6 @@
     owner: root
     group: root
     mode: '0644'
-  become: true
 
 - name: Copy Outpost Service File
   ansible.builtin.copy:
@@ -38,4 +34,3 @@
     owner: root
     group: root
     mode: '0644'
-  become: true

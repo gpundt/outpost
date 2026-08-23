@@ -1,0 +1,99 @@
+---
+# net_config.yml
+# Configures a static IP on wlan0, hands the interface over to hostapd/dnsmasq,
+# and wires up systemd ordering so the AP comes up cleanly on every boot.
+
+- name: Ensure NetworkManager conf.d directory exists
+  ansible.builtin.file:
+    path: /etc/NetworkManager/conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Tell NetworkManager to ignore the AP interface
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/unmanaged-outpost.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [keyfile]
+      unmanaged-devices=interface-name:{{ outpost_wlan_interface }}
+  notify: Restart NetworkManager
+
+- name: Deploy static IP assignment script for the AP interface
+  ansible.builtin.copy:
+    src: outpost-netconfig.service.j2
+    dest: /etc/systemd/system/outpost-netconfig.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd daemon
+
+- name: Ensure hostapd config path is set in /etc/default/hostapd
+  ansible.builtin.lineinfile:
+    path: /etc/default/hostapd
+    regexp: '^#?DAEMON_CONF='
+    line: 'DAEMON_CONF="{{ outpost_hostapd_conf_path }}"'
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Unmask hostapd (Debian ships it masked until configured)
+  ansible.builtin.systemd_service:
+    name: hostapd
+    masked: no
+
+- name: Create systemd override for hostapd to wait on static IP
+  ansible.builtin.file:
+    path: /etc/systemd/system/hostapd.service.d
+    state: directory
+    mode: '0755'
+
+- name: Deploy hostapd systemd ordering override
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/hostapd.service.d/override.conf
+    content: |
+      [Unit]
+      After=outpost-netconfig.service
+      Requires=outpost-netconfig.service
+  notify: Reload systemd daemon
+
+- name: Create systemd override for dnsmasq to wait on static IP
+  ansible.builtin.file:
+    path: /etc/systemd/system/dnsmasq.service.d
+    state: directory
+    mode: '0755'
+
+- name: Deploy dnsmasq systemd ordering override
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/dnsmasq.service.d/override.conf
+    content: |
+      [Unit]
+      After=outpost-netconfig.service hostapd.service
+      Requires=outpost-netconfig.service
+  notify: Reload systemd daemon
+
+- name: Flush handlers before enabling services
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start outpost-netconfig service
+  ansible.builtin.systemd_service:
+    name: outpost-netconfig.service
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Enable and start hostapd
+  ansible.builtin.systemd_service:
+    name: hostapd
+    enabled: yes
+    state: started
+
+- name: Enable and start dnsmasq
+  ansible.builtin.systemd_service:
+    name: dnsmasq
+    enabled: yes
+    state: started
