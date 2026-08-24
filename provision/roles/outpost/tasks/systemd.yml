@@ -1,6 +1,23 @@
 ---
-- name: Restart Outpost
+- name: Enable Outpost Service
   ansible.builtin.systemd_service:
     name: outpost
-    state: restarted
+    state: stopped
     enabled: true
+
+- name: Enable hostapd
+  ansible.builtin.systemd_service:
+    name: hostapd
+    state: stopped
+    enabled: true
+
+- name: Enable dnsmasq
+  ansible.builtin.systemd_service:
+    name: dnsmasq
+    state: stopped
+    enabled: true
+
+- name: Disable wpa_supplicant
+  ansible.builtin.systemd_service:
+    name: wpa_supplicant
+    enabled: false

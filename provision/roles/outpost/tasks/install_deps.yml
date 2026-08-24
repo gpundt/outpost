@@ -5,3 +5,8 @@
       - hostapd
       - dnsmasq
     state: present
+
+- name: Unmask hostapd
+  ansible.builtin.systemd_service:
+    name: hostapd
+    masked: false

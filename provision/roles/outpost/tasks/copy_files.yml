@@ -1,16 +1,4 @@
 ---
-- name: Ensure Outpost Directory Exists
-  ansible.builtin.file:
-    path: /opt/outpost/bin
-    state: directory
-    mode: '0755'
-  
-- name: Copy Outpost Server Binary
-  ansible.builtin.copy:
-    src: outpost_server_pizero
-    dest: /opt/outpost/bin/outpost_server
-    mode: '0700'
-
 - name: Copy hostapd Config
   ansible.builtin.copy:
     src: hostapd.conf
@@ -27,6 +15,18 @@
     group: root
     mode: '0644'
 
+- name: Ensure Outpost Directory Exists
+  ansible.builtin.file:
+    path: /opt/outpost/bin
+    state: directory
+    mode: '0755'
+  
+- name: Copy Outpost Server Binary
+  ansible.builtin.copy:
+    src: outpost_server_pizero
+    dest: /opt/outpost/bin/outpost_server
+    mode: '0755'
+
 - name: Copy Outpost Service File
   ansible.builtin.copy:
     src: outpost.service
@@ -34,3 +34,16 @@
     owner: root
     group: root
     mode: '0644'
+  notify:
+    - Daemon Reload
+
+# fix dhcpd.conf -> dhcpcd.conf, everything else structurally fine
+- name: Edit /etc/dhcpcd.conf
+  ansible.builtin.blockinfile:
+    path: /etc/dhcpcd.conf
+    insertafter: EOF
+    block: |
+      interface {{ outpost_wlan_interface }}
+          static ip_address={{ outpost_static_ip }}/{{ outpost_static_prefix }}
+          nohook wpa_supplicant
+
