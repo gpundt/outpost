@@ -18,7 +18,7 @@ define successful
 	@echo -e "\t - $(GREEN)*Successful*$(RESET)\n"
 endef
 
-all: prep_provisioning_files
+all: generate_certs build_outpost prep_provisioning_files
 
 PIZERO_HOST      ?= mesh@192.168.1.191
 PIZERO_TARGET    := arm-unknown-linux-gnueabihf
@@ -74,7 +74,7 @@ build_outpost_client:										## Builds outpost_client
 	cp outpost_client/target/release/outpost_client ./build/outpost_client
 	$(call successful)
 
-build_outpost: build_outpost_client							## Builds outpost binaries. Set PLATFORM=pizero to cross-compile for the Pi Zero W
+build_outpost: 												## Builds outpost binaries. Set PLATFORM=pizero to cross-compile for the Pi Zero W
 	$(MAKE) prepare_build_output_dir							
 ifeq ($(PLATFORM),pizero)
 	$(MAKE) build_outpost_server_pizero
@@ -85,17 +85,36 @@ endif
 	$(call successful)
 
 generate_certs:												## Generates server and client-side certificates
+	$(call start_step_message,"Generating server and client certificates")
 ifndef CLIENT_HOSTNAME
 	$(call error_message,"CLIENT_HOSTNAME not defined")
 endif
 	@cd ./scripts && ./generate_server_certs.sh
 	@cd ./scripts && ./generate_client_certs.sh $(CLIENT_HOSTNAME)
 
-prep_provisioning_files: build_outpost generate_certs		## Prepares Ansible provisioning files
+prep_provisioning_files: 									## Prepares Ansible provisioning files
 	$(call start_step_message,"Prepping Ansible Provisioning Directories")
-	cp ./build/outpost_client ./provision/roles/outpost/files/outpost_client
+ifndef AP_SSID
+	$(call error_message,"AP_SSID is not specified")
+else
+	sed -i 's/^ssid=.*/ssid=$(AP_SSID)/' ./provision/roles/outpost/files/hostapd.conf
+endif
+ifndef AP_PASSWORD
+	$(call error_message,"AP_PASSWORD flag is not specified")
+else
+	sed -i 's/^wpa_passphrase=.*/wpa_passphrase=$(AP_PASSWORD)/' ./provision/roles/outpost/files/hostapd.conf
+endif
+ifdef AP_INTERFACE
+	sed -i 's/^interface=.*/interface=$(AP_INTERFACE)/' ./provision/roles/outpost/files/hostapd.conf
+	sed -i 's/^interface=.*/interface=$(AP_INTERFACE)/' ./provision/roles/outpost/files/dnsmasq.conf
+else
+	sed -i 's/^interface=.*/interface=wlan0/' ./provision/roles/outpost/files/hostapd.conf
+	sed -i 's/^interface=.*/interface=wlan0/' ./provision/roles/outpost/files/dnsmasq.conf
+endif
+	cp ./build/outpost_server* ./provision/roles/outpost/files/
 	cp ./certs/ca/ca.crt ./provision/roles/outpost/files/ca.crt
 	cp ./certs/server/server.* ./provision/roles/outpost/files/
+	$(call successful)
 
 help:														## Displays available make targets
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(BLUE)  %-30s$(RESET) %s\n", $$1, $$2}'
