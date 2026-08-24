@@ -6,9 +6,6 @@
     - Send Meshtastic packets
         - Scheduled messages?
 
-- Client (Rust)
-    - TUI
-
 - Ansible
     - Configure node
         - Wireless network

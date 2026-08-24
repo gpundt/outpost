@@ -6,7 +6,7 @@ Ansible-deployed Meshtastic connector for offline, remote Linux hosts
 To configure an outpost server, do the following:
 
 1) Build the outpost Rust binaries:
-    - `make`
+    - `make AP_SSID=<WIRELESS AP NAME> AP_PASSWORD=<WIRELESS AP PASSWORD>`
 
 2) Update the Ansible inventory with your desired Outpost node IPs:
     - `provision/inventory/hosts.yml`
