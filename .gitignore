@@ -8,3 +8,6 @@ provision/roles/outpost/files/*
 !provision/roles/outpost/files/hostapd.conf
 !provision/roles/outpost/files/dnsmasq.conf
 !provision/roles/outpost/files/outpost.service
+!provision/roles/outpost/files/wlan0-static-ip.service
+
+vault.yml

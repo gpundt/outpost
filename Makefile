@@ -104,13 +104,6 @@ ifndef AP_PASSWORD
 else
 	sed -i 's/^wpa_passphrase=.*/wpa_passphrase=$(AP_PASSWORD)/' ./provision/roles/outpost/files/hostapd.conf
 endif
-ifdef AP_INTERFACE
-	sed -i 's/^interface=.*/interface=$(AP_INTERFACE)/' ./provision/roles/outpost/files/hostapd.conf
-	sed -i 's/^interface=.*/interface=$(AP_INTERFACE)/' ./provision/roles/outpost/files/dnsmasq.conf
-else
-	sed -i 's/^interface=.*/interface=wlan0/' ./provision/roles/outpost/files/hostapd.conf
-	sed -i 's/^interface=.*/interface=wlan0/' ./provision/roles/outpost/files/dnsmasq.conf
-endif
 	cp ./build/outpost_server* ./provision/roles/outpost/files/
 	cp ./certs/ca/ca.crt ./provision/roles/outpost/files/ca.crt
 	cp ./certs/server/server.* ./provision/roles/outpost/files/

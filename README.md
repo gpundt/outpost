@@ -16,12 +16,13 @@ To configure an outpost server, do the following:
 cd provision
 ansible-vault create vault.yml
 ...
+vault_ssh_user:  "<NODE_SSH_USER>"
 vault_ssh_password: "<NODE_SSH_PASSWORD>"
 vault_become_password: "<NODE_SUDO_PASSWORD>"
 ```
 
 4) Run the playbook:
-    - `ansible-playbook -i inventry/hosts.yml outpost.yml -m <NODE_USERNAME> -e @vault.yml --ask-vault-pass`
+    - `ansible-playbook -i inventry/hosts.yml outpost.yml --ask-vault-pass`
 
 5) Review output for any errors and troubleshoot accordingly
 
