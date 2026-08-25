@@ -5,9 +5,6 @@
 - name: Copy necessary files
   ansible.builtin.import_tasks: files.yml
 
-- name: Flush handlers before managing services
-  ansible.builtin.meta: flush_handlers
-
 - name: Start systemd services
   ansible.builtin.import_tasks: systemd.yml
 

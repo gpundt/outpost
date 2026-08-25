@@ -9,7 +9,7 @@ To configure an outpost server, do the following:
     - `make AP_SSID=<WIRELESS AP NAME> AP_PASSWORD=<WIRELESS AP PASSWORD>`
 
 2) Update the Ansible inventory with your desired Outpost node IPs:
-    - `provision/inventory/hosts.yml`
+    - `provision/inventory.yml`
 
 3) Create an Ansible vault with each outpost node's SSH password and sudo password:
 ```bash
@@ -22,7 +22,7 @@ vault_become_password: "<NODE_SUDO_PASSWORD>"
 ```
 
 4) Run the playbook:
-    - `ansible-playbook -i inventry/hosts.yml outpost.yml --ask-vault-pass`
+    - `ansible-playbook -i inventory.yml --limit prod outpost.yml --ask-vault-pass`
 
 5) Review output for any errors and troubleshoot accordingly
 
