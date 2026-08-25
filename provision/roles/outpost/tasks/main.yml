@@ -1,12 +1,15 @@
 ---
 - name: Install necessary dependencies
-  ansible.builtin.import_tasks: install_deps.yml
+  ansible.builtin.import_tasks: apt.yml
 
 - name: Copy necessary files
-  ansible.builtin.import_tasks: copy_files.yml
+  ansible.builtin.import_tasks: files.yml
 
 - name: Flush handlers before managing services
   ansible.builtin.meta: flush_handlers
 
 - name: Start systemd services
   ansible.builtin.import_tasks: systemd.yml
+
+- name: Install RaspAP
+  ansible.builtin.import_tasks: raspap.yml

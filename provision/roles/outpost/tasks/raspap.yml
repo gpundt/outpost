@@ -1,0 +1,25 @@
+---
+- name: Check if RaspAP is already installed
+  stat:
+    path: /etc/raspap
+  register: raspap_installed
+
+- name: Download and run RaspAP quick installer
+  ansible.builtin.shell: |
+    curl -sL https://install.raspap.com | bash -s -- \
+      --yes \
+      --check 0 \
+      --openvpn 0 \
+      --adblock 0 \
+      --wireguard 0 \
+      --restapi 1
+  args:
+    executable: /bin/bash
+  become: yes
+  when: not raspap_installed.stat.exists
+  register: raspap_install_result
+
+- name: Show install output
+  debug:
+    var: raspap_install_result.stdout_lines
+  when: raspap_install_result is defined and raspap_install_result.changed

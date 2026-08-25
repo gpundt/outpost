@@ -1,6 +1,13 @@
 ---
 - name: Configure Outpost Nodes
-  hosts: prod
+  hosts: all
   become: true
+  vars_files:
+    - vault.yml
+  vars:
+    ansible_user: "{{ vault_ssh_user }}"
+    ansible_password: "{{ vault_ssh_password }}"
+    ansible_become_password: "{{ vault_become_password }}"
+
   roles:
     - outpost

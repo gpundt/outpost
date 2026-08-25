@@ -1,0 +1,20 @@
+---
+- name: Ensure Outpost Directory Exists
+  ansible.builtin.file:
+    path: /opt/outpost/bin
+    state: directory
+    mode: '0755'
+  
+- name: Copy Outpost Server Binary
+  ansible.builtin.copy:
+    src: outpost_server_pizero
+    dest: /opt/outpost/bin/outpost_server
+    mode: '0755'
+
+- name: Copy Outpost Service File
+  ansible.builtin.copy:
+    src: outpost.service
+    dest: /etc/systemd/system/outpost.service
+    owner: root
+    group: root
+    mode: '0644'
