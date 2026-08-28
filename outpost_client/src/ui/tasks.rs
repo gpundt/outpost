@@ -74,6 +74,56 @@ pub fn generate_tasks_dashboard_widget<'a>(
         .scroll((current_scroll_offset, 0))
 }
 
+pub fn generate_tasks_list_widget<'a>(current_index: u16) -> Paragraph<'a> {
+    let mut lines = Vec::new();
+
+    for (index, choice) in vec![
+        OutpostTask::Backup,
+        OutpostTask::Beacon,
+        OutpostTask::PurgeNodes,
+        OutpostTask::PurgeRaw,
+        OutpostTask::PurgePositions,
+        OutpostTask::ReconnectSerial,
+        OutpostTask::Restart,
+    ]
+    .iter()
+    .enumerate()
+    {
+        let cursor = if index == current_index as usize {
+            Span::styled(
+                " > ".to_string(),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            )
+        } else {
+            Span::styled("   ".to_string(), Style::default().fg(Color::White))
+        };
+        let formatted_task_name = choice
+            .to_string()
+            .split('_')
+            .map(|part| {
+                let mut c = part.chars();
+                match c.next() {
+                    None => String::new(),
+                    Some(f) => f.to_uppercase().collect::<String>() + c.as_str() + " ",
+                }
+            })
+            .collect::<String>();
+
+        lines.push(Line::from(vec![
+            cursor,
+            Span::styled(formatted_task_name, Style::default().fg(Color::White)),
+        ]));
+    }
+
+    Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Blue))
+            .border_type(BorderType::Rounded)
+            .title("Available Tasks")
+            .padding(Padding::new(3, 0, 0, 0)),
+    )
+}
 pub enum TaskWidgets {
     LIST,
     CONFIRM,
@@ -176,6 +226,30 @@ impl TasksFrame {
         frame.render_widget(serial_connection_paragraph, header_row[3]);
 
         // Main Content
+        let main_body = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .split(chunks[1]);
+        let main_body_top_half = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .split(main_body[0]);
+        frame.render_widget(
+            generate_tasks_list_widget(self.current_list_index),
+            main_body_top_half[0],
+        );
+
+        let main_body_bottom_half = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .split(main_body[1]);
+        frame.render_widget(
+            generate_tasks_dashboard_widget(
+                self.current_history_offset,
+                matches!(self.current_widget, TaskWidgets::HISTORY),
+            ),
+            main_body_bottom_half[0],
+        );
 
         // Footer
         let footer_content = Layout::default()
@@ -185,7 +259,8 @@ impl TasksFrame {
         // Keybinds
         let mut keybinds: Vec<Keybind> = Vec::new();
         keybinds.push(Keybind::new("q / Esc".to_string(), "Dashboard".to_string()));
-
+        keybinds.push(Keybind::new("Enter".to_string(), "Select".to_string()));
+        keybinds.push(Keybind::new("h".to_string(), "Task History".to_string()));
         frame.render_widget(generate_keybinds(keybinds), footer_content[0]);
         // Status
         frame.render_widget(generate_client_status(&self.status), footer_content[1]);
@@ -234,7 +309,18 @@ impl TasksFrame {
                     }
                 }
                 TaskWidgets::LIST => {
-                    if self.current_list_index < 7 as u16 {
+                    if self.current_list_index
+                        < vec![
+                            OutpostTask::Backup,
+                            OutpostTask::Beacon,
+                            OutpostTask::PurgeNodes,
+                            OutpostTask::PurgeRaw,
+                            OutpostTask::PurgePositions,
+                            OutpostTask::ReconnectSerial,
+                            OutpostTask::Restart,
+                        ]
+                        .len() as u16
+                    {
                         self.current_list_index += 1
                     }
                 }
