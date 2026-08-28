@@ -1,3 +1,0 @@
-[submodule "tools/meshtastic_tui"]
-	path = tools/meshtastic_tui
-	url = git@github.com:gpundt/meshastic_tui.git
