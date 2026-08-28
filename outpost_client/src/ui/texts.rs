@@ -1,4 +1,4 @@
-use crate::{client_http::storage::get_server_texts, ui::dashboard};
+use crate::client_http::storage::get_server_texts;
 use ratatui::{
     style::{Color, Style},
     text::{Line, Span},

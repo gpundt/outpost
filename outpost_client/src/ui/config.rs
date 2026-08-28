@@ -250,9 +250,4 @@ impl ConfigFrame {
             _ => {}
         }
     }
-
-    /// Function to safely update self.status
-    fn update_status(&mut self, client_status: ClientStatus) {
-        self.status = client_status;
-    }
 }
