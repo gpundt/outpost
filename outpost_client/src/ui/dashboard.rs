@@ -19,6 +19,8 @@ use super::{
     header::{Title, generate_server_status, generate_title},
 };
 
+use crate::client_http::storage::{get_server_config, get_server_status};
+
 use crate::client_http::storage::{get_server_nodes, get_server_tasks, get_server_texts};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
@@ -288,14 +290,30 @@ impl DashboardFrame {
                     "Tasks Widget: Selected".to_string(),
                 ));
             }
-            KeyCode::Char('c') => {
-                self.next_frame = NextFrame::Config;
-                self.mode = FrameMode::ChangeFrame;
-            }
-            KeyCode::Char('s') => {
-                self.next_frame = NextFrame::Status;
-                self.mode = FrameMode::ChangeFrame;
-            }
+            KeyCode::Char('c') => match get_server_config() {
+                Some(_) => {
+                    self.next_frame = NextFrame::Config;
+                    self.mode = FrameMode::ChangeFrame;
+                }
+                None => {
+                    self.update_status(ClientStatus::new(
+                        Severity::Error,
+                        "Server config not available".to_string(),
+                    ));
+                }
+            },
+            KeyCode::Char('s') => match get_server_status() {
+                Some(_) => {
+                    self.next_frame = NextFrame::Status;
+                    self.mode = FrameMode::ChangeFrame;
+                }
+                None => {
+                    self.update_status(ClientStatus::new(
+                        Severity::Error,
+                        "Server status not available".to_string(),
+                    ));
+                }
+            },
             KeyCode::Down => match self.current_widget {
                 Some(DashboardWidgets::TASKS) => {
                     if let Some(tasks) = get_server_tasks() {

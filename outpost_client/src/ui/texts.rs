@@ -18,7 +18,7 @@ pub fn generate_texts_widget<'a>(
             if texts_vec.is_empty() {
                 lines.push(Line::from(Span::styled(
                     format!("No meshtastic texts received..."),
-                    Style::default().fg(Color::White),
+                    Style::default().fg(Color::Yellow),
                 )));
             }
 
@@ -37,7 +37,7 @@ pub fn generate_texts_widget<'a>(
         None => {
             lines.push(Line::from(Span::styled(
                 format!(" Server connection failed..."),
-                Style::default().fg(Color::White),
+                Style::default().fg(Color::Red),
             )));
         }
     }

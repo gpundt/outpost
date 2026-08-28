@@ -18,7 +18,7 @@ pub fn generate_tasks_dashboard_widget<'a>(
             if tasks_vec.is_empty() {
                 lines.push(Line::from(Span::styled(
                     format!(" No outpost tasks issued..."),
-                    Style::default().fg(Color::White),
+                    Style::default().fg(Color::Yellow),
                 )));
             }
             for task in tasks_vec {
@@ -40,7 +40,7 @@ pub fn generate_tasks_dashboard_widget<'a>(
         None => {
             lines.push(Line::from(Span::styled(
                 format!(" Server connection failed..."),
-                Style::default().fg(Color::White),
+                Style::default().fg(Color::Red),
             )));
         }
     }
