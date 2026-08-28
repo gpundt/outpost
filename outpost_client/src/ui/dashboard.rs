@@ -226,7 +226,7 @@ impl DashboardFrame {
                 Some(DashboardWidgets::TASKS) => {
                     keybinds.push(Keybind::new(
                         "Enter".to_string(),
-                        "Inspect Tasks".to_string(),
+                        "Submit Tasks".to_string(),
                     ));
                 }
                 Some(DashboardWidgets::TEXTS) => {

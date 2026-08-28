@@ -168,8 +168,7 @@ impl ConfigFrame {
 
             match self.mode {
                 FrameMode::Exit => return Ok(NextFrame::Dashboard),
-                FrameMode::Navigation => {}
-                FrameMode::ChangeFrame => return Ok(self.next_frame.clone()),
+                _ => {}
             }
         }
     }

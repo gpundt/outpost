@@ -1,6 +1,8 @@
 use std::io;
 
-use crate::ui::{config::ConfigFrame, dashboard::DashboardFrame, status::StatusFrame};
+use crate::ui::{
+    config::ConfigFrame, dashboard::DashboardFrame, status::StatusFrame, tasks::TasksFrame,
+};
 
 use super::frame::{ActiveFrame, NextFrame};
 
@@ -49,7 +51,13 @@ impl App {
                     }
                     ActiveFrame::Nodes => {}
                     ActiveFrame::Texts => {}
-                    ActiveFrame::Tasks => {}
+                    ActiveFrame::Tasks => {
+                        let next = TasksFrame::new().run(terminal)?;
+                        self.active_frame = match next {
+                            NextFrame::Dashboard => ActiveFrame::Dashboard,
+                            _ => ActiveFrame::Tasks,
+                        }
+                    }
                 }
             }
             Ok(())
