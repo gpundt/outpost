@@ -1,19 +1,8 @@
 use std::io;
 
-use crate::ui::dashboard::Dashboard;
+use crate::ui::{config::ConfigFrame, dashboard::DashboardFrame, status::StatusFrame};
 
-use super::frame::NextFrame;
-
-#[derive(Debug, Default)]
-pub enum ActiveFrame {
-    #[default]
-    Dashboard,
-    Nodes,
-    Texts,
-    Postions,
-    Tasks,
-    Exit,
-}
+use super::frame::{ActiveFrame, NextFrame};
 
 pub struct App {
     active_frame: ActiveFrame,
@@ -32,21 +21,35 @@ impl App {
                 match &self.active_frame {
                     ActiveFrame::Exit => break,
 
-                    ActiveFrame::Dashboard
-                    | ActiveFrame::Nodes
-                    | ActiveFrame::Texts
-                    | ActiveFrame::Tasks
-                    | ActiveFrame::Postions => {
-                        let next = Dashboard::new().run(terminal)?;
+                    ActiveFrame::Dashboard => {
+                        let next = DashboardFrame::new().run(terminal)?;
                         self.active_frame = match next {
                             NextFrame::Exit => ActiveFrame::Exit,
                             NextFrame::Dashboard => ActiveFrame::Dashboard,
                             NextFrame::Nodes => ActiveFrame::Nodes,
-                            NextFrame::Positions => ActiveFrame::Postions,
+                            NextFrame::Config => ActiveFrame::Config,
+                            NextFrame::Status => ActiveFrame::Status,
                             NextFrame::Tasks => ActiveFrame::Tasks,
-                            NextFrame::Texts => ActiveFrame::Tasks,
-                        };
+                            NextFrame::Texts => ActiveFrame::Texts,
+                        }
                     }
+                    ActiveFrame::Config => {
+                        let next = ConfigFrame::new().run(terminal)?;
+                        self.active_frame = match next {
+                            NextFrame::Dashboard => ActiveFrame::Dashboard,
+                            _ => ActiveFrame::Config,
+                        }
+                    }
+                    ActiveFrame::Status => {
+                        let next = StatusFrame::new().run(terminal)?;
+                        self.active_frame = match next {
+                            NextFrame::Dashboard => ActiveFrame::Dashboard,
+                            _ => ActiveFrame::Status,
+                        }
+                    }
+                    ActiveFrame::Nodes => {}
+                    ActiveFrame::Texts => {}
+                    ActiveFrame::Tasks => {}
                 }
             }
             Ok(())

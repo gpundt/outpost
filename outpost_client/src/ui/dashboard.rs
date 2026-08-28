@@ -3,6 +3,7 @@ use std::{io, time::Duration};
 
 use crate::ui::{
     config::generate_server_url_widget,
+    frame::FrameMode,
     nodes::generate_nodes_dashbaord_widget,
     status::{
         generate_server_serial_port_widget, generate_server_uptime_widget,
@@ -25,8 +26,6 @@ use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
     DefaultTerminal, Frame,
     layout::{Constraint, Direction, Layout},
-    style::{Color, Style},
-    widgets::{Block, BorderType, Paragraph},
 };
 
 pub enum DashboardWidgets {
@@ -44,16 +43,9 @@ impl fmt::Display for DashboardWidgets {
     }
 }
 
-#[derive(Debug, Default)]
-pub enum DashboardMode {
-    #[default]
-    Navigation,
-    Exit,
-}
-
-pub struct Dashboard {
+pub struct DashboardFrame {
     /// Specifies which mode we're on
-    pub mode: DashboardMode,
+    pub mode: FrameMode,
     /// Current status
     pub status: ClientStatus,
     /// Current Texts widget scroll offset
@@ -64,14 +56,16 @@ pub struct Dashboard {
     pub current_nodes_offset: u16,
     /// Current selected widget
     pub current_widget: Option<DashboardWidgets>,
+    /// Next frame to render
+    pub next_frame: NextFrame,
 }
 
 /// Functions that can be imlemented by DeviceDashboard
-impl Dashboard {
+impl DashboardFrame {
     /// Function to create a new dashboard object
-    pub fn new() -> Self {
-        Self {
-            mode: DashboardMode::default(),
+    pub fn new() -> DashboardFrame {
+        DashboardFrame {
+            mode: FrameMode::default(),
             status: ClientStatus {
                 severity: Severity::Info,
                 message: "".to_string(),
@@ -80,6 +74,7 @@ impl Dashboard {
             current_tasks_offset: 0,
             current_texts_offset: 0,
             current_widget: None,
+            next_frame: NextFrame::Dashboard,
         }
     }
 
@@ -93,8 +88,8 @@ impl Dashboard {
             }
 
             match self.mode {
-                DashboardMode::Exit => return Ok(NextFrame::Exit),
-                DashboardMode::Navigation => {}
+                FrameMode::Exit => return Ok(NextFrame::Exit),
+                FrameMode::Navigation => return Ok(self.next_frame.clone()),
             }
         }
     }
@@ -215,8 +210,8 @@ impl Dashboard {
         keybinds.push(Keybind::new("t".to_string(), "Tasks".to_string()));
         keybinds.push(Keybind::new("a".to_string(), "Tasks".to_string()));
         keybinds.push(Keybind::new("n".to_string(), "Nodes".to_string()));
-        keybinds.push(Keybind::new("c".to_string(), "Server Config".to_string()));
-        keybinds.push(Keybind::new("s".to_string(), "Server Status".to_string()));
+        keybinds.push(Keybind::new("c".to_string(), "Config".to_string()));
+        keybinds.push(Keybind::new("s".to_string(), "Status".to_string()));
         if !matches!(self.current_widget, None) {
             match self.current_widget {
                 Some(DashboardWidgets::NODES) => {
@@ -268,7 +263,7 @@ impl Dashboard {
                     ));
                     self.current_widget = None
                 } else {
-                    self.mode = DashboardMode::Exit;
+                    self.mode = FrameMode::Exit;
                 }
             }
             KeyCode::Char('t') => {
@@ -291,6 +286,12 @@ impl Dashboard {
                     Severity::Info,
                     "Tasks Widget: Selected".to_string(),
                 ));
+            }
+            KeyCode::Char('c') => {
+                self.next_frame = NextFrame::Config;
+            }
+            KeyCode::Char('s') => {
+                self.next_frame = NextFrame::Status;
             }
             KeyCode::Down => match self.current_widget {
                 Some(DashboardWidgets::TASKS) => {
@@ -331,6 +332,18 @@ impl Dashboard {
                     if self.current_texts_offset > 0 {
                         self.current_texts_offset -= 1
                     }
+                }
+                None => {}
+            },
+            KeyCode::Enter => match self.current_widget {
+                Some(DashboardWidgets::NODES) => {
+                    self.next_frame = NextFrame::Nodes;
+                }
+                Some(DashboardWidgets::TEXTS) => {
+                    self.next_frame = NextFrame::Texts;
+                }
+                Some(DashboardWidgets::TASKS) => {
+                    self.next_frame = NextFrame::Tasks;
                 }
                 None => {}
             },
