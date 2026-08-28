@@ -50,6 +50,88 @@ pub fn generate_server_url_widget<'a>() -> Paragraph<'a> {
     );
 }
 
+pub fn generate_server_config_widget<'a>() -> Paragraph<'a> {
+    let mut lines = Vec::new();
+
+    let server_config = get_server_config();
+    match server_config {
+        Some(config) => {
+            // Debug Logs
+            let debug_log_key = Span::styled(
+                format!("  {:<20}:", "Debug Logs".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+
+            let debug_log_value = Span::styled(
+                format!("  {}", config.debug),
+                if config.debug {
+                    Style::default().fg(Color::Magenta)
+                } else {
+                    Style::default().fg(Color::Blue)
+                },
+            );
+            lines.push(Line::from(vec![debug_log_key, debug_log_value]));
+
+            // HTTP Port
+            let http_port_key = Span::styled(
+                format!("  {:<20}:", "HTTP Port".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let http_port_value = Span::styled(
+                format!("  {}", config.http_port),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![http_port_key, http_port_value]));
+
+            // Serial Port
+            let serial_port_key = Span::styled(
+                format!("  {:<20}:", "Serial Port".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let serial_port_value = Span::styled(
+                format!("  {}", config.serial_port),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![serial_port_key, serial_port_value]));
+
+            // Log Level
+            let log_level_key = Span::styled(
+                format!("  {:<20}:", "Log Level".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let log_level_value = Span::styled(
+                format!("  {}", config.log_level),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![log_level_key, log_level_value]));
+
+            // Log File
+            let log_file_key = Span::styled(
+                format!("  {:<20}:", "Log File".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let log_file_value = Span::styled(
+                format!("  {}", config.log_file),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![log_file_key, log_file_value]));
+        }
+        None => {
+            lines.push(Line::from(Span::styled(
+                format!("No server config received..."),
+                Style::default().fg(Color::White),
+            )));
+        }
+    }
+
+    return Paragraph::new(lines).block(
+        Block::bordered()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Blue))
+            .border_type(BorderType::Rounded)
+            .title("Server Config"),
+    );
+}
 pub struct ConfigFrame {
     /// Specifies which mode we're on
     pub mode: FrameMode,
@@ -86,7 +168,8 @@ impl ConfigFrame {
 
             match self.mode {
                 FrameMode::Exit => return Ok(NextFrame::Dashboard),
-                FrameMode::Navigation => return Ok(self.next_frame.clone()),
+                FrameMode::Navigation => {}
+                FrameMode::ChangeFrame => return Ok(self.next_frame.clone()),
             }
         }
     }
@@ -129,6 +212,9 @@ impl ConfigFrame {
         frame.render_widget(server_connection_paragraph, header_row[1]);
         frame.render_widget(database_connection_paragraph, header_row[2]);
         frame.render_widget(serial_connection_paragraph, header_row[3]);
+
+        // Main Content
+        frame.render_widget(generate_server_config_widget(), chunks[1]);
 
         // Footer
         let footer_content = Layout::default()

@@ -25,7 +25,7 @@ pub fn generate_texts_widget<'a>(
             for text in texts_vec {
                 lines.push(Line::from(Span::styled(
                     format!(
-                        "[{}] {:<10}: {}\n\n\n",
+                        "[{}] {:<10}: {}",
                         text.timestamp.format("%m/%d %H:%M:%S"),
                         text.src_id,
                         text.message

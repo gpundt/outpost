@@ -89,7 +89,8 @@ impl DashboardFrame {
 
             match self.mode {
                 FrameMode::Exit => return Ok(NextFrame::Exit),
-                FrameMode::Navigation => return Ok(self.next_frame.clone()),
+                FrameMode::Navigation => {}
+                FrameMode::ChangeFrame => return Ok(self.next_frame.clone()),
             }
         }
     }
@@ -289,9 +290,11 @@ impl DashboardFrame {
             }
             KeyCode::Char('c') => {
                 self.next_frame = NextFrame::Config;
+                self.mode = FrameMode::ChangeFrame;
             }
             KeyCode::Char('s') => {
                 self.next_frame = NextFrame::Status;
+                self.mode = FrameMode::ChangeFrame;
             }
             KeyCode::Down => match self.current_widget {
                 Some(DashboardWidgets::TASKS) => {
@@ -338,12 +341,15 @@ impl DashboardFrame {
             KeyCode::Enter => match self.current_widget {
                 Some(DashboardWidgets::NODES) => {
                     self.next_frame = NextFrame::Nodes;
+                    self.mode = FrameMode::ChangeFrame;
                 }
                 Some(DashboardWidgets::TEXTS) => {
                     self.next_frame = NextFrame::Texts;
+                    self.mode = FrameMode::ChangeFrame;
                 }
                 Some(DashboardWidgets::TASKS) => {
                     self.next_frame = NextFrame::Tasks;
+                    self.mode = FrameMode::ChangeFrame;
                 }
                 None => {}
             },

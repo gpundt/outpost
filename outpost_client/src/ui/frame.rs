@@ -26,5 +26,6 @@ pub enum ActiveFrame {
 pub enum FrameMode {
     #[default]
     Navigation,
+    ChangeFrame,
     Exit,
 }

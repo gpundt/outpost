@@ -116,6 +116,109 @@ pub fn generate_server_serial_port_widget<'a>() -> Paragraph<'a> {
     return serial_port_widget;
 }
 
+pub fn generate_server_status_widget<'a>() -> Paragraph<'a> {
+    let mut lines = Vec::new();
+
+    let server_status = get_server_status();
+    match server_status {
+        Some(status) => {
+            // Server Status
+            let server_status_key = Span::styled(
+                format!("  {:<20}:", "Status".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let server_status_value = Span::styled(
+                format!("  {}", status.status),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![server_status_key, server_status_value]));
+
+            // Server Uptime
+            let server_uptime_key = Span::styled(
+                format!("  {:<20}:", "Uptime".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let server_uptime_value = Span::styled(
+                format!("  {}", status.uptime),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![server_uptime_key, server_uptime_value]));
+
+            // Server Version
+            let server_version_key = Span::styled(
+                format!("  {:<20}:", "Version".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let server_version_value = Span::styled(
+                format!("  {}", status.version),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![server_version_key, server_version_value]));
+
+            // Serial Connected
+            let serial_connected_key = Span::styled(
+                format!("  {:<20}:", "Serial Connected".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let serial_connected_value = Span::styled(
+                format!("  {}", status.serial_connected),
+                if status.serial_connected {
+                    Style::default().fg(Color::Green)
+                } else {
+                    Style::default().fg(Color::Red)
+                },
+            );
+            lines.push(Line::from(vec![
+                serial_connected_key,
+                serial_connected_value,
+            ]));
+
+            // Serial Port
+            let serial_port_key = Span::styled(
+                format!("  {:<20}:", "Serial Port".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let serial_port_value = Span::styled(
+                format!("  {}", status.serial_port),
+                Style::default().fg(Color::White),
+            );
+            lines.push(Line::from(vec![serial_port_key, serial_port_value]));
+
+            // Database reachable
+            let database_reachable_key = Span::styled(
+                format!("  {:<20}:", "Database Reachable".to_string()),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            );
+            let database_reachable_value = Span::styled(
+                format!("  {}", status.database_reachable),
+                if status.database_reachable {
+                    Style::default().fg(Color::Green)
+                } else {
+                    Style::default().fg(Color::Red)
+                },
+            );
+            lines.push(Line::from(vec![
+                database_reachable_key,
+                database_reachable_value,
+            ]));
+        }
+        None => {
+            lines.push(Line::from(Span::styled(
+                format!("No server status received..."),
+                Style::default().fg(Color::White),
+            )));
+        }
+    }
+
+    return Paragraph::new(lines).block(
+        Block::bordered()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Blue))
+            .border_type(BorderType::Rounded)
+            .title("Server Status"),
+    );
+}
+
 pub struct StatusFrame {
     /// Specifies which mode we're on
     pub mode: FrameMode,
@@ -152,7 +255,8 @@ impl StatusFrame {
 
             match self.mode {
                 FrameMode::Exit => return Ok(NextFrame::Dashboard),
-                FrameMode::Navigation => return Ok(self.next_frame.clone()),
+                FrameMode::Navigation => {}
+                FrameMode::ChangeFrame => return Ok(self.next_frame.clone()),
             }
         }
     }
@@ -195,6 +299,9 @@ impl StatusFrame {
         frame.render_widget(server_connection_paragraph, header_row[1]);
         frame.render_widget(database_connection_paragraph, header_row[2]);
         frame.render_widget(serial_connection_paragraph, header_row[3]);
+
+        // Main Content
+        frame.render_widget(generate_server_status_widget(), chunks[1]);
 
         // Footer
         let footer_content = Layout::default()
