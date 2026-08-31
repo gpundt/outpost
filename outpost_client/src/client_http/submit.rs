@@ -78,6 +78,10 @@ pub async fn submit_purge_nodes_task() -> Option<TaskResponse> {
     submit_task(OutpostTask::PurgeNodes, None).await
 }
 
+pub async fn submit_purge_raw_task() -> Option<TaskResponse> {
+    submit_task(OutpostTask::PurgeRaw, None).await
+}
+
 pub async fn submit_purge_positions_task() -> Option<TaskResponse> {
     submit_task(OutpostTask::PurgePositions, None).await
 }

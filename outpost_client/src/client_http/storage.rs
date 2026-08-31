@@ -3,17 +3,26 @@ use std::{
     sync::{Arc, OnceLock, RwLock},
 };
 
-use crate::client_http::query::query_server_tasks;
+use crate::client_http::{
+    query::query_server_tasks,
+    submit::{
+        submit_backup_task, submit_beacon_task, submit_purge_nodes_task,
+        submit_purge_positions_task, submit_purge_raw_task, submit_reconnect_serial_task,
+        submit_restart_task,
+    },
+};
 
 use super::query::{
     query_server_config, query_server_health_check, query_server_nodes, query_server_positions,
     query_server_raw_packets, query_server_status, query_server_texts,
 };
+use config::tasks::OutpostTask;
 use database::schema::{
     MeshtasticNodeEntry, MeshtasticPositionEntry, MeshtasticRawEntry, MeshtasticTextEntry,
     TaskRequestEntry,
 };
 use http::query::{ConfigResponse, HealthCheckResponse, StatusResponse};
+use http::submit::TaskResponse;
 
 #[derive(Default, Debug, Clone)]
 pub struct ResponseStorage {
@@ -25,6 +34,7 @@ pub struct ResponseStorage {
     pub server_nodes: Option<Vec<MeshtasticNodeEntry>>,
     pub server_positions: Option<Vec<MeshtasticPositionEntry>>,
     pub server_raw_packets: Option<Vec<MeshtasticRawEntry>>,
+    pub server_task_response: Option<TaskResponse>,
 }
 
 pub fn global_response_storage() -> &'static Arc<RwLock<ResponseStorage>> {
@@ -99,6 +109,22 @@ async fn update_server_raw_packets() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+pub async fn update_server_task_response(task_type: OutpostTask) -> Result<(), Box<dyn Error>> {
+    let mut storage = global_response_storage().write().unwrap();
+
+    let response: Option<TaskResponse> = match task_type {
+        OutpostTask::Backup => submit_backup_task().await,
+        OutpostTask::Beacon => submit_beacon_task().await,
+        OutpostTask::PurgeNodes => submit_purge_nodes_task().await,
+        OutpostTask::PurgeRaw => submit_purge_raw_task().await,
+        OutpostTask::PurgePositions => submit_purge_positions_task().await,
+        OutpostTask::ReconnectSerial => submit_reconnect_serial_task().await,
+        OutpostTask::Restart => submit_restart_task().await,
+    };
+    storage.server_task_response = response;
+
+    Ok(())
+}
 
 pub fn get_health_check() -> Option<HealthCheckResponse> {
     let storage = global_response_storage().read().unwrap();
@@ -131,4 +157,8 @@ pub fn get_server_positions() -> Option<Vec<MeshtasticPositionEntry>> {
 pub fn get_server_raw_packets() -> Option<Vec<MeshtasticRawEntry>> {
     let storage = global_response_storage().read().unwrap();
     return storage.clone().server_raw_packets;
+}
+pub fn get_server_task_response() -> Option<TaskResponse> {
+    let storage = global_response_storage().read().unwrap();
+    return storage.clone().server_task_response;
 }

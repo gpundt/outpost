@@ -1,5 +1,12 @@
 use crate::{
-    client_http::storage::get_server_tasks,
+    client_http::{
+        storage::get_server_tasks,
+        submit::{
+            submit_backup_task, submit_beacon_task, submit_purge_nodes_task,
+            submit_purge_positions_task, submit_purge_raw_task, submit_reconnect_serial_task,
+            submit_restart_task,
+        },
+    },
     ui::{
         footer::{ClientStatus, Keybind, Severity, generate_client_status, generate_keybinds},
         frame::{FrameMode, NextFrame},
@@ -284,6 +291,9 @@ impl TasksFrame {
             KeyCode::Esc | KeyCode::Char('q') => {
                 if matches!(&self.current_widget, TaskWidgets::LIST) {
                     self.mode = FrameMode::Exit;
+                } else if matches!(&self.current_widget, TaskWidgets::CONFIRM) {
+                    self.current_widget = TaskWidgets::LIST;
+                    self.update_status(ClientStatus::new(Severity::Info, "".to_string()));
                 } else {
                     self.update_status(ClientStatus::new(
                         Severity::Info,
@@ -303,14 +313,14 @@ impl TasksFrame {
             KeyCode::Down => match self.current_widget {
                 TaskWidgets::HISTORY => {
                     if let Some(tasks) = get_server_tasks() {
-                        if self.current_history_offset < tasks.len() as u16 {
+                        if self.current_history_offset < (tasks.len() - 1) as u16 {
                             self.current_history_offset += 1
                         }
                     }
                 }
                 TaskWidgets::LIST => {
                     if self.current_list_index
-                        < vec![
+                        < (vec![
                             OutpostTask::Backup,
                             OutpostTask::Beacon,
                             OutpostTask::PurgeNodes,
@@ -319,7 +329,8 @@ impl TasksFrame {
                             OutpostTask::ReconnectSerial,
                             OutpostTask::Restart,
                         ]
-                        .len() as u16
+                        .len()
+                            - 1) as u16
                     {
                         self.current_list_index += 1
                     }
@@ -340,16 +351,46 @@ impl TasksFrame {
                 _ => {}
             },
             KeyCode::Enter => match self.current_widget {
-                TaskWidgets::LIST => {}
+                TaskWidgets::LIST => {
+                    self.selected_task = match self.current_list_index {
+                        0 => Some(OutpostTask::Backup),
+                        1 => Some(OutpostTask::Beacon),
+                        2 => Some(OutpostTask::PurgeNodes),
+                        3 => Some(OutpostTask::PurgeRaw),
+                        4 => Some(OutpostTask::PurgePositions),
+                        5 => Some(OutpostTask::ReconnectSerial),
+                        6 => Some(OutpostTask::Restart),
+                        _ => None,
+                    };
+                    self.current_widget = TaskWidgets::CONFIRM;
+                    self.update_status(ClientStatus::new(
+                        Severity::Successful,
+                        "Press Enter to Submit Task".to_string(),
+                    ));
+                }
                 TaskWidgets::HISTORY => {}
                 TaskWidgets::CONFIRM => match self.selected_task {
-                    Some(OutpostTask::Backup) => {}
-                    Some(OutpostTask::Beacon) => {}
-                    Some(OutpostTask::PurgeNodes) => {}
-                    Some(OutpostTask::PurgeRaw) => {}
-                    Some(OutpostTask::PurgePositions) => {}
-                    Some(OutpostTask::ReconnectSerial) => {}
-                    Some(OutpostTask::Restart) => {}
+                    Some(OutpostTask::Backup) => {
+                        submit_backup_task();
+                    }
+                    Some(OutpostTask::Beacon) => {
+                        submit_beacon_task();
+                    }
+                    Some(OutpostTask::PurgeNodes) => {
+                        submit_purge_nodes_task();
+                    }
+                    Some(OutpostTask::PurgeRaw) => {
+                        submit_purge_raw_task();
+                    }
+                    Some(OutpostTask::PurgePositions) => {
+                        submit_purge_positions_task();
+                    }
+                    Some(OutpostTask::ReconnectSerial) => {
+                        submit_reconnect_serial_task();
+                    }
+                    Some(OutpostTask::Restart) => {
+                        submit_restart_task();
+                    }
                     None => {}
                 },
             },

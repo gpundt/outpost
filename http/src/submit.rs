@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use log::error;
 
 /// Struct to organize an individual task request
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TaskRequest {
     pub task: OutpostTask,
     pub parameters: Option<serde_json::Value>,
@@ -28,7 +28,7 @@ impl TaskRequest {
 }
 
 /// Struct to organize an individual task response
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, Debug, Deserialize, Clone)]
 pub struct TaskResponse {
     pub task: OutpostTask,
     pub success: bool,

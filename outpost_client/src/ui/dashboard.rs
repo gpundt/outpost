@@ -317,21 +317,21 @@ impl DashboardFrame {
             KeyCode::Down => match self.current_widget {
                 Some(DashboardWidgets::TASKS) => {
                     if let Some(tasks) = get_server_tasks() {
-                        if self.current_tasks_offset < tasks.len() as u16 {
+                        if self.current_tasks_offset < (tasks.len() - 1) as u16 {
                             self.current_tasks_offset += 1
                         }
                     }
                 }
                 Some(DashboardWidgets::NODES) => {
                     if let Some(nodes) = get_server_nodes() {
-                        if self.current_nodes_offset < nodes.len() as u16 {
+                        if self.current_nodes_offset < (nodes.len() - 1) as u16 {
                             self.current_nodes_offset += 1
                         }
                     }
                 }
                 Some(DashboardWidgets::TEXTS) => {
                     if let Some(texts) = get_server_texts() {
-                        if self.current_texts_offset < texts.len() as u16 {
+                        if self.current_texts_offset < (texts.len() - 1) as u16 {
                             self.current_texts_offset += 1
                         }
                     }

@@ -50,6 +50,7 @@ pub fn generate_keybinds<'a>(keybinds: Vec<Keybind>) -> Paragraph<'a> {
     return footer_widget;
 }
 pub enum Severity {
+    Successful,
     Info,
     Warning,
     Error,
@@ -101,6 +102,17 @@ pub fn generate_client_status<'a>(status: &ClientStatus) -> Paragraph<'a> {
                 Style::default().fg(Color::Gray),
             ));
             (spans, Color::Gray)
+        }
+        Severity::Successful => {
+            let info_header = match status.message.as_str() {
+                "" => "",
+                _ => "Info",
+            };
+            spans.push(Span::styled(
+                format!("{:<10}", info_header),
+                Style::default().fg(Color::Green),
+            ));
+            (spans, Color::Green)
         }
     };
 
