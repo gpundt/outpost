@@ -1,11 +1,6 @@
 use crate::{
-    client_http::{
-        storage::get_server_tasks,
-        submit::{
-            submit_backup_task, submit_beacon_task, submit_purge_nodes_task,
-            submit_purge_positions_task, submit_purge_raw_task, submit_reconnect_serial_task,
-            submit_restart_task,
-        },
+    client_http::storage::{
+        get_server_task_response, get_server_tasks, update_server_task_response,
     },
     ui::{
         footer::{ClientStatus, Keybind, Severity, generate_client_status, generate_keybinds},
@@ -23,7 +18,8 @@ use ratatui::{
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, Padding, Paragraph},
 };
-use std::{io, time::Duration};
+use std::{io, thread, time::Duration};
+use tokio::runtime::Runtime;
 
 pub fn generate_tasks_dashboard_widget<'a>(
     current_scroll_offset: u16,
@@ -128,6 +124,56 @@ pub fn generate_tasks_list_widget<'a>(current_index: u16) -> Paragraph<'a> {
             .border_style(Style::default().fg(Color::Blue))
             .border_type(BorderType::Rounded)
             .title("Available Tasks")
+            .padding(Padding::new(3, 0, 0, 0)),
+    )
+}
+
+fn generate_task_response_widget<'a>() -> Paragraph<'a> {
+    let mut lines = Vec::new();
+
+    let task = get_server_task_response();
+
+    match task {
+        Some(task_response) => {
+            lines.push(Line::from(Span::styled(
+                format!("{:<15}: {}", "Task Type".to_string(), task_response.task,),
+                Style::default().fg(Color::Rgb(255, 165, 0)),
+            )));
+            lines.push(Line::from(Span::styled(
+                format!(
+                    "{:<15}: {}",
+                    "Successful?".to_string(),
+                    task_response.success
+                ),
+                if task_response.success {
+                    Style::default().fg(Color::Green)
+                } else {
+                    Style::default().fg(Color::Red)
+                },
+            )));
+            lines.push(Line::from(Span::styled(
+                format!("{:<15}: {}", "Message".to_string(), task_response.message),
+                if task_response.success {
+                    Style::default().fg(Color::Green)
+                } else {
+                    Style::default().fg(Color::Red)
+                },
+            )));
+        }
+        None => {
+            lines.push(Line::from(Span::styled(
+                format!(" Server connection failed..."),
+                Style::default().fg(Color::Red),
+            )));
+        }
+    }
+
+    Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Blue))
+            .border_type(BorderType::Rounded)
+            .title("Tasks")
             .padding(Padding::new(3, 0, 0, 0)),
     )
 }
@@ -245,6 +291,7 @@ impl TasksFrame {
             generate_tasks_list_widget(self.current_list_index),
             main_body_top_half[0],
         );
+        frame.render_widget(generate_task_response_widget(), main_body_top_half[1]);
 
         let main_body_bottom_half = Layout::default()
             .direction(Direction::Horizontal)
@@ -370,28 +417,26 @@ impl TasksFrame {
                 }
                 TaskWidgets::HISTORY => {}
                 TaskWidgets::CONFIRM => match self.selected_task {
-                    Some(OutpostTask::Backup) => {
-                        submit_backup_task();
+                    None => {
+                        self.update_status(ClientStatus::new(
+                            Severity::Warning,
+                            "Please select a task to submit.".to_string(),
+                        ));
                     }
-                    Some(OutpostTask::Beacon) => {
-                        submit_beacon_task();
+                    _ => {
+                        let selected_task_clone = self.selected_task.clone().unwrap();
+                        thread::spawn(|| {
+                            let task_submisson_runtime = Runtime::new().unwrap();
+                            let _ = task_submisson_runtime
+                                .block_on(update_server_task_response(selected_task_clone));
+                        });
+
+                        self.current_widget = TaskWidgets::LIST;
+                        self.update_status(ClientStatus::new(
+                            Severity::Info,
+                            format!("Submitted task: {:?}", self.selected_task.clone().unwrap()),
+                        ));
                     }
-                    Some(OutpostTask::PurgeNodes) => {
-                        submit_purge_nodes_task();
-                    }
-                    Some(OutpostTask::PurgeRaw) => {
-                        submit_purge_raw_task();
-                    }
-                    Some(OutpostTask::PurgePositions) => {
-                        submit_purge_positions_task();
-                    }
-                    Some(OutpostTask::ReconnectSerial) => {
-                        submit_reconnect_serial_task();
-                    }
-                    Some(OutpostTask::Restart) => {
-                        submit_restart_task();
-                    }
-                    None => {}
                 },
             },
 
