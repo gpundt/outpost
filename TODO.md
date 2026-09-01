@@ -1,7 +1,4 @@
 # To Do
-- Client (Rust)
-    - Send tasks to server
-
 -  Server (Rust)
     - API authentication (mTLS)
     - Webpage
